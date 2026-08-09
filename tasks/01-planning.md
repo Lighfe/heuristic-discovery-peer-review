@@ -156,3 +156,17 @@ routes around a flaw it noticed is worse than one that stops.
 - a list of everything you need from me before implementation starts
 
 Write no implementation code in this session.
+---
+
+## Amendment — 2026-08-09
+
+Two corrections of record, appended per the immutability convention (the
+original text above stands unedited):
+
+- "Eleven real repos … ten peer capstones" is superseded: `repos.yaml` pins
+  twelve `role: corpus` repos (p01–p12) plus one `role: self` (p13, commit
+  still unpinned). Recomputed from the file, decision `corpus-twelve`.
+- The corpus repos come from the 2026 cohort currently under peer review.
+  No pass set or threshold exists anywhere yet, so the adoption check
+  cannot anchor on institutional pass data at all — see decision
+  `g2-anchored-on-construction` for what replaced it.
