@@ -1,0 +1,68 @@
+# ---------------------------------------------------------------------------
+# Project-specific — read the comments before removing anything here
+# ---------------------------------------------------------------------------
+
+# The id -> person mapping. This is the ONLY file that connects p01, p02 …
+# to a named classmate's repository, so keeping it local is what makes
+# everything else safe to publish: evidence records, findings and run logs
+# are keyed by id and are anonymous without it.
+courses/*/repos.yaml
+!courses/*/repos.example.yaml
+
+# Cloned capstone repositories. Someone else's code, usually with no licence
+# attached — read it, never redistribute it. Facts about a project are ours
+# to publish; the project is not.
+clones/
+work/repos/
+
+# Cached model responses. Large, and they contain generated text about other
+# people's repositories. Local by design: the cache makes a re-run free, it
+# is not a shared artifact.
+.cache/
+**/cache/
+
+# Raw run payloads. Manifests and summaries under runs/ ARE committed — they
+# are what makes a finding traceable. Adjust the pattern once the run layout
+# is settled.
+runs/**/raw/
+
+# ---------------------------------------------------------------------------
+# Secrets
+# ---------------------------------------------------------------------------
+
+.env
+.env.*
+!.env.example
+
+# ---------------------------------------------------------------------------
+# Python
+# ---------------------------------------------------------------------------
+
+__pycache__/
+*.py[cod]
+*.so
+*.egg-info/
+build/
+dist/
+.venv/
+venv/
+
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.coverage
+htmlcov/
+
+.ipynb_checkpoints/
+
+# NOTE: uv.lock is committed on purpose — pinned versions are the point.
+
+# ---------------------------------------------------------------------------
+# Editors and OS
+# ---------------------------------------------------------------------------
+
+.vscode/
+.idea/
+*.swp
+.DS_Store
+Thumbs.db
