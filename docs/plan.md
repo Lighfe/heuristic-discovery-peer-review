@@ -144,14 +144,19 @@ generality claims rest on R2.
 
 ## Cost model and budget
 
-The scarce resource is requests per day. Verified 2026-08-09: Google no
-longer publishes fixed free-tier RPM/RPD tables — limits are per-account,
-visible in AI Studio, and third-party reports conflict (250 vs 1,500 RPD for
-Flash-class). Therefore:
+The scarce resource is requests per day. Google publishes no free-tier
+RPM/TPM/RPD table; limits are per-account and visible only in the
+login-gated AI Studio dashboard. **Read there by the owner 2026-08-10** and
+stored in `loop/config.toml` with that date:
 
-- Quota is **runtime-discovered config**: day one of implementation reads
-  the real account's limits and stores them in `loop/` config; until then
-  every sizing below assumes **≤250 requests/day** Flash-class.
+- `gemini-3.5-flash-lite` — **500 RPD**, ~15 RPM. The primary reviewer.
+- `gemini-3.1-flash-lite` — the declared fallback, operator-selected for a
+  *new* run only; a run never switches models mid-pass.
+- `gemini-2.5-flash` and `gemini-3.5-flash` — **20 RPD**, unusable at any
+  volume. The full Flash models are out; the sizing below is Flash-Lite's.
+- **Input TPM is ~250k across all of them**, so tokens, not requests, are
+  the plausible binding constraint once records are full-size. The client
+  meters a rolling 60-second input-token window alongside the request rate.
 - HF free tier is **$0.10/month** in credits (the docs mark it subject to
   change) — roughly 50–150 small-model calls a month. Cross-family agreement is therefore measured **once, on the
   final candidate, on a case subset**, and nowhere else.
@@ -162,7 +167,7 @@ Flash-class). Therefore:
   fallback list exists but a run **fails loudly** rather than switching
   models mid-run.
 
-Sizing of the recurring measurements (at 250 RPD): baseline agreement pass =
+Sizing of the recurring measurements (at 500 RPD): baseline agreement pass =
 12 corpus records × 3 reviewers = 36 requests, once, cached. Candidate
 fidelity probe = case subset (~20) × 3 reviewers = 60 requests per candidate
 that reaches it. Twin tests and adoption checks are free (executable layer).

@@ -1,0 +1,70 @@
+# Runner configuration.
+#
+# Quota is runtime-discovered config, never a constant baked into code
+# (decision `quota-runtime-discovered`): Google does not publish free-tier
+# RPM/TPM/RPD figures — https://ai.google.dev/gemini-api/docs/rate-limits
+# redirects to the login-gated AI Studio dashboard. The numbers below were
+# read there by the owner and carry the date they were read. The runner
+# refuses to spend a request while `verified = false`.
+#
+# Nothing course-specific belongs in this file.
+
+schema_version = 1
+
+# Bumped whenever anything that changes the meaning of a cached model
+# response changes: prompt construction, the field-shuffle rule, the
+# sampling protocol. It is part of every cache key, so a bump can never
+# silently reuse results measured under the old protocol.
+protocol_version = 1
+
+
+[gemini]
+# Fixed model. A run NEVER switches models on its own: half a pass measured
+# on a different model is not a measurement. `fallback` is a declared,
+# operator-selectable alternative for a *new* run, not an automatic failover.
+primary = "gemini-3.5-flash-lite"
+fallback = ["gemini-3.1-flash-lite"]
+
+[gemini.quota]
+verified = true
+verified_on = "2026-08-10"
+source = "Google AI Studio rate-limit dashboard, read by the owner"
+# Exact model ids these figures were read for, matched by equality. The
+# primary must appear here or the config refuses to load: quota is per-model
+# on the free tier, and the spread is 20 RPD vs 500.
+applies_to = ["gemini-3.5-flash-lite"]
+requests_per_day = 500
+requests_per_minute = 15
+input_tokens_per_minute = 250_000
+
+# Read 2026-08-10 alongside the numbers above, and load-bearing for the
+# choice of primary: the full Flash models are capped at 20 requests/day on
+# the free tier, which makes them unusable as the volume reviewer that
+# `plan.md`'s cost model assumed. Flash-Lite at 500 RPD is the only viable
+# primary. Input TPM is ~250k across all of them, so TPM — not RPD — is the
+# plausible binding constraint at full-corpus size; the runner meters both.
+[gemini.quota.rejected_models]
+"gemini-2.5-flash" = { requests_per_day = 20, reason = "20 RPD makes any pass impossible" }
+"gemini-3.5-flash" = { requests_per_day = 20, reason = "20 RPD makes any pass impossible" }
+
+[gemini.throttle]
+# 15 RPM -> one request every 4s, with headroom. Serial only; there is no
+# parallelism setting on purpose.
+min_seconds_between_requests = 4.5
+max_retries = 5
+backoff_initial_seconds = 8.0
+backoff_multiplier = 2.0
+backoff_max_seconds = 120.0
+backoff_jitter_seconds = 3.0
+
+[gemini.sampling]
+# Above zero by design: at temperature 0 the G4 self-consistency measurement
+# would be vacuously perfect (decision `agreement-protocol-ceiling`).
+# FROZEN AT M2 — changing it after that invalidates the baseline.
+temperature = 0.7
+max_output_tokens = 2048
+
+
+[paths]
+cache_dir = ".cache"
+runs_dir = "runs"

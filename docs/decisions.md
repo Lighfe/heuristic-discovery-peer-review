@@ -254,11 +254,51 @@ where they looked; approval gates ask the owner to check what they can see.
 
 ## Infrastructure
 
-**quota-runtime-discovered** — Verified 2026-08-09: Google no longer
-publishes fixed free-tier RPM/RPD tables; per-account limits live in AI
-Studio and third-party figures conflict (250 vs 1,500 RPD Flash-class). The
-runner treats quota as runtime-discovered config, sized at 250 RPD until
-the real limits are read on day one — a precondition, not a settled fact.
+**quota-runtime-discovered** — Google publishes no free-tier RPM/TPM/RPD
+figures (re-verified 2026-08-10); per-account limits live only in the
+login-gated AI Studio dashboard. Quota is therefore runner config carrying
+the date it was read, and `loop/config.py` refuses to spend a request while
+`verified = false`. Numbers now read: see `primary-model-flash-lite`.
+
+**primary-model-flash-lite** — Primary reviewer is `gemini-3.5-flash-lite`
+(500 RPD, ~15 RPM), fallback `gemini-3.1-flash-lite`; owner-read from AI
+Studio 2026-08-10. Rejected: `gemini-2.5-flash` and `gemini-3.5-flash`, both
+capped at **20 RPD**. Input TPM (~250k, common to all) is metered too.
+Revisit if Flash-Lite reviewer quality proves inadequate.
+
+**python-312** — Pinned to Python 3.12: `CLAUDE.md` said 3.12 while the
+scaffold's `pyproject.toml`/`.python-version` said 3.13, and CLAUDE.md is
+the authority. Contradiction resolved in the scaffold, not in CLAUDE.md.
+
+**ledger-counts-attempts** — The ledger holds one row per provider
+*attempt*, stamped when the attempt was made. A 429-retried call spends
+quota per attempt, and a backoff sequence can straddle UTC midnight — an
+aggregate row dated at completion would drift the day's accounting away
+from the provider's own dashboard, which is the ledger's only purpose.
+
+**sampling-in-cache-key** — Sampling params join the cache key (model,
+prompt-hash, case-id, protocol-version), and each cached response records
+them. Temperature reaches the provider as an API argument, invisible to the
+prompt hash: omitted, an edited temperature silently serves old responses
+and a contaminated pass looks clean. Rejected: bump-protocol-by-hand.
+
+**manifest-always-written** — A pass writes its manifest on every exit path,
+recording `outcome`, the error, and `cases_not_reached`. Reason: the manifest
+matters most for the run that failed — it is what says where the quota went
+and which cases were never scored. Losing it makes a partial pass
+indistinguishable from one that never ran.
+
+**budget-headroom-floors-at-one-retry-sequence** — Retry headroom is
+`max(25% of the pass, max_retries − 1)`. A flat percentage lets a small pass
+trip the budget stop before its retry policy has run, reporting "out of
+budget" when the truth is "the provider is failing" — and `objective.md`'s
+stopping criterion depends on telling a quota pause from a provider failure.
+
+**shuffle-checked-at-schema-gate** — `protocol.seeded_field_order` is tested
+in isolation, but nothing renders a prompt yet, so "the cache key covers the
+shuffle" is design intent, not a demonstrated property. The phase-2 prompt
+renderer must ship with a test that two samples of one case, identical in
+field values, produce different `prompt_sha256`. Checked at the schema gate.
 
 ## Observations (out of scope, recorded and not designed against)
 
