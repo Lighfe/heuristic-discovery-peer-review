@@ -5,6 +5,11 @@ topic, five lines maximum each. Reversals rewrite the entry in place and move
 the old reasoning to `superseded.md`. What the lab learned about the criteria
 under study goes in `findings.md`, not here.*
 
+*2026-08-10: rewritten wholesale under `tasks/reviews/review-01.md` while
+still in the task-01 planning phase; per owner instruction the replaced
+entries were overwritten, not moved to `superseded.md`, because the initial
+review was part of the same planning round.*
+
 ## Candidate and scoring
 
 **candidate-two-layer** — A candidate is prose criteria plus an executable
@@ -18,6 +23,18 @@ critique, not pure optimisation. Rejected: importing the workshop's
 optimisation framing, because the one property it depends on — a held-out
 scenario — is the one this project cannot have; optimising an overfittable
 objective without a holdout is how the scorer gets gamed.
+
+**candidate-states-threshold** — The proposed guidance should state the
+pass threshold; today it names criteria but no pass line, which lives only
+behind the course login, so an author cannot see the stakes from the
+document being revised. In scope (it is the guidance, not platform
+mechanics), subject to DataTalksClub confirming the number is publishable.
+
+**candidate-read-and-execute** — Candidate guidance must ask that projects
+be reviewable both by reading and by executing; where execution is not
+realistic for a reviewer, documentation compensates (screenshots, recorded
+outputs, worked examples). Owner, review-01 B14. Lives as proposer content
+guidance in `plan.md`, deliberately not as a gate in `objective.md`.
 
 ## Cases and twins
 
@@ -44,18 +61,43 @@ no-change twins whose required direction is exactly zero. Reason: twins that
 only flip the field a criterion reads are tautological for any candidate
 written against the same schema, and noise-sensitivity is a failure mode.
 
+**g1-claims-catalogue-coverage** — A G1 pass is claimed as discrimination of
+the catalogued failure modes only, never as general discrimination: the
+types are named categories, and a candidate mirroring that taxonomy passes
+G1 while proving nothing beyond it (review-01 B4). Generality claims rest on
+R2; the writeup is bound to this scoping. Stated in `objective.md` G1.
+
+**unlocatable-twin-is-structural** — `unlocatable-project` stays in the
+catalogue despite sitting near the excluded "badly written README" example
+(review-01 B9): reachability is a checkable fact about the repo graph
+(artifact exists, no path from the README reaches it), expressible as a
+record-field diff — which "badly written" is not. The taste guard holds.
+
 **synthetic-thin-records** — The corpus has no near-threshold project, so
 synthetic thin records are constructed at the certification boundary to
 probe gate G2. They are labelled synthetic, kept out of spread statistics
-(R1), and do not close the gap: a real thin repo is requested from the
-owner, and until it exists the writeup states G2's non-coverage plainly.
+(R1) and the G2 rate, and do not close the gap: a real thin repo is asked of
+the owner, and until then the writeup states G2's non-coverage plainly.
+
+**extraction-validation-scope** — Both `owner_reviewed` repos (p01, p02) are
+extracted and validated in M1, not one — one repo is too thin a basis for a
+milestone whose goal is catching catastrophic failure cheaply (review-01
+B5). Before M2 sealing, a light spot-check verifies a few fields per record,
+as facts in the repo, across the non-owner-reviewed corpus.
 
 ## Loop protocol
 
 **reviewer-independence** — Each reviewer call is stateless, scores one case,
 sees no other reviewer's output, receives evidence fields in shuffled order;
-cache key is (model, prompt-hash, case-id). Rejected: multi-case batching
-(saves requests but leaks context across cases, breaking independence).
+cache key is (model, prompt-hash, case-id, protocol-version). Rejected:
+multi-case batching (saves requests but leaks context across cases,
+breaking independence).
+
+**primary-reviewer-not-claude-code** — Headless Claude Code (`claude -p` /
+Agent SDK) was considered for the primary reviewer (review-01 B12) and
+rejected: no temperature control, so the G4 protocol cannot run on it;
+subscription quota is opaque, session-windowed, and shared with the
+interactive work; and proposer and reviewer would share one model family.
 
 **hf-final-only** — The HF second family measures cross-family agreement
 once, on the final candidate, on a case subset. Reason: verified 2026-08-09
@@ -68,6 +110,12 @@ judges them"). Novel attacks still *count for R2 immediately* when their
 badness is stated as a checkable structural fact per the taste guard —
 approval gates case-set entry, not attack recognition.
 
+**redteam-fresh-session-audit** — At M4 a fresh session with no access to
+the proposer's rationale runs one full budgeted attack round against the
+final candidate; successful attacks reopen an M3 round if the cap permits,
+else ship as named unpatched attacks (outcome defined in `plan.md` M4).
+Reason (B3): R2 had no independent check. Limit: session, not family.
+
 ## Objective and measurement
 
 **objective-lexicographic** — Owner decision 2026-08-09: gates first, then
@@ -76,23 +124,35 @@ confirmed after external challenge: red-team resistance already has teeth in
 the stopping criterion; discrimination is the stated goal. Rejected:
 weighted composite (masks adoption near-misses), discrimination-only.
 
-**agreement-floor-current-rubric** — Owner decision 2026-08-09: the
-agreement floor is the current rubric's own agreement, measured once on the
-same case subset with the same protocol, cached. Rejected: absolute
-constants (imported from survey methodology, arbitrary for a 0–2 tier
-scale) and max-of-both (can reject candidates that beat today's instrument).
+**g2-rate-floor** — G2 is an absolute certification rate floor: ≥75% of
+`role: corpus` repos certify under the candidate (a threshold-based one
+certifies at total ≥ its stated threshold); churn allowed; 75% is minimum
+acceptable, never a target. Owner, review-01 A2: today's criteria certify
+essentially anything, and a per-repo guarantee made that permanent.
 
-**g2-anchored-on-construction** — G2 is defined against candidate v0's own
-computed verdicts across a stated plausible threshold band (monotone, binds
-at the lower end), collapsing to a point if the real threshold is ever
-obtained. Rejected twice, same failure both times: anchoring on a published
-threshold, then on a published pass set — institutional facts this project
-cannot get (the 2026 cohort is under review now; no pass set exists).
+**g2-rate-not-count** — The floor is a rate, not a fixed count (review-01 A2
+sub-question, decided ahead of M2 sealing): it protects a proportion of the
+population the corpus samples, and a fixed count silently weakens as the
+corpus grows (9 of 12 ≈ 75%, but 9 of 13 ≈ 69%). Binds at ≥9 today; only a
+new **corpus** repo moves it — p13 is `role: self` and does not.
 
-**time-cost-table** — G3 reviewer minutes come from an owner-approved table
-keyed by evidence-field type, read-only to agents; a candidate's cost is
-the sum over fields its mapping reads. Rejected: proposer-declared
-estimates — the proposer would grade its own homework on a hard gate.
+**pass-threshold-11** — The pass threshold is 11 points, owner-confirmed
+2026-08-10 from the enrolled cohort dashboard ("Project outcomes → score to
+pass"); platform-enforced per-course (`project_passing_score`). In no
+public document, so agents cannot re-verify it (details in `sources.md`).
+It sets v0's certification line, hence r₀ — but not G2's 75% floor.
+
+**agreement-floor-current-rubric** — The G4 floor is the current rubric's
+own agreement, measured once on the same case subset, cached. Rejected:
+absolute constants and max-of-both. Owner 2026-08-10: **measure the
+baseline before fixing G4's form**; tendency is demotion to a reported
+metric, since the course already medians three reviewers (`sources.md`).
+
+**g4-is-self-consistency** — G4 measures same-model self-consistency (three
+samples, one Gemini model, nonzero temperature), not human agreement and not
+cross-family agreement (review-01 B10) — the gap matters because the real
+process medians three humans. The writeup may not use the bare word
+"agreement" for it; a missing cross-family run is reported as a named gap.
 
 **agreement-protocol-ceiling** — Reviewer sampling: three stateless samples,
 temperature above zero (frozen at M2), shuffle seeded by (case-id,
@@ -100,46 +160,105 @@ sample-index, protocol-version), protocol-version in the cache key. If the
 baseline agreement is ≥ 0.95, G4 is declared non-binding and reported as
 decorative. Rejected: temperature 0 (agreement would be vacuously perfect).
 
+**g3-ceiling-and-r3-band** — G3 is a hard gate at 150% of v0's cost under
+the owner-set table; the near-current-cost preference moved to ranking term
+R3 with a 25% tie band and no reward for large decreases (an unexplained
+drop more likely means a criterion got shallower). Owner, review-01 A3/A4.
+Rejected: the 0%-increase gate — it failed a +2-minutes-per-hour candidate.
+
+**g3-per-criterion-cap** — Besides the aggregate ceiling, no single
+criterion may exceed an owner-set minute cap (frozen at M2 with the cost
+table). Reason (review-01 B8): reviewers skip individually expensive
+criteria, so the careless-application risk is per-criterion; a candidate
+could otherwise hide one costly criterion under nine cheap ones.
+
+**g6-cost-ceiling** — G6 is a ceiling of ≈€0.10 expected token cost per
+project verification, not zero-spend; no credentials beyond what the course
+already asks students to hold. Owner, review-01 A5: reviewers do run
+project code on their own keys (the owner's project cost €0.004 to re-run),
+so a zero rule failed current practice — v0 would not have cleared it.
+
+**v0-exempt-baseline** — v0 is not a candidate and cannot be discarded by a
+gate; it is still run through every gate measurement, results recorded as
+baseline findings (review-01 B2 — old-G6 would have failed v0: a fact about
+the gate). Asymmetry stated once in `objective.md`. Rejected: discardable
+v0 (the baseline must exist) and silent exemption (hides gate defects).
+
+**v0-post-seal-correction** — A v0 transcription error found after M2
+sealing (review-01 B6): fix the executable layer, bump v0's version, rerun
+every scorer-based comparison (deterministic, zero requests), log error and
+discovery route in `findings.md`. v0's prose is the course's own text, so
+only the transcription can err; G3/R3 and baselines are the re-derived surface.
+
+**time-cost-table** — G3 reviewer minutes come from an owner-approved table
+keyed by evidence-field type, read-only to agents; a candidate's cost is
+the sum over fields its mapping reads. Rejected: proposer-declared
+estimates — the proposer would grade its own homework on a hard gate.
+
 **ranking-noise-bands** — R1–R3 comparisons happen within noise bands frozen
 at M2. R1's band comes from a bootstrap over corpus records — the scorer is
 deterministic, so re-run variance is exactly zero and would silently restore
-strict ordering; sampled measurements (G4, R2) band on re-run variation.
-Rejected: strict comparison, declared constants, one band recipe for all.
+strict ordering; G4/R2 band on re-run variation; R3's 25% band is owner-set
+(review-01 A4). Rejected: strict comparison, one band recipe for all.
+
+**owner-set-parameters-named** — Every judgment-set constant (75% floor,
+150% ceiling, per-criterion cap, 25% band, €0.10, cost-table values, G4
+temperature/tolerance, round cap) is named once as an owner-set parameter
+in `objective.md`; gates inherit that conditionality (review-01 B1).
+Pushback: noise bands are derived — the judgment there is procedure choice.
 
 **v0-independent-diff** — Candidate v0's transcription is verified at M2 by
 a fresh session diffing guidance criterion → mapping → field list line by
-line, with no access to the transcription rationale. Reason: v0 anchors G2
-and G3, so a transcription error biases two gates undetectably — and the
-author confirming its own reading is the G3 self-grading failure again.
+line, with no access to the transcription rationale. Reason: v0 anchors
+G3/R3 and every baseline finding, so a transcription error biases them
+undetectably — and the author confirming its own reading is self-grading.
 
 **degenerate-optimum-ties-fail** — Flat-scale candidates are caught by
 counting twin-pair ties as failures (gate G1), with corpus spread as the
 top ranking term — never by an agreement objective. Rejected: any objective
 term that rewards agreement, per the CLAUDE.md epistemics.
 
-**stopping-two-clean-rounds** — Discovery stops when gates pass and two
-consecutive budgeted red-team rounds find no new successful attack, with
-all attempts logged including failures. Rejected: stopping on a score
-plateau (unfalsifiable without a holdout) or on a fixed round count
-(arbitrary).
+**stopping-bounded** — Discovery stops when gates pass and two consecutive
+budgeted red-team rounds find no new successful attack, bounded by a round
+cap with a defined outcome, plus an attempt-clocked provider-failure stop
+distinct from quota pauses (A6; both in `objective.md`). The cap is **8 and
+uncalibrated** — no round has run; a stop-and-look point, resized as pace
+emerges.
+
+**writeup-gate-bindingness** — The final writeup and `proposed-guidance.md`
+report per-gate bindingness — which gates bound, which were decorative or
+compliance checks — never a bare "passed all six gates". Review-01 B11: if
+G2 is near-vacuous, G4 ceilings out, and G5/G6 are compliance, the honest
+claim is one real test plus qualifiers, and no more may be presented.
 
 ## Corpus and inputs
 
-**corpus-twelve** — `repos.yaml` pins twelve `role: corpus` repos; the task
-prompt's "ten" is stale and the yaml wins. p13 (`role: self`) is feasibility
-only and its commit is still TODO — implementation blocks on pinning it.
+**corpus-twelve** — `repos.yaml` pins twelve `role: corpus` repos plus p13
+(`role: self`). p13 is **feasibility only**: it checks the pipeline on a
+repo the owner can fully verify, and enters no distribution statistic and
+no G2 rate (review-01 B7) — a thirteenth *corpus* repo could only be the
+hoped-for thin one. p13's commit is TODO; that blocks **M2**, not M1.
 
-**milestone1-p01** — M1 extracts p01: it is `owner_reviewed`, so extraction
-can be validated against a careful human reading immediately. Rejected: p13
+**milestone1-p01** — M1 extracts p01 first: it is `owner_reviewed`, so
+extraction can be validated against a careful human reading immediately.
+p02 follows within M1 per `extraction-validation-scope`. Rejected: p13
 first (commit unpinned, and `self` role tests less of the pipeline).
+
+## Process
+
+**negative-claims-name-their-search** — Review-01 A1's root cause: an
+approved document asserted "no pass threshold exists" when the truth was
+"not found in the sources searched" — and the owner, who could check the
+dashboard, was never prompted to. Rule: negative existence claims enumerate
+where they looked; approval gates ask the owner to check what they can see.
 
 ## Infrastructure
 
 **quota-runtime-discovered** — Verified 2026-08-09: Google no longer
 publishes fixed free-tier RPM/RPD tables; per-account limits live in AI
 Studio and third-party figures conflict (250 vs 1,500 RPD Flash-class). The
-runner treats quota as runtime-discovered config, sized conservatively at
-250 RPD until the real key's limits are read on implementation day one.
+runner treats quota as runtime-discovered config, sized at 250 RPD until
+the real limits are read on day one — a precondition, not a settled fact.
 
 ## Observations (out of scope, recorded and not designed against)
 
@@ -147,8 +266,3 @@ runner treats quota as runtime-discovered config, sized conservatively at
 of review quality; nothing checks the review itself. Weak, known, and out of
 scope per CLAUDE.md (peer-review reward structure is not ours).
 
-**obs-pass-threshold-unstated** — The guidance document never states what
-score earns the certificate, and no pass set exists yet (2026 cohort under
-review). G2 no longer blocks on this: it runs over a threshold band that
-collapses to a point if the real number is ever obtained. Still worth
-asking the course for.

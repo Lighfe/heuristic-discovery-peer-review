@@ -82,9 +82,14 @@ ignores that is rejected on contact whatever its technical merit.
 
 What DataTalksClub and the course tutor need:
 
-- **Certification stays achievable.** A revision that fails people who pass
-  under the current criteria is dead. Learners are unpaid volunteers doing this
-  around jobs; a course that becomes discouraging loses them.
+- **Certification stays achievable.** The guard is a certification **rate
+  floor** (≥75% of corpus repos certify under a candidate, `objective.md`
+  G2), not per-person protection: individual churn is acceptable, a
+  shrinking pass rate is not. Owner position (review-01): the current
+  criteria certify essentially any submitted RAG system, and a per-repo
+  no-regression guarantee would make that defect permanent by construction.
+  Learners are unpaid volunteers doing this around jobs; a course that
+  becomes discouraging loses them.
 - **Reviewer workload does not rise.** Reviews are unpaid. Criteria that
   cost more time per project will be applied carelessly, which makes them
   worse than the ones they replaced.
@@ -92,12 +97,15 @@ What DataTalksClub and the course tutor need:
   appeals land on the organisers.
 - **Incremental adoption.** A wholesale replacement mid-cohort is not
   adoptable. Scores should stay roughly comparable with previous cohorts.
-- **Nothing requiring paid access** from reviewers.
+- **Reviewer spend stays near zero.** Reviewers already run project code
+  with their own credentials; the bound is a small out-of-pocket ceiling
+  per project (`objective.md` G6), not a zero-spend rule.
 
 **Difficulty and discrimination are different axes, and only the second one
 is the goal here.** The aim is not stricter criteria; it is criteria whose
-scores carry information — the same people certified, but their scores
-meaning something above the pass line, where today they cluster.
+scores carry information — certification staying as achievable as it is
+today, but with scores meaning something above the pass line, where today
+they cluster.
 
 This converges with the dead-floor problem rather than fighting it. Turning
 admission-style criteria into explicit certification gates is exactly what a
@@ -108,11 +116,12 @@ real information without threatening anyone's certificate.
 **Measured, not asserted.** Score every `role: corpus` repo in
 `courses/<slug>/repos.yaml` under the current criteria and under each
 candidate. `role: self` is excluded from anything measuring how scores
-distribute. The invariant is the *set of projects that clear certification*,
-not the raw number of points — if the scale changes, the threshold is
-recalibrated with it, and the set must not shrink. Estimated review time per
-project must not rise either. A candidate failing these is discarded however
-well it scores on everything else.
+distribute. The invariant is the *certification rate over the corpus*, not
+the raw number of points and not the identity of who passes — if the scale
+changes, the candidate's own certification gates carry the line, and the
+rate must not drop below the floor in `objective.md` G2. Estimated review
+time per project is bounded by G3's ceiling. A candidate failing these is
+discarded however well it scores on everything else.
 
 ## Cost model — read before designing anything
 
@@ -261,3 +270,9 @@ A run is complete when the red-team agent, given the current candidate,
 cannot find a new way to score well while being structurally bad — and that
 claim is backed by the attacks it *did* try, logged, including the failures.
 Diminishing returns is a result to record, not a reason to stop quietly.
+
+## Wanted Behaviour
+
+Every document must be checkable by a reader who was not in the session that produced it: claims trace to artifacts, terms are defined where used, and nothing depends on knowing what was discussed.
+
+End every handoff with what could sink the work — the assumptions that, if wrong, invalidate what was built — separately from what is merely unfinished.

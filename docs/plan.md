@@ -1,11 +1,13 @@
 # Plan
 
 *Live document — rewritten in place, describes only the current plan. Length
-budget: ~180 lines.*
+budget: ~250 lines (raised 2026-08-10 to absorb review-01; do not drift
+further).*
 
-Produced by `tasks/01-planning.md` (2026-08-09). Decisions behind every
-choice here live in `decisions.md`; what "better" means lives in
-`objective.md` (draft, awaiting owner approval).
+Produced by `tasks/01-planning.md` (2026-08-09), revised by
+`tasks/reviews/review-01.md` (2026-08-10). Decisions behind every choice
+here live in `decisions.md`; what "better" means lives in `objective.md`
+(approved 2026-08-10, which unblocks M1).
 
 ## Shape of the loop
 
@@ -35,6 +37,11 @@ Two layers with an explicit mapping:
 
 - **Prose layer** — a complete replacement `project-evaluation-guidance.md`:
   criteria plus the reviewer guidance around them. This is what ships.
+  Content requirement (owner, review-01 B14, for the proposer — not a
+  gate): a project should be reviewable **both** by reading the code and
+  documentation **and** by executing it; where execution is not realistic
+  for a reviewer, the documentation must compensate — screenshots, recorded
+  outputs, worked examples.
 - **Executable layer** — a deterministic scoring function over evidence
   records. The mapping declares, per prose criterion, which record fields it
   reads and the tier function that turns them into points.
@@ -66,7 +73,7 @@ the abstraction honest:
 | reviewer agents | Gemini Flash-class | prose criteria + one record each | scores, via the runner |
 | second-family reviewer | HF Inference Providers | same as reviewer agents | scores, via the runner |
 | red-teamer | Claude Code | candidate (both layers), schema, catalogue *types* | attack reports in `runs/` |
-| adoption critic | Claude Code | candidate, adoption-check results | critique notes in `runs/` |
+| adoption critic | Claude Code | candidate, adoption-check results, R3 cost flags | critique notes in `runs/` |
 
 Hard rules (from CLAUDE.md epistemics, restated as mechanism):
 
@@ -81,6 +88,13 @@ Hard rules (from CLAUDE.md epistemics, restated as mechanism):
   a re-run costs zero requests and a protocol change can never silently
   reuse results measured under the old protocol.
 - The owner's past review verdicts never enter any prompt or comparison.
+- The primary reviewer stays Gemini, not headless Claude Code (decision
+  `primary-reviewer-not-claude-code`): the G4 protocol needs a fixed
+  temperature, which the Claude Code CLI/SDK does not expose; subscription
+  quota is opaque, session-windowed, and shared with the high-judgment
+  interactive work; and Claude reviewing Claude-proposed candidates would
+  put proposer and reviewer in one model family — the exact correlation
+  the cross-family measurement exists to break.
 
 ## The case set
 
@@ -120,10 +134,13 @@ construction; if G1 proves unsatisfiable anyway, that escalates to the owner
 as an epistemics amendment (see `objective.md`).
 
 Known limit, recorded rather than hidden: twins written against the same
-schema the scorer reads risk tautology. Countered by cross-criterion
-conditional twins (e.g. a technique point must *condition* on evaluation
-fields, not read a "technique present" boolean) and by the red-team round,
-which is not restricted to the catalogue.
+schema the scorer reads risk tautology. The sharp version (review-01 B4):
+the catalogue types are named categories, so a candidate written to detect
+exactly those categories passes G1 completely while demonstrating nothing
+general. Cross-criterion conditional twins and the unrestricted red-team
+round mitigate but do not close this; the closure is honest labelling — a
+G1 pass is claimed as catalogue coverage only (see `objective.md` G1), and
+generality claims rest on R2.
 
 ## Cost model and budget
 
@@ -156,37 +173,65 @@ tomorrow; nothing is re-spent.
 
 - **M1 — smallest end-to-end slice.** Extract p01 (owner_reviewed, so
   extraction is validatable) → derive schema v0 → **stop: owner approves
-  schema** → 5–6 twins (3 catalogue types + 1 no-change) → candidate v0 =
-  current rubric transcribed to executable form + mapping → one pass: scorer
-  on cases, Gemini agreement probe (≤60 requests), one mini red-team round.
-  Proves the schema is extractable, the pipeline/cache/budget accounting
-  works, and yields the baseline finding: which known twins the *current*
-  criteria fail. Spec: `tasks/02-milestone-1.md`.
-- **M2 — full corpus and case set.** All 12 corpus records + p13 (feasibility
-  only), full twin catalogue, extraction validation on both owner_reviewed
-  repos, baseline agreement measured (including the G4 ceiling check), case
-  set reviewed and sealed (owner gate). M2 sealing also freezes, with the
-  owner: the G2 threshold band, the G3 cost table, the G4 temperature, and
-  the R-term noise bands (R1's bootstrapped over records — the scorer is
-  deterministic, so re-run variance is zero) — every measurement parameter
-  is fixed before any candidate is compared. Two M2 obligations follow from
+  schema** → extract p02 (the second owner_reviewed repo) and validate both
+  extractions against the owner's field-level reading — one repo is too
+  thin a basis for M1's stated goal of catching catastrophic failure
+  cheaply (review-01 B5) → 5–6 twins of p01 (3 catalogue types + 1
+  no-change) → candidate v0 = current rubric transcribed to executable form
+  + mapping → one pass: scorer on cases, Gemini agreement probe (≤60
+  requests), one mini red-team round. Proves the schema is extractable
+  (p02 is noted domain-opaque, so it also stresses the procedural-fields
+  claim), the pipeline/cache/budget accounting works, and yields the
+  baseline finding: which known twins the *current* criteria fail. Spec:
+  `tasks/02-milestone-1.md`.
+- **M2 — full corpus and case set.** All 12 corpus records + p13
+  (**feasibility only** — `role: self`, the owner's own capstone; it
+  checks that extraction/schema/scoring run end-to-end on a repo the owner
+  can fully verify, and enters no distribution statistic and no G2 rate),
+  full twin catalogue, a light extraction spot-check (a few fields per
+  record verified as facts in the repo) across the non-owner-reviewed
+  corpus before sealing, baseline agreement measured (including the G4
+  ceiling check), **v0's real pass rate at the 11-point threshold measured
+  over the corpus** (free, scorer harness — replaces the 0-of-12-fail
+  hypothesis with a number), case set reviewed and sealed (owner gate). M2
+  sealing also freezes, with the owner: the G3 cost table and per-criterion
+  cap, the G4 temperature, **G4's form — chosen only once the baseline
+  number is in hand**, owner tendency being demotion to a reported metric
+  (`objective.md` G4), the R-term noise bands
+  (R1's bootstrapped over records — the scorer is deterministic, so re-run
+  variance is zero), and the M3 round cap — every measurement parameter is
+  fixed before any candidate is compared. Two M2 obligations follow from
   review: (a) an **independent v0 fidelity diff** — a fresh session, with
   no access to the transcription rationale, diffs guidance criterion →
-  mapping → field list line by line, because v0 anchors both G2 and G3 and
-  a transcription error would bias two gates undetectably; (b) effort is
-  weighted toward the **twin catalogue**, where the objective's real
-  discriminating power concentrates — G2 may prove near-vacuous, G4 may
-  ceiling out, and G5/G6 are compliance checks, leaving G1 plus the
-  catalogue as the project's validity.
+  mapping → field list line by line, because v0 anchors G3/R3 and the
+  baseline findings, and a transcription error would bias them
+  undetectably; (b) effort is weighted toward the **twin catalogue**, where
+  the objective's real discriminating power concentrates — G2 may prove
+  near-vacuous, G4 may ceiling out, and G5/G6 are compliance checks,
+  leaving G1 plus the catalogue as the project's validity.
 - **M3 — discovery rounds.** Propose → score → red-team → critique, until
-  the stopping criterion in `objective.md` is met. Findings land in
-  `findings.md`, each naming its run. Rounds are **owner-paced by design**:
+  the stopping criterion in `objective.md` is met **or its round cap (8,
+  resizable at M2) is reached** — the cap's outcome is defined in
+  `objective.md`, never improvised. Findings land in `findings.md`, each
+  naming its run. Rounds are **owner-paced by design**:
   red-team case-set additions and any epistemics question batch at round
   boundaries, so the loop deliberately stalls on the owner there — this is
   the "agents may not edit what judges them" rule made operational, and the
   cost in autonomy is accepted, not accidental.
 - **M4 — adoption check and writeup.** Final candidate through the full
-  gates incl. HF cross-family measurement; `proposed-guidance.md` written;
+  gates incl. HF cross-family measurement (provider-failure fallback per
+  `objective.md`); an **independent red-team audit** — a fresh session with
+  no access to the proposer's rationale runs one full budgeted attack round
+  against the final candidate (decision `redteam-fresh-session-audit`;
+  same model family, so it breaks session correlation, not family
+  correlation, and the writeup says so). **If the audit lands successful
+  attacks**, M3 reopens for one more round if the round cap permits;
+  if the cap is spent, the candidate still ships and each surviving attack
+  is named in the writeup as a **known unpatched attack against the
+  shipped criteria**, with its structural fact stated — never demoted to an
+  appendix. Then `proposed-guidance.md` is written;
+  the writeup reports **per-gate bindingness** — which gates bound, which
+  were decorative or compliance checks — never a bare "passed all gates";
   weak consistency check run and labelled as such.
 
 ## Challenge-the-framing (recorded, per the task)

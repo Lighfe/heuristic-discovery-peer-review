@@ -170,3 +170,14 @@ original text above stands unedited):
   No pass set or threshold exists anywhere yet, so the adoption check
   cannot anchor on institutional pass data at all — see decision
   `g2-anchored-on-construction` for what replaced it.
+
+## Amendment — 2026-08-10
+
+The second bullet above is false. A pass threshold does exist: **11
+points**, platform-enforced, owner-confirmed from the enrolled cohort
+dashboard ("Project outcomes → score to pass") — it is login-gated, which
+is why the public-source search missed it. See `tasks/reviews/review-01.md`
+A1, decision `pass-threshold-11`, and the process rule
+`negative-claims-name-their-search`. G2 was rebuilt as an absolute
+certification rate floor (decision `g2-rate-floor`); no institutional pass
+*set* is available, and that part of the bullet stands.

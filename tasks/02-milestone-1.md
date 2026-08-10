@@ -2,7 +2,8 @@
 
 Save as `tasks/02-milestone-1.md`. Run in a fresh session with the repo
 checked out. Once run, this file is not edited — amendments append as dated
-sections.
+sections. (Revised in place 2026-08-10 under `tasks/reviews/review-01.md`,
+*before* any run — the immutability rule was not in force yet.)
 
 ---
 
@@ -14,9 +15,10 @@ NEEDS OWNER APPROVAL marker — ask the owner to resolve it first.
 
 ## Goal
 
-Prove the pipeline end to end at minimum size: one real repo extracted, a
-handful of twins, one candidate, one loop pass — and produce the baseline
-finding: which known defect twins the *current* course criteria fail.
+Prove the pipeline end to end at minimum size: both `owner_reviewed` repos
+extracted, a handful of twins, one candidate, one loop pass — and produce
+the baseline finding: which known defect twins the *current* course
+criteria fail.
 
 ## Preconditions (ask the owner for any that are missing)
 
@@ -26,12 +28,14 @@ finding: which known defect twins the *current* course criteria fail.
   this milestone; it blocks M2, flag it now)
 - the actual Gemini free-tier limits for this account, read from AI Studio —
   record them in the runner config with the date
-- the owner's field-level reading of p01, for extraction validation. The
-  protocol is strict: the owner re-checks record fields as *facts in the
-  repo* (this artifact exists at this path, these numbers appear in this
-  file), never as review verdicts. The owner's original peer-review text
-  stays out of the session entirely — this is the epistemics line between
-  validating extraction and importing taste.
+- the owner's field-level reading of p01 **and p02** (decision
+  `extraction-validation-scope`: one repo is too thin a basis for a
+  milestone meant to catch catastrophic failure cheaply). The protocol is
+  strict: the owner re-checks record fields as *facts in the repo* (this
+  artifact exists at this path, these numbers appear in this file), never
+  as review verdicts. The owner's original peer-review text stays out of
+  the session entirely — this is the epistemics line between validating
+  extraction and importing taste.
 
 ## Build order — stop at each phase boundary and report before continuing
 
@@ -57,7 +61,13 @@ finding: which known defect twins the *current* course criteria fail.
 3. **STOP — schema gate.** Present schema v0 to the owner. No case is built
    before approval. (This is one of the five ask-gates; the others are in
    `tasks/01-planning.md`.)
-4. **Twins.** Plain-Python twin generator producing 5–6 twins of p01's
+4. **Extract p02** at its pinned commit with the same extractor prompt, and
+   validate both records against the owner's field-level readings
+   (precondition above). p02 is noted domain-opaque to a general reviewer,
+   so it also stresses the schema's claim that fields are procedural —
+   answerable without domain knowledge. Schema changes forced by p02 go
+   back through the step-3 gate.
+5. **Twins.** Plain-Python twin generator producing 5–6 twins of p01's
    record: three catalogue types from `docs/plan.md` (include
    harmful-component-kept and claim-without-artifact) plus one no-change
    twin. Each twin file states its field diff and its direction, known by
@@ -67,7 +77,7 @@ finding: which known defect twins the *current* course criteria fail.
    read-set — this is what makes gate G1 satisfiable, and M1 is its first
    test. Store in `cases/twins/`. From here on, `cases/` is read-only to
    every loop agent.
-5. **Candidate v0.** Transcribe the *current* course criteria
+6. **Candidate v0.** Transcribe the *current* course criteria
    (`courses/llm-zoomcamp-2026/project-evaluation-guidance.md`) into the
    executable layer plus field mapping, changing nothing. Fidelity to the
    current rubric is the point — v0 is the baseline instrument, not a
@@ -75,8 +85,8 @@ finding: which known defect twins the *current* course criteria fail.
    criterion: at M2 a *fresh session* diffs it against the guidance text
    with no access to your rationale (decision `v0-independent-diff`), so
    do not rely on prose explanations to carry the mapping.
-6. **One loop pass.** (a) Scorer harness runs candidate v0 over p01's record
-   and all twins — free, deterministic; (b) Gemini agreement probe: ≤60
+7. **One loop pass.** (a) Scorer harness runs candidate v0 over both
+   records and all twins — free, deterministic; (b) Gemini agreement probe: ≤60
    requests, 3 independent samples per case (stateless, one case each,
    seeded shuffle, temperature above zero, per `decisions.md`
    agreement-protocol-ceiling). This probe is a **pipeline smoke test, not
@@ -90,9 +100,9 @@ finding: which known defect twins the *current* course criteria fail.
 
 - `runs/` holds a manifest naming: model, prompt hashes, request count vs
   budget, cache hits, and every artifact the pass produced
-- extraction validation: p01's record compared against a careful human
-  reading (p01 is `owner_reviewed` — validation is of the extraction step
-  only; no review verdict enters anything)
+- extraction validation: p01's and p02's records compared against careful
+  human readings (both are `owner_reviewed` — validation is of the
+  extraction step only; no review verdict enters anything)
 - `docs/findings.md` opens with baseline entries naming the run: which
   twins candidate v0 (the current criteria) failed and which it passed —
   this twin baseline is evidence the project argues from. The agreement
@@ -103,7 +113,7 @@ finding: which known defect twins the *current* course criteria fail.
 
 ## Hard limits
 
-- Read-only for agents: `cases/` (after step 4), `docs/objective.md`, the
+- Read-only for agents: `cases/` (after step 5), `docs/objective.md`, the
   constraint list in `CLAUDE.md`
 - Budget: this milestone spends at most 60 Gemini requests and 0 HF credits
 - Stop and ask the owner about: the schema (step 3), anything that would
