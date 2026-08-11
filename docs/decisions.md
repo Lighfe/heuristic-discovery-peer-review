@@ -49,6 +49,17 @@ diff over record fields with a direction known by construction; anything
 else is rejected mechanically. This is the enforcement mechanism for the
 CLAUDE.md rule that twins encode structural facts, not taste.
 
+**twin-entailed-change-scoped** — CLAUDE.md's "differs in exactly one way"
+means one *fact*: a field the first change makes arithmetically false is the
+same fact recorded twice, not a second defect. Owner, M1 twin gate —
+**scoped to `p01-t01`/`p01-t02` only, explicitly refused as a standing rule
+any future twin-builder may invoke by analogy.** Enforced by
+`APPROVED_ENTAILMENTS` in `tools/generate_twins.py`; an unlisted entailment
+fails the build. Underlying cause is schema non-normalisation
+(`retrieval_best_approach_shipped` summarises the technique effects), so
+every `harmful-component-kept` twin on p01 moves two fields — see
+`docs/deferred-to-m2.md`.
+
 **twin-fields-disjoint** — Degraded mutations must be categorical (flip a
 fact any reasonable criterion tiers on); no-change mutations touch only
 fields outside any plausible criterion read-set. This makes G1 satisfiable

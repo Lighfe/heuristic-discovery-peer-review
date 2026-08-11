@@ -148,6 +148,11 @@ fields:
     evidence: ["src/api/routes.py:161-172", "src/api/static/index.html:409-434", "dashboards/food-wine-dashboard.json"]
     basis: "A feedback endpoint is wired to thumbs-up/down buttons in the UI, and a provisioned Grafana dashboard is committed."
 
+  monitoring_dashboard_provenance:
+    value: committed_definitions
+    evidence: ["dashboards/food-wine-dashboard.json", "dashboards/grafana-dashboard.yml", "dashboards/grafana-datasource.yml", "docker-compose.yml"]
+    basis: "the dashboard is defined by a committed JSON file and provisioned into Grafana by committed provisioning files mounted read-only; the panels a reviewer sees are the project's own, not a tool's defaults"
+
   monitoring_instrumentation:
     value: traced_on_request_path
     evidence: ["src/api/routes.py:37-95", "src/api/db.py:45-61"]

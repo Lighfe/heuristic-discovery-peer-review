@@ -131,7 +131,84 @@ it works*" — the current wording conflates the same two things, so the
 transcription inherits the conflation honestly). At M2 the pair needs
 resolving together, probably alongside item 3.
 
-### 4. Group J has accreted — restructure, do not extend
+### 3c. The scoreable/descriptive split is clean at `value` and leaky at `basis`
+
+Found by the M1 twin generation (2026-08-10), and it bears on whether gate
+G1 is satisfiable rather than on convenience.
+
+The split exists so degraded twins and no-change twins bind on disjoint
+fields. It holds perfectly for `value`. It does **not** hold for `basis` —
+and `basis` is read by the prose reviewer agents, so a change there is a
+change to what a reviewer sees.
+
+Concretely, in p01 the `basis` strings of *scoreable* fields embed
+*descriptive* facts: `problem_statement.basis` names the audience and the
+subject; `retrieval_eval_relevance_rule.basis` turns on the `wikipedia_pt`
+label; `limitations_section.basis` rests on the corpus being non-English;
+`llm_eval_judge_kind.basis` and `llm_eval_role_overlap.basis` name the model
+vendor. So a **dataset-domain-swap no-change twin cannot be built**: swapping
+`corpus_domain` or `corpus_language` forces either a rewrite of prose on
+scoreable fields — breaking the no-change half — or a self-contradictory
+record. `llm_provider` is unswappable for the same reason.
+
+Only 3 of the 6 descriptive fields (`interface_framework`, `vector_store`,
+`repo_file_count`) are swappable without contamination. The catalogue names
+three no-change kinds — cosmetic rename, technology swap, dataset-domain
+swap — and **only the technology swap is currently expressible.** There is
+also no project-name, module-name or path field, so the cosmetic-rename kind
+has no field to touch at all; M1's second no-change twin substitutes a
+file-count change, which is a liberty and is labelled as one.
+
+The generator enforces disjointness over prose as well as values for the
+twins it built. Nothing outside it does, so a future twin restating a
+scoreable `basis` while claiming zero movement would break the no-change
+gate silently.
+
+### 3d. `claim-without-artifact` has almost no headroom on p01
+
+`headline_numbers_traceable` already sits at `some_traceable`, and
+`none_traceable` is unreachable as a single fact: the panel count is
+traceable *because* the dashboard JSON is committed, so uncommitting it
+drags `monitoring_chart_count`, `monitoring_charts_bound_to_data` and
+`monitoring_dashboard_provenance` with it — a different project, not a twin.
+The only clean move is `untraceable_number_count: 18 → 21` (removing the
+ingestion screenshot's three figures).
+
+**If a candidate tiers that field coarsely, the twin ties and fails G1's
+strict-ordering half** — and per the above there is no larger single-fact
+move available on this record. Fixing it needs a *different base record*,
+not a different twin, which is an argument for building this catalogue type
+against a repository with more headroom at M2.
+
+Related trap, recorded so nobody re-treads it:
+`retrieval_eval_set_committed: committed → referenced_not_committed` looks
+like a clean flip but erases the evidence for `document_code_conflicts: 1`
+(the 52%-versus-48.1% finding derives from the committed test-set labels),
+so one field degrades while another improves and no direction claim
+survives.
+
+### 3e. The schema is not normalised, which is why entailed twin changes exist
+
+`retrieval_best_approach_shipped` is a derived summary of the per-technique
+`measured_effect` values: `mixed_result` *means* "the reported metrics
+disagree about which approach wins". So changing a technique's measured
+effect makes the summary field factually false, and **every**
+`harmful-component-kept` twin on p01 necessarily moves two fields. Checked
+across all three techniques; there is no single-field version.
+
+The owner ruled at the M1 twin gate that "differs in exactly one way" means
+one *fact*, and **scoped that ruling to `p01-t01`/`p01-t02` alone**,
+explicitly refusing it as a standing rule (decision
+`twin-entailed-change-scoped`, enforced by `APPROVED_ENTAILMENTS`). The
+scoping is right, and it means the next base record hitting the same
+structure comes back to the owner rather than proceeding.
+
+The permanent fix is normalisation: either derive
+`retrieval_best_approach_shipped` from the technique blocks at scoring time
+rather than storing it, or drop it and let a criterion compute what it
+needs. Then a twin genuinely can differ in one field and the allowance is
+not needed at all. Not mandated by the ruling — recorded because the
+alternative is an allowlist that grows one owner decision at a time.
 
 Documentation accuracy is now eight fields, each added to close a gap a
 single repository exposed: `headline_numbers_traceable`,
