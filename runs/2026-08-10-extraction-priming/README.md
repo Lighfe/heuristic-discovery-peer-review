@@ -18,11 +18,9 @@ record. p02 was extracted the same way and has no primed counterpart.
 Artifacts: `p01.primed.yaml` (superseded, kept only as the comparison
 baseline). The clean records are the canonical ones in `cases/records/`.
 
-**Isolation is partial and the writeup must say so.** A Claude Code
-subagent in this repository still receives `CLAUDE.md`, which states the
-project's purpose. It did not receive the diagnosis, the catalogue, the
-plan, or this conversation. "Clean" here means *unprimed by the failure-mode
-list*, not *blind*.
+**Isolation is partial and the writeup must say so.** See *What this does
+and does not license* below for what was and was not achieved, and how
+compliance was audited.
 
 ## Result — field values
 
@@ -54,24 +52,53 @@ the artifact it names. Both records already agreed the notebooks cannot
 execute; only the clean one worked out what the code would produce if they
 could.
 
-### Two consequences
+### What this does and does not license
 
-**1. Priming made the reader worse, not better.** The expected failure was
-that a primed reader would over-report — seeing catalogue failure modes
-everywhere. What happened was the opposite: the primed session pattern-matched
-the repository against a known list and stopped there, while the unprimed one
-followed the schema field by field and checked what the code actually
-computes. Checking against a list of known answers is what prevented the
-finding. Recorded in `decisions.md` as `extraction-in-clean-context`.
+**It does not show that priming causes anything.** One repository, one pair
+of runs, one difference found. Any causal reading is unsupported, and an
+earlier version of this file asserted one — that priming makes a reader stop
+early. Withdrawn. The rule in `decisions.md` is categorical (a corrupted
+context is corrupted) and needs no claim about which reader performs better.
 
-**2. Value-level agreement is the wrong instrument for extraction
-validation, and `plan.md` currently relies on it.** A double-extraction
-agreement check over field values would have reported 94.7% here and
-concluded extraction is reliable — while one run had found a fatal defect
-and the other had not. The difference lived entirely in `extraction_notes`,
-which no agreement statistic reads. Any extraction-validation claim scoped
-to field values must say what it excludes; before M2 sealing, the sampled
-spot-check needs a component that compares notes, not only values.
+**The two runs differ in four ways at once**, so even the direction of the
+difference is not attributable:
+
+| | primed | clean |
+|---|---|---|
+| agent | the interactive session | a general-purpose subagent |
+| system prompt | full, including `CLAUDE.md` | subagent scaffolding, no `CLAUDE.md` |
+| conversation history | the entire session | none |
+| knowledge of the diagnosis | yes | no |
+
+"The primed reader missed it" and "the two runs were not the same
+instrument" are both consistent with the evidence, and this comparison
+cannot separate them.
+
+**Isolation was instruction-based, not enforced.** The subagents held full
+filesystem tool access and were told which paths not to read. Compliance was
+audited afterwards from the transcripts: zero reads of repo-root `docs/`,
+`tasks/`, `courses/` or `cases/`; the only matches were the clones' own
+documentation, plus `tasks/02-milestone-1.md` occurring as a string inside
+`schema.md`'s own header, and `p01.primed.yaml` occurring inside the
+prohibition text itself. No `CLAUDE.md` content appears in either transcript.
+Compliance held; it was not prevented. A future run wanting a stronger claim
+needs filesystem-level isolation — a working tree containing only the prompt,
+the schema and the clone.
+
+Residual priming, for completeness: `schema.md` itself mentions twins and
+red-teaming, so the clean runs knew the schema serves a testing purpose.
+They did not have the failure-mode catalogue.
+
+### The one consequence that does hold
+
+**A value-level agreement statistic may not be reported as extraction
+validity, and the reason is structural rather than statistical.**
+`extraction_notes` exist precisely to carry what the fields cannot express,
+and no value-level comparison reads them — so two records can agree on every
+field while disagreeing about whether the repository has a fatal defect.
+That follows from what the instrument measures, not from this sample of one.
+`plan.md`'s sampled double-extraction spot-check needs a note-comparison
+component before M2 sealing, or its claim must state what it excludes.
 
 ## Schema defect found by this comparison
 

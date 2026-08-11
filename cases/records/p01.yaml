@@ -131,6 +131,11 @@ fields:
     evidence: ["docs/evaluation.md:17", "notebooks/02_llm_evaluation.py:66-68"]
     basis: "Faithfulness is reported as 5.00/5 on a judge scale whose stated maximum is 5, so on 27 integer-valued items every item scored the maximum."
 
+  llm_eval_role_overlap:
+    value: same_family
+    evidence: ["notebooks/02_llm_evaluation.py:44", "notebooks/02_llm_evaluation.py:64-88", "src/evaluation/test_set.py:1-137"]
+    basis: "the question set is a committed literal with no generator, so no model wrote it; the answer generator is gpt-4o and the judge is gpt-4o-mini - different sizes of one model line, hence same_family rather than same_model"
+
   llm_eval_config_matches_shipped:
     value: differs
     evidence: ["notebooks/02_llm_evaluation.py:37-46", "src/api/routes.py:36-55"]
@@ -142,6 +147,11 @@ fields:
     value: feedback_and_dashboard
     evidence: ["src/api/routes.py:161-172", "src/api/static/index.html:409-434", "dashboards/food-wine-dashboard.json"]
     basis: "A feedback endpoint is wired to thumbs-up/down buttons in the UI, and a provisioned Grafana dashboard is committed."
+
+  monitoring_instrumentation:
+    value: traced_on_request_path
+    evidence: ["src/api/routes.py:37-95", "src/api/db.py:45-61"]
+    basis: "the request handler times embedding, retrieval and the LLM call and writes latencies, token counts, model and error to the conversations table on every request"
 
   monitoring_chart_count:
     value: 8
@@ -199,6 +209,14 @@ fields:
       value: improves
       evidence: ["docs/evaluation.md:7-9"]
       basis: "Read off the project's own reported numbers: hybrid exceeds both dense and sparse on all four reported columns (15/37/52/0.39 vs 11/33/48/0.34 and 7/26/41/0.28)."
+    decision_documented:
+      value: false
+      evidence: ["docs/evaluation.md:3-19", "docs/architecture.md:80-92"]
+      basis: "the technology-decisions table justifies tools that were NOT adopted, but no committed text states why this component is shipped enabled given its own measured numbers"
+    decision_axes:
+      value: []
+      evidence: ["docs/evaluation.md:3-19"]
+      basis: "no stated justification tied to measurements, so no axes"
 
   reranking:
     present:
@@ -217,6 +235,14 @@ fields:
       value: mixed
       evidence: ["docs/evaluation.md:9-10"]
       basis: "Read off the project's own reported numbers: adding the re-ranker raises Hit Rate@1 (15% to 19%) and @3 (37% to 44%) but lowers Hit Rate@5 (52% to 48%) and MRR@10 (0.39 to 0.36)."
+    decision_documented:
+      value: false
+      evidence: ["docs/evaluation.md:9-10", "docs/architecture.md:45-53", "docs/limitations.md:10"]
+      basis: "the component ships enabled although its own reported numbers trail hybrid alone on HR@5 and MRR@10; no committed text states why it was kept. limitations.md:10 notes the cross-encoder is English-trained but draws no ship/do-not-ship conclusion from the measurements"
+    decision_axes:
+      value: []
+      evidence: ["docs/evaluation.md:3-19"]
+      basis: "no stated justification tied to measurements, so no axes"
 
   query_rewriting:
     present:
@@ -235,6 +261,14 @@ fields:
       value: not_measured
       evidence: ["docs/evaluation.md:5-17"]
       basis: "No row or metric in the reported results corresponds to rewriting on versus off."
+    decision_documented:
+      value: false
+      evidence: ["docs/evaluation.md:3-19", "docs/architecture.md:80-92"]
+      basis: "the technology-decisions table justifies tools that were NOT adopted, but no committed text states why this component is shipped enabled given its own measured numbers"
+    decision_axes:
+      value: []
+      evidence: ["docs/evaluation.md:3-19"]
+      basis: "no stated justification tied to measurements, so no axes"
 
   # --- I. Deployment and bonus ---
 
@@ -254,6 +288,16 @@ fields:
     value: 18
     evidence: ["docs/evaluation.md:7-10", "docs/evaluation.md:16-17", "notebooks/01_retrieval_evaluation.py:1-9", "notebooks/02_llm_evaluation.py:1-12"]
     basis: "Counted reported measurement results with no committed artifact able to produce them: 4 strategies by 4 metrics in the retrieval table (16) plus the two answer-quality scores (2). One of the 16 is additionally unreachable arithmetically — see extraction_notes."
+
+  document_code_conflicts:
+    value: 1
+    evidence: ["docs/evaluation.md:9", "notebooks/01_retrieval_evaluation.py:41-49", "src/evaluation/test_set.py:1-137", "src/ingestion/wikipedia.py:67"]
+    basis: "one claim the code contradicts: Hybrid Hit Rate@5 is reported as 52%, but the scorer tests exact equality between a chunk's metadata source and the item's source, ingestion writes 'wikipedia' while 12 of 27 items expect 'wikipedia_pt', and 2 further items are hard-coded to zero - so 13/27 = 48.1% is the maximum any strategy can reach"
+
+  broken_reference_count:
+    value: 0
+    evidence: ["README.md:45-60"]
+    basis: "every path named in the README project tree exists at this commit"
 
   document_number_conflicts:
     value: 2

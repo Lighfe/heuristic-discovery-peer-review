@@ -210,7 +210,20 @@ tomorrow; nothing is re-spent.
   no access to the transcription rationale, diffs guidance criterion →
   mapping → field list line by line, because v0 anchors G3/R3 and the
   baseline findings, and a transcription error would bias them
-  undetectably; (b) effort is weighted toward the **twin catalogue**, where
+  undetectably; (b) the extraction spot-check **compares extraction notes,
+  not only field values** — two records can agree on every field and
+  disagree about whether a repository has a fatal defect, because the notes
+  carry what the fields cannot express (decision
+  `extraction-agreement-needs-notes`; measured at M1, see
+  `runs/2026-08-10-extraction-priming/`); (c) the schema items left open at
+  the M1 gate are closed *before* sealing, since a later change costs a full
+  re-extraction: a controlled vocabulary for group-K string fields, a
+  notebook cell-locator convention, and the counting rule for
+  `untraceable_number_count`; the full queue is `docs/deferred-to-m2.md`,
+  which the sealing checklist works through item by item — the schema is
+  **frozen for M1** and every open question was written there rather than
+  resolved, because a schema change is free before sealing and costs a full
+  corpus re-extraction after it; (d) effort is weighted toward the **twin catalogue**, where
   the objective's real discriminating power concentrates — G2 may prove
   near-vacuous, G4 may ceiling out, and G5/G6 are compliance checks,
   leaving G1 plus the catalogue as the project's validity.

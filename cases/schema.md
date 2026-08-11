@@ -5,8 +5,16 @@ step 2), then revised in place at the 2026-08-10 owner gate (C1-C8) before any
 case was built on it. Nothing course-specific belongs
 here: this schema must survive pointing the project at a second zoomcamp.*
 
-**Status: DRAFT — awaiting owner approval at the step-3 gate. No case may be
-built on it until then.**
+**Status: FROZEN FOR M1 (2026-08-10).** Cleared the step-3 owner gate after
+two revision rounds; cases may now be built on it. Every open question found
+since — including several the owner raised and several the p02 extraction
+surfaced — is queued in `docs/deferred-to-m2.md` rather than resolved here.
+
+The freeze is deliberate and its reason is arithmetic: a schema change
+before M2 sealing is free, because the corpus is being extracted then
+anyway; after sealing it costs a full re-extraction plus a re-run of every
+measurement. M1's deliverable is the twin baseline, and no further schema
+round-trip buys anything toward it.
 
 ## What a record is
 
@@ -116,6 +124,23 @@ Re-verification stays possible indefinitely: `repos.yaml` pins every commit,
 so a clone is reproducible exactly, and clones persist locally under
 `clones/` (gitignored — someone else's code is not ours to redistribute).
 
+### Locators inside notebooks
+
+`.ipynb` files are JSON, so a line number points at an escaped string rather
+than at code a reader can find. Notebook evidence therefore uses
+**`path:cellN`**, with N the zero-based index into the `cells` array:
+`notebooks/rag.ipynb:cell17`. Several cells are cited as
+`path:cellN,cellM`.
+
+Stated here because the p02 extraction hit this and invented the convention
+mid-run. The convention it chose was the right one, but a locator format
+decided per-run is not comparable between records, and an extractor
+inventing schema is exactly what `schema-proposals-via-owner` exists to
+prevent. Formats belong in the schema, not in an agent's judgment.
+
+Plain `.py` notebooks (marimo, jupytext) are ordinary source files and use
+`path:lines`.
+
 ### Evidence for computed fields
 
 A few fields are counts over the repository rather than claims located in
@@ -202,6 +227,7 @@ lose the distinction a candidate most needs.
 | `llm_eval_judge_spotchecked` | bool | a sample of judge verdicts checked by hand, with the result reported |
 | `llm_eval_question_generator` | enum | `none_committed` · `generator_committed` · `generator_ties_question_to_passage` · `other` · `undeterminable` |
 | `llm_eval_metric_at_ceiling` | bool | a reported metric sits at its maximum for effectively every item |
+| `llm_eval_role_overlap` | enum | `distinct` · `same_family` · `same_model` · `undeterminable` |
 | `llm_eval_config_matches_shipped` | enum | `matches` · `differs` · `undeterminable` |
 
 `llm_eval_judge_spotchecked` and `llm_eval_question_generator` together
@@ -220,16 +246,64 @@ generation code, by contrast, is a fact about the repository. So
 rests on assertion" — which is the honest reading and *not* a synonym for
 hand-written.
 
-`llm_eval_metric_at_ceiling` is the unfailable-test lever: a metric every
-item scores full marks on cannot discriminate, whatever it is named.
+`llm_eval_metric_at_ceiling` is the unfailable-test lever. It is `true` when
+a reported metric sits at its maximum for effectively every item — p01
+reports faithfulness of **5.00 out of 5**, meaning all 27 items scored full
+marks. A measurement nothing fails ranks nothing: it cannot separate a good
+system from a bad one, so it carries no information about the system even
+though it looks like a result. The field does not say the system is bad or
+good; it says the *measurement* has no discriminating power, which is a fact
+about the reported numbers and needs no view about the subject matter.
+Contrast p02, whose judge scores are 0.805 and 0.969 — below ceiling, so the
+metric could in principle have come out worse.
+
+`llm_eval_role_overlap` records how many roles one model occupies:
+generating the question set, being a system under comparison, and judging.
+p02 has one model in all three, including judging a comparison it loses.
+The field states the fact and leaves the consequence to a criterion,
+deliberately: each call runs in a fresh context, so this is not information
+leaking between roles, and the owner's position (M1 gate) is that shared
+identity is weaker evidence of circularity than it first appears. What
+remains is shared inductive bias — a judge that makes the same mistakes as
+the generator scores them as correct — which is real but is a tendency, not
+a defect the schema should assert. `same_family` covers different sizes of
+one model line.
 
 ## F. Monitoring — `scoreable`
 
 | field | type | values |
 |---|---|---|
 | `monitoring_kind` | enum | `none` · `feedback_only` · `dashboard_only` · `feedback_and_dashboard` · `other` |
-| `monitoring_chart_count` | int | |
+| `monitoring_dashboard_provenance` | enum | `none` · `committed_definitions` · `stock_tool_ui` · `other` |
+| `monitoring_instrumentation` | enum | `none` · `logged` · `traced_on_request_path` |
+| `monitoring_chart_count` | int \| null | committed panel definitions; `null` when not applicable |
 | `monitoring_charts_bound_to_data` | enum | `none` · `some` · `all` · `not_applicable` |
+
+`monitoring_dashboard_provenance` exists because counting committed panels
+silently misreads a whole class of project. p02 deploys a stock
+observability image whose UI shows request traces and latency out of the
+box; nothing is committed, so a panel count returns **0** — the same value a
+project with no monitoring at all gets, while the reviewer is looking at a
+working dashboard. The two are opposite situations and the count cannot tell
+them apart.
+
+So `monitoring_chart_count` counts **committed panel definitions only**, and
+is `null` — not `0` — whenever `monitoring_dashboard_provenance` is
+`stock_tool_ui`. `0` then means what it should: a dashboard was defined and
+has no panels.
+
+`monitoring_instrumentation` carries the half a panel count cannot see: what
+the application itself does. p02 emits OpenTelemetry spans from its retrieval
+and serving paths, so the traces a reviewer sees are produced by the
+project's own code even though no dashboard is committed. Counting panels
+scored that as *nothing*, for a project that had done strictly more work
+than one committing a three-panel Grafana JSON. `traced_on_request_path`
+means instrumentation runs where requests are served; `logged` means
+records are written but nothing is wired to a viewer.
+
+Neither field decides whether a stock tool *should* score as well as a built
+dashboard. Together they make the distinction visible so a criterion can
+decide, which is the schema's job and not the schema's call.
 
 `monitoring_charts_bound_to_data` checks each panel's query against the
 schema the application actually writes: does every referenced table and
@@ -294,6 +368,8 @@ One block per technique, keys `hybrid_search`, `reranking`,
 | `shipped_enabled` | bool | active on the request path, not merely present |
 | `evaluated` | bool | its effect is measured and the numbers reported |
 | `measured_effect` | enum | `improves` · `mixed` · `hurts` · `not_measured` |
+| `decision_documented` | bool | the ship/do-not-ship choice is stated **and** justified by the project's own measurements |
+| `decision_axes` | list[str] | which measured quantities the stated justification rests on |
 
 This is the harmful-component-kept lever, and the reason it needs four
 sub-fields rather than one. The current criteria award a point for
@@ -305,6 +381,28 @@ requires nobody to read anything.
 `measured_effect` is read off the project's **own reported numbers**, never
 from a view about whether the component ought to help. `mixed` when the
 reported metrics disagree with each other.
+
+`decision_documented` is the field that makes a **documented removal**
+visible, and without it the schema could only ever record the negative half
+of one. p02 implements a reranker, measures it, and rejects it: MRR improves
+but latency rises more than tenfold, and the README says so and says why.
+Under the earlier field set that repository was indistinguishable from one
+that built a reranker and silently dropped it — `shipped_enabled: false`,
+`measured_effect: mixed`, nothing else. The author had in fact done the
+exact thing a course on evaluation is trying to teach.
+
+This is the incentive gradient of `project-evaluation-issues.md` §2 reduced
+to a checkable fact. Shipping a component is visible in the file tree;
+measuring one and removing it is visible only if someone reads the write-up.
+A criterion cannot reward the second path unless a field carries it.
+
+`decision_axes` names the quantities the justification rests on — e.g.
+`["mrr", "hit_rate", "latency", "token costs"]` — because a project may decide on an axis
+the retrieval metrics do not cover. p02 decided on latency, which
+`measured_effect` cannot see at all: read on retrieval quality alone the
+rejection looks unmotivated, and the schema would misreport a reasoned
+decision as an arbitrary one. Record the axes the project actually argued
+from, not the ones a criterion happens to score.
 
 ## I. Deployment and bonus — `scoreable`
 
@@ -322,8 +420,10 @@ read.
 | field | type | values |
 |---|---|---|
 | `headline_numbers_traceable` | enum | `no_numbers` · `none_traceable` · `some_traceable` · `all_traceable` |
-| `untraceable_number_count` | int | headline figures with no committed artifact behind them |
-| `document_number_conflicts` | int | figures that disagree between two committed documents |
+| `untraceable_number_count` | int | **individual reported figures** with no committed artifact able to produce them |
+| `document_number_conflicts` | int | figures that disagree between two committed **documents** |
+| `document_code_conflicts` | int | claims the committed **code** contradicts |
+| `broken_reference_count` | int | documented paths or artifacts that do not exist |
 | `limitations_section` | enum | `absent` · `cosmetic_only` · `includes_structural` |
 | `artifact_reference_strength` | enum | `all_linked` · `all_referenced` · `partially_referenced` · `none` |
 | `artifacts_unreferenced_count` | int | expected artifacts named nowhere in the documentation |
@@ -348,6 +448,30 @@ limitation concerns the system's own method or measurement, rather than only
 its hardware, scope or budget. The check is which of the two a stated
 limitation is about — not whether the list is complete, which nobody can
 verify.
+
+`untraceable_number_count` counts **individual figures**, not results
+tables or claims: a four-row table of four metrics is sixteen figures. The
+rule is stated because it was not, and two extractions free to choose
+between "figures", "rows" and "claims" produce numbers that cannot be
+compared across repositories even when both are careful.
+
+`document_code_conflicts` is the field two repositories independently
+needed and neither had. A claim can disagree with another document — that is
+`document_number_conflicts` — or it can disagree with the code, which is a
+different and usually worse fact. p01 reports a retrieval hit rate of 52%
+while its own scoring function and ingestion labels make 48.1% the ceiling:
+not untraceable, not a document conflict, simply unreachable. p02 reports
+faithfulness of 0.969 where the judge returns null on parse failures and the
+reported rate silently drops them, so the figure is a rate over 962 items
+and the document states no denominator. Both are checkable by reading two
+committed files against each other, and both were invisible to the schema.
+
+`broken_reference_count` is `artifacts_unreferenced_count` from the other
+end: that field counts artifacts nothing points at, this one counts pointers
+that reach nothing. p02's README project tree lists two files that are not
+tracked and gives three result files under names that do not match the
+committed ones. Same findability failure, opposite direction, and a reviewer
+following the documentation hits this one first.
 
 `document_number_conflicts` is a **count**, not a verdict. An earlier draft
 had a `consistent`/`inconsistent` enum, which spanned everything from a
