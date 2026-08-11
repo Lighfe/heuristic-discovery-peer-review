@@ -1,0 +1,285 @@
+schema_version: 0
+case_id: p01
+commit: "42cda614c65c970bc1b5ca9b25f4252baef233e7"
+extracted_by: agents/extractor/v1
+extracted_on: "2026-08-10"
+
+fields:
+
+  # --- A. System shape -----------------------------------------------
+  knowledge_base_present:
+    value: present
+    evidence: ["src/ingestion/qdrant_index.py", "src/search/dense.py", "docker-compose.yml"]
+    basis: "Qdrant collection `portuguese_food_wine` built by ingestion and queried on the request path"
+
+  llm_in_flow:
+    value: present
+    evidence: ["src/api/answer.py", "src/api/routes.py:70-77"]
+    basis: "generate_answer() calls the OpenAI chat model configured as OPENAI_CHAT_MODEL"
+
+  retrieval_flow:
+    value: kb_and_llm
+    evidence: ["src/api/routes.py:51-77"]
+    basis: "request handler searches Qdrant + BM25, reranks, then calls the LLM"
+
+  problem_statement:
+    value: specific
+    evidence: ["README.md:62-64"]
+    basis: "names the audience (tourists and food enthusiasts) and what the system answers (Portuguese gastronomy questions, with citations)"
+
+  # --- B. Interface --------------------------------------------------
+  interface_kind:
+    value: web_ui
+    evidence: ["src/api/static/index.html", "src/api/app.py", "src/api/routes.py:23"]
+    basis: "browser chat UI served by Flask, backed by POST /api/chat"
+
+  interface_evidence_kind:
+    value: code_and_screenshot
+    evidence: ["screenshots/chat-ui.png", "README.md:39-43"]
+    basis: "four screenshots committed and displayed in the README; no recording"
+
+  # --- C. Ingestion --------------------------------------------------
+  ingestion_kind:
+    value: script_or_notebook
+    evidence: ["src/ingestion/run.py", "docs/architecture.md:86-88"]
+    basis: "python -m src.ingestion.run; architecture states dlt and Kestra were considered and not used"
+
+  ingestion_single_command:
+    value: true
+    evidence: ["README.md:21-22"]
+    basis: "docker compose exec api python -m src.ingestion.run"
+
+  ingestion_output_stated:
+    value: true
+    evidence: ["docs/architecture.md:108", "src/ingestion/run.py:109-118"]
+    basis: "1432 documents -> 1514 chunks -> 1514 vectors, and run.py logs a matching per-source summary"
+
+  # --- D. Retrieval evaluation ---------------------------------------
+  retrieval_eval_present:
+    value: true
+    evidence: ["notebooks/01_retrieval_evaluation.py", "docs/evaluation.md:3-10"]
+
+  retrieval_eval_approaches_compared:
+    value: 4
+    evidence: ["notebooks/01_retrieval_evaluation.py:52", "docs/evaluation.md:5-10"]
+    basis: "counted strategies with reported numbers: dense, sparse, hybrid, hybrid+rerank"
+
+  retrieval_eval_set_committed:
+    value: committed
+    evidence: ["src/evaluation/test_set.py:1-137"]
+    basis: "the set is the artifact, not a program with an output: TEST_SET is a literal list of 27 question/answer/source dicts spanning the whole file, inspectable without running anything"
+
+  retrieval_eval_set_size:
+    value: 27
+    evidence: ["src/evaluation/test_set.py:1-137", "docs/evaluation.md:19"]
+    basis: "27 `question` keys counted in the TEST_SET literal; docs state 27, so the stated and countable sizes agree"
+
+  retrieval_eval_relevance_rule:
+    value: source_level
+    evidence: ["notebooks/01_retrieval_evaluation.py:40-47"]
+    basis: "hit_rate() counts a hit when any retrieved chunk's metadata.source equals the expected source; the corpus has 4 source labels"
+
+  retrieval_eval_config_matches_shipped:
+    value: differs
+    evidence: ["notebooks/01_retrieval_evaluation.py:62-66", "src/api/routes.py:51-56"]
+    basis: "notebook retrieves k=20 and reranks to top_k=10 with no query rewriting; the API retrieves k=50 and reranks to top_k=5 with query rewriting applied"
+
+  retrieval_eval_uncertainty_stated:
+    value: false
+    evidence: ["docs/evaluation.md:5-19", "notebooks/01_retrieval_evaluation.py:76-86"]
+    basis: "means reported per strategy and k; no interval, variance or uncertainty statement anywhere"
+
+  retrieval_best_approach_shipped:
+    value: mixed_result
+    evidence: ["docs/evaluation.md:9-10", "src/api/routes.py:55-56"]
+    basis: "hybrid+rerank leads on HR@1 (19% vs 15%) and HR@3 (44% vs 37%) but trails hybrid on HR@5 (48% vs 52%) and MRR@10 (0.36 vs 0.39); the shipped path reranks"
+
+  # --- E. Answer evaluation ------------------------------------------
+  llm_eval_present:
+    value: true
+    evidence: ["notebooks/02_llm_evaluation.py", "docs/evaluation.md:12-19"]
+
+  llm_eval_approaches_compared:
+    value: 1
+    evidence: ["notebooks/02_llm_evaluation.py:36-47", "docs/evaluation.md:14-17"]
+    basis: "one generation configuration (gpt-4o, one prompt) scored on two metrics; no second prompt or model compared"
+
+  llm_eval_judge_kind:
+    value: model_judge
+    evidence: ["notebooks/02_llm_evaluation.py:64-88"]
+    basis: "gpt-4o-mini scores relevance and faithfulness from a JSON-mode prompt"
+
+  llm_eval_judge_spotchecked:
+    value: false
+    evidence: ["notebooks/02_llm_evaluation.py:64-105"]
+    basis: "no sample of judge verdicts is checked by hand and no judge error rate is reported anywhere in the repository"
+
+  llm_eval_question_generator:
+    value: none_committed
+    evidence: ["src/evaluation/test_set.py:1-137", "docs/evaluation.md:19"]
+    basis: "no generation script anywhere in the repository; the set exists only as a committed literal. The README calls it 'curated', which is an assertion about a process that left no trace — recorded here as the absence of a generator, not as a claim that it was typed by hand"
+
+  llm_eval_metric_at_ceiling:
+    value: true
+    evidence: ["docs/evaluation.md:17"]
+    basis: "Faithfulness reported at 5.00/5, the maximum, i.e. every one of the 27 items scored full marks"
+
+  llm_eval_config_matches_shipped:
+    value: differs
+    evidence: ["notebooks/02_llm_evaluation.py:36-42", "src/api/routes.py:51-56"]
+    basis: "notebook retrieves k=20 before fusion; the API retrieves k=50. Rerank top_k=5 and query rewriting match"
+
+  # --- F. Monitoring -------------------------------------------------
+  monitoring_kind:
+    value: feedback_and_dashboard
+    evidence: ["src/api/routes.py:161-172", "src/api/db.py:104-109", "dashboards/food-wine-dashboard.json"]
+    basis: "POST /api/feedback writes a score to conversations.feedback; Grafana dashboard provisioned"
+
+  monitoring_chart_count:
+    value: 8
+    evidence: ["dashboards/food-wine-dashboard.json"]
+    basis: "8 panels: 5 timeseries, 3 stat"
+
+  monitoring_charts_bound_to_data:
+    value: all
+    evidence: ["dashboards/food-wine-dashboard.json", "src/api/db.py:45-61"]
+    basis: "every panel queries the conversations table; each referenced column (created_at, retrieval_latency_ms, llm_latency_ms, prompt_tokens, completion_tokens, total_latency_ms, error, feedback) exists in the DDL the app creates"
+
+  # --- G. Containerization and reproducibility ------------------------
+  containerization_kind:
+    value: compose_full
+    evidence: ["docker-compose.yml", "docker/Dockerfile"]
+    basis: "api, qdrant, postgres, grafana all in compose; caddy behind the `cloud` profile"
+
+  run_instructions:
+    value: complete
+    evidence: ["README.md:7-28", ".env.example"]
+    basis: "clone, configure env, compose up, ingest, open UI; required variables enumerated in .env.example"
+
+  run_instructions_gap_count:
+    value: 2
+    evidence: ["README.md:18-25", "src/api/app.py:29-51", "docs/deployment.md:9", "deploy/deploy.sh:14", "docker-compose.yml"]
+    basis: "two steps cannot achieve what they state. (1) The API builds its BM25 index once at startup by scrolling Qdrant (src/api/app.py:29-51); the documented order starts the API at step 3 while Qdrant is still empty, ingests at step 4, and opens the UI at step 5 with no restart in between, so BM25 stays empty and the `except` branch logs 'Could not rebuild BM25 index from Qdrant, BM25 will be empty'. Hybrid retrieval silently degrades to dense-only, and nothing in the procedure says to restart. (2) The cloud path has no step that puts an .env on the host: docs/deployment.md:9 says to set the key in .env before deploying, but deploy/deploy.sh:14 rsyncs with --exclude '.env', and ${OPENAI_API_KEY} in docker-compose.yml has no default. Other checks pass: POSTGRES_* and both model names default, api publishes 5000:5000, ./data is bind-mounted"
+
+  dependency_versions_pinned:
+    value: lockfile_committed
+    evidence: ["uv.lock", "pyproject.toml:6-22"]
+    basis: "uv.lock committed and resolves exact versions; pyproject itself states lower bounds only (>=)"
+
+  data_accessible:
+    value: automated_or_committed
+    evidence: ["data/data-03-00009-s001.zip", "src/ingestion/wikipedia.py", "src/ingestion/infovini.py"]
+    basis: "MDPI dataset committed in-repo; Wikipedia and Infovini fetched by the ingestion script"
+
+  # --- H. Techniques --------------------------------------------------
+  hybrid_search:
+    present:
+      value: true
+      evidence: ["src/search/hybrid.py"]
+    shipped_enabled:
+      value: true
+      evidence: ["src/api/routes.py:55"]
+    evaluated:
+      value: true
+      evidence: ["docs/evaluation.md:5-10"]
+    measured_effect:
+      value: improves
+      evidence: ["docs/evaluation.md:7-9"]
+      basis: "hybrid beats dense and sparse on all four reported metrics (15/37/52/0.39 vs 11/33/48/0.34 and 7/26/41/0.28)"
+
+  reranking:
+    present:
+      value: true
+      evidence: ["src/search/reranker.py"]
+    shipped_enabled:
+      value: true
+      evidence: ["src/api/routes.py:56"]
+    evaluated:
+      value: true
+      evidence: ["docs/evaluation.md:10"]
+    measured_effect:
+      value: mixed
+      evidence: ["docs/evaluation.md:9-10"]
+      basis: "gains at HR@1 and HR@3, losses at HR@5 and MRR@10, against hybrid alone"
+
+  query_rewriting:
+    present:
+      value: true
+      evidence: ["src/search/query_rewriter.py"]
+    shipped_enabled:
+      value: true
+      evidence: ["src/api/routes.py:41"]
+    evaluated:
+      value: false
+      evidence: ["notebooks/01_retrieval_evaluation.py:52-66"]
+      basis: "absent from the four evaluated strategies; notebook 01 embeds the raw question. Notebook 02 applies it but runs no with/without comparison"
+    measured_effect:
+      value: not_measured
+      evidence: ["docs/evaluation.md:3-19"]
+
+  # --- I. Deployment --------------------------------------------------
+  cloud_deployment:
+    value: deployment_code_committed
+    evidence: ["deploy/provision.sh", "deploy/deploy.sh", "docker/Caddyfile", "docs/deployment.md"]
+
+  # --- J. Documentation accuracy --------------------------------------
+  headline_numbers_traceable:
+    value: some_traceable
+    evidence: ["notebooks/01_retrieval_evaluation.py:1-10", "notebooks/02_llm_evaluation.py:1-12", "docs/evaluation.md:5-19", "src/evaluation/test_set.py:1-137", "dashboards/food-wine-dashboard.json", "src/ingestion/run.py:109-118"]
+    basis: "traceable: the 27-pair set size (countable in test_set.py), the 8-panel count (countable in the dashboard JSON) and the ingestion counts (src/ingestion/run.py is an importable module that computes and logs them). Not traceable: every figure in the two results tables. Both notebooks import only `marimo` and `sys` - nb02 adds `OpenAI` - while using `mo`, `np`, `pd`, `plt`, `TEST_SET`, `DenseRetriever`, `BM25Retriever`, `Reranker`, `embed_query` and `hybrid_fusion`, none of which is imported or defined, so they raise NameError on the first cell that uses them. marimo notebooks are plain .py and store no outputs, so no committed artifact contains or can produce those figures"
+
+  untraceable_number_count:
+    value: 18
+    evidence: ["docs/evaluation.md:5-10", "docs/evaluation.md:14-17", "notebooks/01_retrieval_evaluation.py:1-10", "notebooks/02_llm_evaluation.py:1-12"]
+    basis: "counted reported figures with no artifact able to produce them: 16 cells of the retrieval table (4 strategies x Hit Rate@1, @3, @5 and MRR@10) plus the 2 answer-quality scores (relevance 3.04, faithfulness 5.00). The notebooks named as their source cannot execute as committed"
+
+  document_number_conflicts:
+    value: 1
+    evidence: ["README.md:79", "docs/architecture.md:68", "docker-compose.yml"]
+    basis: "one conflict: README says 'Docker Compose (4 services + optional Caddy)' while docs/architecture.md:68 says '5 services + optional Caddy'. The compose file defines 5 services with caddy behind the `cloud` profile, so the two cannot both be right. No other figure disagrees between documents: the evaluation tables, the 27-pair set size and the 8-panel count each appear consistently wherever repeated"
+
+  limitations_section:
+    value: includes_structural
+    evidence: ["docs/limitations.md:10", "docs/limitations.md:5"]
+    basis: "the cross-encoder being trained on English while the corpus is Portuguese is a limitation of the method, not of hardware or scope"
+
+  artifact_reference_strength:
+    value: all_referenced
+    evidence: ["README.md:30-37", "README.md:45-60", "docs/evaluation.md:19"]
+    basis: "every checklist artifact is named by path: notebooks/ and src/evaluation/ and dashboards/ in the plain-text project tree at README.md:45-60, notebooks/ again as a code span at docs/evaluation.md:19, deploy/ in the tree. Not `all_linked`: the five docs pages and four screenshots are reached by markdown links, the notebooks, test set and dashboard JSON are named but not linked"
+
+  artifacts_unreferenced_count:
+    value: 0
+    evidence: ["README.md:45-60"]
+    basis: "checklist of five: evaluation notebook, evaluation question set, dashboard definition, ingestion entry point, deployment configuration. All five are named by path in the README project tree; none is unreferenced"
+
+  # --- K. Descriptive (no criterion may read these) --------------------
+  corpus_language:
+    value: "pt"
+    evidence: ["src/evaluation/test_set.py", "src/api/static/index.html"]
+  corpus_domain:
+    value: "food_and_wine"
+    evidence: ["README.md:1-3"]
+  interface_framework:
+    value: "flask"
+    evidence: ["src/api/app.py", "pyproject.toml:8"]
+  vector_store:
+    value: "qdrant"
+    evidence: ["docker-compose.yml", "src/ingestion/qdrant_index.py"]
+  llm_provider:
+    value: "openai"
+    evidence: [".env.example:2-6", "src/api/answer.py"]
+  repo_file_count:
+    value: 53
+    evidence: ["<repo>"]
+    basis: "computed field: `git ls-files | wc -l` at commit 42cda614"
+
+extraction_notes:
+  - "PROVENANCE WARNING, and it applies to this whole record. It was written by a Claude Code session that had already read `project-evaluation-issues.md`, the twin catalogue and the owner's live comments, not by `agents/extractor/v1` run in a clean context. The prompt exists and was followed, but it was not the only thing in the room. Two notes below were seeded by owner remarks rather than found by extraction and are marked; the unmarked ones carry the same risk less visibly. Re-running extraction in an isolated context is the only way to know which findings survive, and until that is done no claim here about what an extractor can find is supported."
+  - "OWNER-SEEDED, not found by extraction. `problem_statement: specific` is true by the field's definition and misleading as a summary: the stated audience is tourists while the corpus, interface and answers are Portuguese (`corpus_language: pt`). Audience and system are each stated and do not cohere. Recognising that needs world knowledge, not a fact in the repository, so no field captures it and the extractor did not raise it unprompted."
+  - "OWNER-SEEDED, and it corrected two field values. `run_instructions_gap_count` was first recorded as 0 from a desk walk-through that checked only whether each documented step had its inputs available. Both real gaps needed tracing a step into the code it invokes: the BM25 index is built once at API startup (src/api/app.py:29-51) so the documented ordering leaves it empty, and deploy/deploy.sh:14 excludes the .env that docs/deployment.md:9 relies on. The check is only as deep as the tracing, and a shallow walk-through returns a confident 0."
+  - "`headline_numbers_traceable` was first recorded as `all_traceable` on the reading that an artifact merely had to exist. Both notebooks are non-executable as committed (no imports for the names they use) and marimo stores no outputs, so 18 reported figures have nothing behind them. The schema definition has been tightened: the artifact must be *able to produce* the number. This is the strongest instance in p01 of the claim-without-artifact pattern from `project-evaluation-issues.md` section 4, and the first reading missed it entirely."
+  - "`retrieval_eval_config_matches_shipped` collapses three independent differences (retrieval depth, rerank cut-off, query rewriting present or absent) into one enum. The diff is in `basis` but is not machine-readable, so a twin cannot mutate one difference without mutating the field wholesale. Owner-acknowledged at the M1 gate as acceptable for M1; if candidates start distinguishing kinds of drift, this becomes a structured list."
+  - "`retrieval_eval_relevance_rule: source_level` records a fact about the scoring function. Whether source-level matching is too coarse *for this corpus* depends on how the 1514 chunks distribute across the four source labels, which is a semantic question the schema deliberately cannot ask. The field records the rule, not its adequacy."
+  - "2 of the 27 test-set entries carry `source: none` and are scored as a miss for every strategy at every k (notebooks/01:56-62). Every reported hit rate is therefore about 7% lower than the same measurement over the 25 answerable questions, uniformly across all four strategies — so the table understates absolute performance while leaving the ranking between strategies intact. No schema field can express a systematic offset in a reported number that leaves comparisons valid."
+  - "p01 exercises every field group cleanly. That is expected and is not evidence the schema is right: it was derived from this repository, by a session that already knew what to look for. p02 is the first real test, and what the schema fails to say about it is the finding."

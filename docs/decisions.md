@@ -279,6 +279,27 @@ first (commit unpinned, and `self` role tests less of the pipeline).
 
 ## Process
 
+**record-decisions-when-made** — A `decisions.md` entry is written when the
+choice is made and *before* the work implementing it, never batched at a
+commit. Batching loses the reasoning if a session is interrupted, and an
+entry reverse-engineered from finished code silently drops the rejected
+alternatives — the part of an entry worth keeping. Same rule for
+`findings.md`: written as its run completes, naming the run.
+
+**extraction-in-clean-context** — Evidence records are produced by a session
+holding only the extractor prompt, the schema and the clone, never one that
+has read the diagnosis or twin catalogue. Owner, M1 gate. Measured, not
+assumed: priming made the reader *worse* — the primed p01 run pattern-matched
+against the known failure list and missed that p01 reports a hit rate above
+the ceiling its own code allows (`runs/2026-08-10-extraction-priming/`).
+
+**extraction-agreement-needs-notes** — Extraction validation may not be
+scoped to field values alone. The primed and clean p01 records agree on 54
+of 57 values (94.7%) while disagreeing about whether the repository contains
+a fatal defect — the difference lived entirely in `extraction_notes`, which
+no agreement statistic reads. `plan.md`'s sampled double-extraction check
+needs a note-comparison component before M2 sealing.
+
 **negative-claims-name-their-search** — Review-01 A1's root cause: an
 approved document asserted "no pass threshold exists" when the truth was
 "not found in the sources searched" — and the owner, who could check the

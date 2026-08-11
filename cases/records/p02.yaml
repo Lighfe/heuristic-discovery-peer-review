@@ -1,0 +1,317 @@
+schema_version: 0
+case_id: p02
+commit: "7e603cbee11af5aef92d242ed70f51c797bfd909"
+extracted_by: agents/extractor/v1
+extracted_on: "2026-08-11"
+
+# Notebook locators are given as `<path>:cellN`, where N is the zero-based index
+# of the cell in the .ipynb `cells` array. Raw JSON line numbers would be
+# unusable for human re-verification. See extraction_notes.
+
+fields:
+
+  # A. System shape
+  knowledge_base_present:
+    value: present
+    evidence: ["src/rag.py:65-71", "src/ingest.py:24-32"]
+    basis: "Qdrant collection `physics_rag_collection_lat_nuc` is created by the ingestion script and queried by the request path."
+
+  llm_in_flow:
+    value: present
+    evidence: ["src/rag.py:117-124"]
+    basis: "The request path calls `genai_client.models.generate_content`."
+
+  retrieval_flow:
+    value: kb_and_llm
+    evidence: ["src/serve.py:50-58", "src/rag.py:99-124"]
+    basis: "POST /rag calls generate_answer, which calls _retrieve_context (Qdrant query_points) and then generate_content."
+
+  problem_statement:
+    value: specific
+    evidence: ["README.md:5-10"]
+    basis: "Named section '## Overview' states the audience ('physics researchers') and what the system answers ('query complex scientific concepts and receive answers based strictly on peer-reviewed or pre-print literature')."
+
+  # B. Interface
+  interface_kind:
+    value: web_ui
+    evidence: ["src/app.py:1-9", "docker-compose.yaml:49-60"]
+    basis: "Streamlit chat UI published on 8501 by compose; the repository also ships a FastAPI service (src/serve.py:47-58) — the enum admits only one value."
+
+  interface_evidence_kind:
+    value: code_only
+    evidence: ["README.md:117-135"]
+    basis: "No image, screenshot or recording file is tracked at this commit (`git ls-files` returns no .png/.jpg/.gif/.svg/.mp4); the interface is documented by URLs and a curl example only."
+
+  # C. Ingestion
+  ingestion_kind:
+    value: script_or_notebook
+    evidence: ["src/ingest.py:144-145", "src/ingest_json.py:95-98"]
+    basis: "Two standalone Python scripts with `__main__` blocks; no orchestrator (no Airflow/Mage/dlt/Prefect config in the tree)."
+
+  ingestion_single_command:
+    value: true
+    evidence: ["README.md:75-77"]
+    basis: "`uv run python src/ingest.py` is documented as the single command for Option A; it creates the collection and populates it in one process (src/ingest.py:21-32,144-145)."
+
+  ingestion_output_stated:
+    value: false
+    evidence: ["README.md:68-91", "src/ingest.py:140-141"]
+    basis: "No document, chunk or vector count is stated in the documentation; the ingestion script prints only 'Ingestion Finished!'. The target counts (5000 in src/ingest.py:145, 10000 in notebooks/rag.ipynb:cell2) appear only as code arguments."
+
+  # D. Retrieval evaluation
+  retrieval_eval_present:
+    value: true
+    evidence: ["notebooks/rag.ipynb:cell7", "notebooks/rag.ipynb:cell8", "README.md:144-171"]
+    basis: "Hit Rate and MRR computed over a committed question set, with outputs stored in the notebook and reported in the README."
+
+  retrieval_eval_approaches_compared:
+    value: 2
+    evidence: ["notebooks/rag.ipynb:cell8", "notebooks/rag.ipynb:cell12"]
+    basis: "Counted strategies with reported numbers: (1) dense-only search, reported at top_k in {1,3,5,10,20}; (2) dense retrieval at 50 followed by a cross-encoder rerank to 5."
+
+  retrieval_eval_set_committed:
+    value: committed
+    evidence: ["data/ground_truth_dataset.csv", "notebooks/rag.ipynb:cell6"]
+    basis: "The evaluation notebook reads ../data/ground_truth_dataset.csv, which is tracked at this commit."
+
+  retrieval_eval_set_size:
+    value: 997
+    evidence: ["data/ground_truth_dataset.csv", "notebooks/rag.ipynb:cell7"]
+    basis: "Counted 997 data rows with csv.DictReader (columns paper_id,title,preprint_date,question,question_type); the notebook progress bar output also reports total=997."
+
+  retrieval_eval_relevance_rule:
+    value: document_level
+    evidence: ["notebooks/rag.ipynb:cell7", "notebooks/ground_truth.ipynb:cell1"]
+    basis: "The scoring function counts a hit when `int(row['paper_id'])` is in the retrieved point ids; each Qdrant point is one whole paper (title+abstract, unchunked) and paper_id is the id of the single paper the question was generated from."
+
+  retrieval_eval_config_matches_shipped:
+    value: differs
+    evidence: ["notebooks/rag.ipynb:cell2", "src/ingest.py:94-113", "src/ingest_json.py:66-84", "notebooks/rag.ipynb:cell7", "src/rag.py:57-71"]
+    basis: "Query parameters agree (collection name, using='default', limit=5, embedding BAAI/bge-base-en-v1.5). The index does not: the evaluated collection was built in notebooks/rag.ipynb:cell2 from inspirehep.net with integer point ids, while both committed ingestion scripts build the same-named collection from the arXiv API / a Kaggle snapshot with uuid5 string ids and different payload keys — so the eval's `int(paper_id) in retrieved_ids` rule cannot match an index built by either shipped script."
+
+  retrieval_eval_uncertainty_stated:
+    value: false
+    evidence: ["README.md:151-171", "notebooks/rag.ipynb:cell8", "notebooks/rag.ipynb:cell12"]
+    basis: "Point estimates only; no interval, variance, standard error or repeat-run statement anywhere in the reported tables or notebook outputs."
+
+  retrieval_best_approach_shipped:
+    value: mixed_result
+    evidence: ["notebooks/rag.ipynb:cell8", "notebooks/rag.ipynb:cell12", "README.md:166-170"]
+    basis: "Dense-only at top_k=5: Hit Rate 0.907723, MRR 0.811852. Dense-50 + rerank-to-5: Hit Rate 0.897693, MRR 0.834336. The two reported metrics disagree about which wins; the dense-only configuration is what ships (src/rag.py:57-71)."
+
+  # E. Answer evaluation
+  llm_eval_present:
+    value: true
+    evidence: ["notebooks/rag.ipynb:cell17", "notebooks/rag.ipynb:cell19", "README.md:175-186"]
+    basis: "Relevance and Faithfulness scored per answer by a model judge, with distributions stored as notebook outputs and reported in the README."
+
+  llm_eval_approaches_compared:
+    value: 2
+    evidence: ["notebooks/rag.ipynb:cell16", "notebooks/rag.ipynb:cell24", "README.md:179-183"]
+    basis: "Counted generator configurations with reported numbers: models/gemini-2.5-flash-lite and models/gemini-2.5-flash, same prompt template and same retrieval."
+
+  llm_eval_judge_kind:
+    value: model_judge
+    evidence: ["notebooks/rag.ipynb:cell17", "notebooks/rag.ipynb:cell19"]
+    basis: "Both scoring functions call models/gemini-2.5-flash-lite and parse a JSON verdict; no human labelling step and no offline metric is committed."
+
+  llm_eval_judge_spotchecked:
+    value: false
+    evidence: ["notebooks/rag.ipynb:cell17", "notebooks/rag.ipynb:cell20", "data/rag_results_for_eval_gemini-2.5-flash-lite.json"]
+    basis: "The judge's per-item 'Explanation' and 'Reason' strings are stored in the results JSON, but no cell samples them, no agreement or error rate is computed, and no such check is reported in README.md."
+
+  llm_eval_question_generator:
+    value: generator_ties_question_to_passage
+    evidence: ["notebooks/ground_truth.ipynb:cell0", "notebooks/ground_truth.ipynb:cell1"]
+    basis: "Committed generator prompts a model with one paper's title and abstract ('Based ONLY on the provided research paper abstract, create a question') and stores that record's id as paper_id, which is exactly the target the retrieval metric later looks for."
+
+  llm_eval_metric_at_ceiling:
+    value: false
+    evidence: ["notebooks/rag.ipynb:cell18", "notebooks/rag.ipynb:cell20", "notebooks/rag.ipynb:cell25", "notebooks/rag.ipynb:cell26"]
+    basis: "Counted over the committed results JSONs: faithfulness FAITHFUL 932/962 parsed (0.968815) for flash-lite and 949/968 (0.980372) for flash; relevance RELEVANT 741/921 (0.804560) and 765/933 (0.819936). The maximum class is not taken by every item on either metric. The schema states no threshold for 'effectively every item' — see extraction_notes."
+
+  llm_eval_config_matches_shipped:
+    value: differs
+    evidence: ["notebooks/rag.ipynb:cell15", "src/rag.py:117-137"]
+    basis: "The evaluated generation call passes config={'response_schema': RAGOutput} with no response_mime_type and returns response.text verbatim; the shipped call passes GenerateContentConfig(response_mime_type='application/json', response_schema=RAGOutputSchema) and returns json.loads(response.text)['answer']. Confirmed by the artifact: 0 of 997 stored answers in data/rag_results_for_eval_gemini-2.5-flash-lite.json begin with '{', i.e. the judged text is prose, not the JSON object the shipped path parses."
+
+  # F. Monitoring
+  monitoring_kind:
+    value: dashboard_only
+    evidence: ["src/serve.py:8-14", "src/rag.py:12-16", "src/rag.py:58-61", "docker-compose.yaml:37-47", "README.md:191-195"]
+    basis: "OpenTelemetry spans are emitted from the request path to an arizephoenix/phoenix container whose UI is published on 6006; src/app.py collects no user feedback (no rating or thumbs control in the Streamlit code)."
+
+  monitoring_chart_count:
+    value: 0
+    evidence: ["docker-compose.yaml:38-47", "README.md:191-195"]
+    basis: "Counted committed dashboard/panel definitions: none. Monitoring is the stock UI of the arizephoenix/phoenix:latest image; no dashboard JSON, provisioning file or chart code is tracked at this commit."
+
+  monitoring_charts_bound_to_data:
+    value: not_applicable
+    evidence: ["docker-compose.yaml:38-47"]
+    basis: "No committed panel queries exist to check against an application-written schema; the traces are pushed over OTLP rather than read from a database the project defines."
+
+  # G. Containerization and reproducibility
+  containerization_kind:
+    value: compose_full
+    evidence: ["docker-compose.yaml:7-60", "Dockerfile:1-26", "Dockerfile.ui:1-26"]
+    basis: "Compose builds and runs the application itself (rag-api from Dockerfile, streamlit-ui from Dockerfile.ui) alongside its dependencies (qdrant, phoenix)."
+
+  run_instructions:
+    value: complete
+    evidence: ["README.md:42-55", "README.md:59-65", "README.md:97-114"]
+    basis: "Setup (uv install), dependencies (uv sync --locked), configuration (.env), the required environment variable (GEMINI_API_KEY) and the run command (docker compose up -d) are all stated."
+
+  run_instructions_gap_count:
+    value: 4
+    evidence: ["README.md:99-104", "src/rag.py:46-49", "README.md:121-124", "docker-compose.yaml:24-26", "README.md:59-65", "docker-compose.yaml:9-19", "README.md:88-89", "src/ingest_json.py:96-98"]
+    basis: "Desk walk-through gaps: (1) README.md:102 writes the key with bash `echo '\\nGEMINI_API_KEY=...'` inside a ```bash fence, where the builtin does not interpret \\n, so the file's only line begins with a literal backslash-n and the variable docker-compose.yaml:29 substitutes is unset, which src/rag.py:46-49 raises on; (2) README.md:121,124 tells the reader to curl port 8000, while docker-compose.yaml:26 publishes 8080:8080 and Dockerfile:23-26 serves 8080 — nothing is published on 8000, and README.md:134 itself uses 8080; (3) README.md:59-65 starts a standalone Qdrant container publishing 6333/6334 and never says to stop it, so `docker compose up -d` at README.md:112 cannot bind the same ports declared at docker-compose.yaml:12-14; (4) README.md:88-89 runs src/ingest_json.py, whose line 97 passes `dtype={'id', str}` — a set literal — to pandas.read_json, whose dtype parameter takes a bool or a column-to-dtype mapping."
+
+  dependency_versions_pinned:
+    value: lockfile_committed
+    evidence: ["uv.lock", "pyproject.toml:7-26", "Dockerfile:14-17"]
+    basis: "pyproject.toml declares lower bounds only (>=), but uv.lock is tracked and both Dockerfiles install with `uv sync --locked`."
+
+  data_accessible:
+    value: automated_or_committed
+    evidence: ["README.md:72-77", "src/ingest.py:47-52", "data/ground_truth_dataset.csv"]
+    basis: "The default ingestion path fetches the corpus from the public arXiv API with one documented command; the evaluation question set and result files are committed. Option B (README.md:81-89) additionally requires a manual Kaggle download."
+
+  # H. Techniques
+  hybrid_search:
+    present:
+      value: false
+      evidence: ["src/rag.py:65-71", "src/ingest.py:24-32"]
+      basis: "The collection declares a single dense vector named 'default'; a case-insensitive search for bm25/sparse/hybrid/rrf/fusion across *.py, *.md and *.ipynb returns only paper titles containing the word 'Hybrid'."
+    shipped_enabled:
+      value: false
+      evidence: ["src/rag.py:65-71"]
+      basis: "The request path issues one dense query_points call."
+    evaluated:
+      value: false
+      evidence: ["notebooks/rag.ipynb:cell8", "notebooks/rag.ipynb:cell12"]
+      basis: "Only dense-only and dense+rerank are measured."
+    measured_effect:
+      value: not_measured
+      evidence: ["notebooks/rag.ipynb:cell8", "notebooks/rag.ipynb:cell12"]
+      basis: "No numbers reported for a hybrid configuration."
+
+  reranking:
+    present:
+      value: true
+      evidence: ["notebooks/rag.ipynb:cell10", "notebooks/test.ipynb:cell22"]
+      basis: "A CrossEncoder('cross-encoder/ms-marco-MiniLM-L-6-v2') rerank function is implemented in the notebooks."
+    shipped_enabled:
+      value: false
+      evidence: ["src/rag.py:57-71", "Dockerfile:20"]
+      basis: "_retrieve_context returns the dense hits directly with no rerank stage, and the image copies only src/rag.py and src/serve.py."
+    evaluated:
+      value: true
+      evidence: ["notebooks/rag.ipynb:cell12"]
+      basis: "evaluate_metrics_rerank run over the full 997-question set with stored output."
+    measured_effect:
+      value: mixed
+      evidence: ["notebooks/rag.ipynb:cell8", "notebooks/rag.ipynb:cell12", "README.md:166-170"]
+      basis: "Against dense-only at top_k=5 (Hit Rate 0.907723, MRR 0.811852), reranking reports Hit Rate 0.897693 (lower) and MRR 0.834336 (higher)."
+
+  query_rewriting:
+    present:
+      value: false
+      evidence: ["src/rag.py:54-71", "notebooks/rag.ipynb:cell15"]
+      basis: "The query string is embedded directly in both the request path and the evaluation; no rewriting, expansion or decomposition step exists."
+    shipped_enabled:
+      value: false
+      evidence: ["src/rag.py:54-63"]
+      basis: "_get_query_vector embeds the raw user query."
+    evaluated:
+      value: false
+      evidence: ["notebooks/rag.ipynb:cell8", "notebooks/rag.ipynb:cell12"]
+      basis: "No query-rewriting configuration is measured."
+    measured_effect:
+      value: not_measured
+      evidence: ["notebooks/rag.ipynb:cell8"]
+      basis: "No numbers reported."
+
+  # I. Deployment and bonus
+  cloud_deployment:
+    value: none
+    evidence: ["README.md:95-114", "docker-compose.yaml:7-60"]
+    basis: "Every documented endpoint is localhost; no cloud provider configuration, IaC file, or hosted URL is tracked at this commit."
+
+  # J. Documentation accuracy
+  headline_numbers_traceable:
+    value: some_traceable
+    evidence: ["README.md:153-159", "notebooks/rag.ipynb:cell8", "README.md:169", "notebooks/rag.ipynb:cell12", "README.md:179-183", "notebooks/rag.ipynb:cell18", "notebooks/rag.ipynb:cell20", "notebooks/rag.ipynb:cell25", "notebooks/rag.ipynb:cell26", "README.md:170", "README.md:186"]
+    basis: "The retrieval table, the rerank figures and all four judge scores match stored notebook outputs to the digits shown; the two timing claims do not, since no committed artifact times anything."
+
+  untraceable_number_count:
+    value: 2
+    evidence: ["README.md:170", "README.md:186"]
+    basis: "Counted headline figures with no committed artifact able to produce them: (1) 'the latency increased by >10x' for the reranker; (2) '~6x throughput' for gemini-2.5-flash-lite versus gemini-2.5-flash. No cell in notebooks/rag.ipynb, notebooks/test.ipynb or notebooks/ground_truth.ipynb records a duration, and the results JSONs carry no timing column."
+
+  document_number_conflicts:
+    value: 1
+    evidence: ["README.md:121", "README.md:124", "README.md:134", "docker-compose.yaml:26", "Dockerfile:23"]
+    basis: "The API port disagrees: README.md:121,124 state 8000, while README.md:134, docker-compose.yaml:26 ('8080:8080') and Dockerfile:23 (EXPOSE 8080) state 8080. No reported metric figure disagrees between two committed documents. See extraction_notes on whether a port counts as a 'figure' for this field."
+
+  limitations_section:
+    value: absent
+    evidence: ["README.md:1-234"]
+    basis: "No section names limitations, caveats, known issues or future work. README.md:161-170 and :184-186 state design decisions and their trade-offs, which is not a limitations list."
+
+  artifact_reference_strength:
+    value: all_referenced
+    evidence: ["README.md:25", "README.md:202-228"]
+    basis: "Checklist items present in this repository and where each is named: evaluation notebook (README.md:215 'rag.ipynb' in the plain-text tree), evaluation question set (README.md:205 'ground_truth_dataset.csv'), ingestion entry point (README.md:25 markdown link to src/ingest.py, also README.md:220), deployment configuration (README.md:209-211 docker-compose.yaml, Dockerfile, Dockerfile.ui). Monitoring dashboard definition does not exist and is excluded. The weakest reference is a plain-text tree entry, not a link."
+
+  artifacts_unreferenced_count:
+    value: 0
+    evidence: ["README.md:202-228"]
+    basis: "Counted checklist artifacts present in the repository and named nowhere in the documentation: none. (The tree additionally names files that do not exist — see extraction_notes.)"
+
+  # K. Descriptive
+  corpus_language:
+    value: english
+    evidence: ["data/ground_truth_dataset.csv", "data/rag_results_for_eval_gemini-2.5-flash-lite.json"]
+    basis: "Indexed text is the title and abstract fields of the stored records, which are in English."
+
+  corpus_domain:
+    value: physics_preprint_abstracts
+    evidence: ["README.md:19-23", "src/ingest.py:16"]
+    basis: "Repository states the indexed categories as nucl-th and hep-lat; the code filters on exactly those two strings."
+
+  interface_framework:
+    value: streamlit
+    evidence: ["src/app.py:1-9", "Dockerfile.ui:26"]
+    basis: "Streamlit front end; the API layer behind it is fastapi (src/serve.py:1,47)."
+
+  vector_store:
+    value: qdrant
+    evidence: ["src/rag.py:42", "docker-compose.yaml:9-19"]
+    basis: "QdrantClient against a qdrant/qdrant container."
+
+  llm_provider:
+    value: google_gemini
+    evidence: ["src/rag.py:22", "src/rag.py:50"]
+    basis: "google.genai client, model models/gemini-2.5-flash-lite."
+
+  repo_file_count:
+    value: 22
+    evidence: ["<repo>"]
+    basis: "`git ls-files | wc -l` at commit 7e603cb returns 22."
+
+extraction_notes:
+  - "Notebook locators. The schema's evidence format is `path:lines`, which is unusable for .ipynb files — a raw JSON line number points at an escaped string, not at code a reader can find. All notebook evidence in this record uses `path:cellN` with N the zero-based index into the `cells` array. The schema should state a notebook locator convention; p01's artifacts apparently did not force the question."
+  - "The generator, the system under test and the judge are all the same model, and the schema cannot say so. models/gemini-2.5-flash-lite writes the 997 questions (notebooks/ground_truth.ipynb:cell0), is one of the two answer generators under comparison (notebooks/rag.ipynb:cell16), and is the sole judge of both generators' relevance and faithfulness (notebooks/rag.ipynb:cell17,cell19) — including when it judges the rival model gemini-2.5-flash and loses to it. `llm_eval_judge_kind: model_judge` plus `llm_eval_question_generator: generator_ties_question_to_passage` capture two separate circularities but not the identity between the three roles, which is the stronger fact here. A field such as `llm_eval_judge_is_generator_model` (or a three-way `same`/`same_family`/`different`) would express it."
+  - "Reported judge scores are computed over a filtered denominator, and no field records that. The judge functions return {verdict: None} on a JSON parse error (notebooks/rag.ipynb:cell17,cell19) and the reported figures come from `value_counts(normalize=True)`, which drops nulls. Counted in the committed artifacts: data/rag_results_for_eval_gemini-2.5-flash-lite.json has 76/997 null relevance and 35/997 null faithfulness; data/rag_results_for_eval_gemini-2.5-flash.json has 64/997 and 29/997. So README.md:181-182's '0.805 / 0.969' are rates over 921 and 962 items, not 997, and the README states no denominator. This is neither an untraceable number (the notebook does produce those digits) nor a document conflict; the schema has nowhere to put 'the reported metric silently excludes the items where measurement failed'. It is also the difference between a 96.9% faithfulness rate and a 93.5% one, so it is not cosmetic."
+  - "The measured index and the shipped index are built from different sources by different code, and `retrieval_eval_config_matches_shipped` only half-fits. Every reported number was measured against a collection built in notebooks/rag.ipynb:cell2 from inspirehep.net using `id=int(hit['id'])`. Both committed ingestion scripts (src/ingest.py, src/ingest_json.py) build a collection of the same name from the arXiv API / a Kaggle snapshot using `uuid5` string ids and different payload keys. The retrieval metric's rule is `int(row['paper_id']) in retrieved_ids`, which cannot match a string uuid — so the evaluation is not merely measuring a differently-configured system, it is measuring an index no committed script can rebuild, and re-running the evaluation after following the README would report a hit rate of 0. README.md:12-25 names arXiv and Kaggle as the data sources and never mentions inspirehep.net. I set the field to `differs` on the schema's 'a pipeline stage present in one and not the other' clause, but every parameter the field explicitly lists (depth, cut-off, model version) matches, so a literal reading would return `matches`. The field's check should name the index/corpus provenance."
+  - "The documentation names artifacts that do not exist, and the reachability fields are one-directional. README.md:202-228's project tree lists `src/ui.py` and `test.py`, neither of which is tracked (the Streamlit app is src/app.py; there is no test file), and names the three result files as `rag_results_eval_flash-lite.json`, `rag_results_eval_flash.json`, `rag_results_test.json` where the committed names are `rag_results_for_eval_gemini-2.5-flash-lite.json`, `rag_results_for_eval_gemini-2.5-flash.json`, `rag_results_for_test_eval.json`. `artifacts_unreferenced_count` measures artifacts nothing points at; there is no field for pointers that resolve to nothing, which is the same findability failure from the other end."
+  - "`monitoring_chart_count` and `monitoring_charts_bound_to_data` assume a self-authored dashboard. Here monitoring is an off-the-shelf tracing UI (arizephoenix/phoenix:latest, docker-compose.yaml:38-47) that the application instruments with OpenTelemetry spans (src/rag.py:12-16,58-61,87-88; src/serve.py:8-14). The committed panel count is 0 and the binding check is not_applicable, yet the instrumentation is real and lives on the request path — so the two fields read as 'nothing here' for a project that did strictly more work than a project committing a Grafana JSON with three panels would. Something like `monitoring_instrumentation: none|logged|traced_on_request_path` would separate the two."
+  - "`interface_kind` forces one value where this repository ships two interfaces. A FastAPI service (src/serve.py:47-58, published on 8080) and a Streamlit UI (src/app.py, published on 8501) are both built and run by docker-compose.yaml. I recorded `web_ui` as the higher rung of what looks like a tier ladder, but `api` is equally true and the record loses that. The field cannot distinguish 'web UI only' from 'API plus web UI'."
+  - "`llm_eval_metric_at_ceiling` gives no threshold, so its value is not reproducible across extractors. Faithfulness is a binary verdict at 0.9688 and 0.9804 of parsed items; 'sits at its maximum for effectively every item' could be read either way at those values. I answered `false` because 30 and 19 items respectively do not take the maximum, and put the counts in `basis` — but a different extractor reading 'effectively' more loosely would answer `true` on the same evidence. The field needs a stated cutoff or should become a proportion."
+  - "An evaluation's dependency is absent from the manifest, and `dependency_versions_pinned` cannot see it. The reranking comparison that README.md:166-170 rests on imports `sentence_transformers` (notebooks/rag.ipynb:cell10), which appears in neither pyproject.toml nor uv.lock. `dependency_versions_pinned: lockfile_committed` is the correct value and reads as the strongest available, while the environment the lockfile pins cannot execute the notebook that produced a reported result. Traceability of the *number* is intact only because the notebook outputs are stored."
+  - "One question set serves both evaluations and nothing is held out. The same 997 rows of data/ground_truth_dataset.csv are used for the retrieval metrics (notebooks/rag.ipynb:cell7) and for generating and judging answers (cells 16, 17, 19, 24-26). The schema records set size and provenance but has no field for whether any portion was held out, or whether the retrieval and answer evaluations share items."
+  - "`document_number_conflicts` is defined over 'figures', and the only conflict this repository offers is a port number (8000 in README.md:121,124 versus 8080 in README.md:134, docker-compose.yaml:26 and Dockerfile:23). I counted it as 1 and named it, but the field's surrounding prose is about headline metric figures, so an extractor reading it narrowly would answer 0. The conflict is also already counted as a gap under `run_instructions_gap_count`; the schema does not say whether the two fields are meant to overlap."
+  - "One gap in `run_instructions_gap_count` rests on library semantics rather than on the repository alone: gap (4), `dtype={'id', str}` passed to pandas.read_json. Knowing that a set is neither a bool nor a mapping is Python knowledge, not domain knowledge, so I judged it admissible under the schema's rule 1, but it is the one gap a reader cannot confirm from the repository text by itself. Gap (1), bash `echo` not interpreting `\\n` without `-e`, is of the same character and is noted for the same reason."
+  - "No file path in this repository contains a person's name; no anonymity exception was needed."
+  - "Domain knowledge was not required for any field. The corpus is English throughout, so the schema's rule-1 stress test (p02 being noted as domain-opaque) did not bind here in the way expected: the subject matter is specialised, but every field was answerable by counting rows, comparing code paths and reading stored notebook outputs."
