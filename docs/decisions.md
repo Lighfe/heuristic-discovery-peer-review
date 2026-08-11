@@ -231,6 +231,39 @@ compliance checks — never a bare "passed all six gates". Review-01 B11: if
 G2 is near-vacuous, G4 ceilings out, and G5/G6 are compliance, the honest
 claim is one real test plus qualifiers, and no more may be presented.
 
+## Schema
+
+**schema-proposals-via-owner** — Loop agents may *propose* a new enum value
+or a new schema field, never add one; the owner approves entry, as with
+red-team case types. Proposals must cite accumulated `other` values,
+`extraction_notes` or `undeterminable` clusters. Reason: a schema drawn from
+the current criteria can only discover criteria in their vocabulary.
+
+**evidence-not-scored** — A record's `evidence` locators are for human
+re-verification only. The executable scorer reads `value`; reviewer agents
+read `value` + `basis` and never receive locators or repository contents.
+Rejected: sending repo excerpts to reviewers — it would blow the input-token
+budget and put other people's code on a free tier for no measurement gain.
+
+**other-vs-undeterminable** — `other` (the repo settles it, the answer is
+unlisted) and `undeterminable` (the repo does not settle it) are distinct
+values on every enum. Conflating them destroys the schema's only signal
+about its own inadequacy: `other` accumulating across the corpus is the
+evidence that an enum was drawn from too few projects.
+
+**counts-over-coarse-enums** — Where a defect has magnitude, the field is an
+integer with each instance named in `basis`, not a two- or three-value enum:
+`document_number_conflicts`, `untraceable_number_count`,
+`run_instructions_gap_count`, `artifacts_unreferenced_count`. Reason: one
+bucket spanning a rounding error and a wholly wrong document is not a
+measurement, and a twin could only move it by flipping the whole field.
+
+**traceable-means-reproducible-in-principle** — A headline number is
+traceable only if the committed artifact could yield it, not if a
+plausibly-named file exists. Found at the M1 gate: p01's marimo notebooks
+import none of the names they use and store no outputs, so 18 reported
+figures had nothing behind them under the looser reading.
+
 ## Corpus and inputs
 
 **corpus-twelve** — `repos.yaml` pins twelve `role: corpus` repos plus p13
