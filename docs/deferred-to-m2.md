@@ -307,6 +307,29 @@ where a twin needs headroom and the count is small and bounded
    rather than *knowing*. Acceptable if stated; not acceptable if a gate
    rests on it unremarked.
 
+### 3j. `basis` leaks repo paths into reviewer prompts
+
+Found while wiring the seeded shuffle into the prompt renderer (2026-08-12).
+The schema states that reviewer agents see `value` and `basis` but never
+`evidence` locators. The `evidence` list is indeed never rendered — but
+`basis` sentences cite paths inline (*"…`docs/evaluation.md:19` states…"*),
+so locators reach the prompt anyway, through the one field designed to be
+read by a model.
+
+Not a privacy problem: paths are repo-relative and name nobody. It is a
+**measurement** problem, and a subtle one. The reviewer is shown pointers it
+cannot follow, and a densely-cited `basis` may read as better-evidenced than
+a sparse one — so a field's citation density could move a score for reasons
+having nothing to do with what the field says. Any prose↔executable fidelity
+number built on these prompts inherits that confound.
+
+Not fixed for M1: stripping paths would mangle the one field written to
+stand alone as a sentence, and M1's probe is an explicitly labelled smoke
+test rather than a baseline. At M2, before the fidelity probe becomes
+load-bearing, decide between rewriting `basis` to carry no locators, or
+rendering a stripped variant for prompts while keeping the cited one for
+humans.
+
 ### 4. Group J has accreted — restructure, do not extend
 
 Documentation accuracy is now eight fields, each added to close a gap a

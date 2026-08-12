@@ -1,0 +1,339 @@
+{
+  "candidate": {
+    "name": "v0",
+    "pass_threshold": 11,
+    "path": "candidates/v0/criteria.yaml",
+    "source": "courses/llm-zoomcamp-2026/project-evaluation-guidance.md",
+    "source_lines": "104-150"
+  },
+  "code_revision": "9e9e6250b61c74d103c97999f7b562a83071b670",
+  "counts": {
+    "records": 2,
+    "records_certifying": 2,
+    "twins": 6,
+    "twins_failing": 2,
+    "twins_passing": 4
+  },
+  "g1": {
+    "failing_twins": [
+      "p01-t03",
+      "p01-t04"
+    ],
+    "passed": false,
+    "scope": "G1 is claimed as discrimination of the CATALOGUED failure modes only, never as general discrimination (decision `g1-claims-catalogue-coverage`)"
+  },
+  "kind": "scorer",
+  "requests_spent": 0,
+  "run_id": "2026-08-12-m1-scorer-v0",
+  "scores": {
+    "p01": {
+      "certifies": true,
+      "max_total": 26,
+      "per_criterion": {
+        "best_practice_hybrid_search": 1,
+        "best_practice_query_rewriting": 1,
+        "best_practice_reranking": 1,
+        "bonus_cloud_deployment": 2,
+        "bonus_discretionary": 0,
+        "containerization": 2,
+        "ingestion_pipeline": 1,
+        "interface": 2,
+        "llm_evaluation": 1,
+        "monitoring": 2,
+        "problem_description": 2,
+        "reproducibility": 2,
+        "retrieval_evaluation": 2,
+        "retrieval_flow": 2
+      },
+      "total": 21,
+      "unmatched_criteria": [],
+      "unscoreable_headroom": 3
+    },
+    "p01-t01": {
+      "certifies": true,
+      "max_total": 26,
+      "per_criterion": {
+        "best_practice_hybrid_search": 1,
+        "best_practice_query_rewriting": 1,
+        "best_practice_reranking": 1,
+        "bonus_cloud_deployment": 2,
+        "bonus_discretionary": 0,
+        "containerization": 2,
+        "ingestion_pipeline": 1,
+        "interface": 2,
+        "llm_evaluation": 1,
+        "monitoring": 2,
+        "problem_description": 2,
+        "reproducibility": 2,
+        "retrieval_evaluation": 1,
+        "retrieval_flow": 2
+      },
+      "total": 20,
+      "unmatched_criteria": [],
+      "unscoreable_headroom": 3
+    },
+    "p01-t02": {
+      "certifies": true,
+      "max_total": 26,
+      "per_criterion": {
+        "best_practice_hybrid_search": 1,
+        "best_practice_query_rewriting": 1,
+        "best_practice_reranking": 1,
+        "bonus_cloud_deployment": 2,
+        "bonus_discretionary": 0,
+        "containerization": 2,
+        "ingestion_pipeline": 1,
+        "interface": 2,
+        "llm_evaluation": 1,
+        "monitoring": 2,
+        "problem_description": 2,
+        "reproducibility": 2,
+        "retrieval_evaluation": 2,
+        "retrieval_flow": 2
+      },
+      "total": 21,
+      "unmatched_criteria": [],
+      "unscoreable_headroom": 3
+    },
+    "p01-t03": {
+      "certifies": true,
+      "max_total": 26,
+      "per_criterion": {
+        "best_practice_hybrid_search": 1,
+        "best_practice_query_rewriting": 1,
+        "best_practice_reranking": 1,
+        "bonus_cloud_deployment": 2,
+        "bonus_discretionary": 0,
+        "containerization": 2,
+        "ingestion_pipeline": 1,
+        "interface": 2,
+        "llm_evaluation": 1,
+        "monitoring": 2,
+        "problem_description": 2,
+        "reproducibility": 2,
+        "retrieval_evaluation": 2,
+        "retrieval_flow": 2
+      },
+      "total": 21,
+      "unmatched_criteria": [],
+      "unscoreable_headroom": 3
+    },
+    "p01-t04": {
+      "certifies": true,
+      "max_total": 26,
+      "per_criterion": {
+        "best_practice_hybrid_search": 1,
+        "best_practice_query_rewriting": 1,
+        "best_practice_reranking": 1,
+        "bonus_cloud_deployment": 2,
+        "bonus_discretionary": 0,
+        "containerization": 2,
+        "ingestion_pipeline": 1,
+        "interface": 2,
+        "llm_evaluation": 1,
+        "monitoring": 2,
+        "problem_description": 2,
+        "reproducibility": 2,
+        "retrieval_evaluation": 2,
+        "retrieval_flow": 2
+      },
+      "total": 21,
+      "unmatched_criteria": [],
+      "unscoreable_headroom": 3
+    },
+    "p01-t05": {
+      "certifies": true,
+      "max_total": 26,
+      "per_criterion": {
+        "best_practice_hybrid_search": 1,
+        "best_practice_query_rewriting": 1,
+        "best_practice_reranking": 1,
+        "bonus_cloud_deployment": 2,
+        "bonus_discretionary": 0,
+        "containerization": 2,
+        "ingestion_pipeline": 1,
+        "interface": 2,
+        "llm_evaluation": 1,
+        "monitoring": 2,
+        "problem_description": 2,
+        "reproducibility": 2,
+        "retrieval_evaluation": 2,
+        "retrieval_flow": 2
+      },
+      "total": 21,
+      "unmatched_criteria": [],
+      "unscoreable_headroom": 3
+    },
+    "p01-t06": {
+      "certifies": true,
+      "max_total": 26,
+      "per_criterion": {
+        "best_practice_hybrid_search": 1,
+        "best_practice_query_rewriting": 1,
+        "best_practice_reranking": 1,
+        "bonus_cloud_deployment": 2,
+        "bonus_discretionary": 0,
+        "containerization": 2,
+        "ingestion_pipeline": 1,
+        "interface": 2,
+        "llm_evaluation": 1,
+        "monitoring": 2,
+        "problem_description": 2,
+        "reproducibility": 2,
+        "retrieval_evaluation": 2,
+        "retrieval_flow": 2
+      },
+      "total": 21,
+      "unmatched_criteria": [],
+      "unscoreable_headroom": 3
+    },
+    "p02": {
+      "certifies": true,
+      "max_total": 26,
+      "per_criterion": {
+        "best_practice_hybrid_search": 0,
+        "best_practice_query_rewriting": 0,
+        "best_practice_reranking": 1,
+        "bonus_cloud_deployment": 0,
+        "bonus_discretionary": 0,
+        "containerization": 2,
+        "ingestion_pipeline": 1,
+        "interface": 2,
+        "llm_evaluation": 2,
+        "monitoring": 1,
+        "problem_description": 2,
+        "reproducibility": 2,
+        "retrieval_evaluation": 2,
+        "retrieval_flow": 2
+      },
+      "total": 17,
+      "unmatched_criteria": [],
+      "unscoreable_headroom": 3
+    }
+  },
+  "twin_verdicts": [
+    {
+      "against": "p01",
+      "base_total": 21,
+      "criteria_that_moved": [
+        "retrieval_evaluation"
+      ],
+      "delta": -1,
+      "diagnosis": "passes: the candidate ordered this pair as the construction requires",
+      "fields_no_criterion_reads": [
+        "reranking.measured_effect"
+      ],
+      "mutated_fields": [
+        "reranking.measured_effect",
+        "retrieval_best_approach_shipped"
+      ],
+      "passed": true,
+      "relation": "strictly_below",
+      "twin_id": "p01-t01",
+      "twin_total": 20,
+      "twin_type": "harmful-component-kept"
+    },
+    {
+      "against": "p01-t01",
+      "base_total": 20,
+      "criteria_that_moved": [
+        "retrieval_evaluation"
+      ],
+      "delta": 1,
+      "diagnosis": "passes: the candidate ordered this pair as the construction requires",
+      "fields_no_criterion_reads": [
+        "reranking.measured_effect",
+        "reranking.shipped_enabled",
+        "reranking.decision_documented",
+        "reranking.decision_axes"
+      ],
+      "mutated_fields": [
+        "reranking.measured_effect",
+        "reranking.shipped_enabled",
+        "reranking.decision_documented",
+        "reranking.decision_axes",
+        "retrieval_best_approach_shipped"
+      ],
+      "passed": true,
+      "relation": "not_below",
+      "twin_id": "p01-t02",
+      "twin_total": 21,
+      "twin_type": "harmful-component-kept/documented-removal"
+    },
+    {
+      "against": "p01",
+      "base_total": 21,
+      "criteria_that_moved": [],
+      "delta": 0,
+      "diagnosis": "FAILS because no criterion reads any mutated field. The candidate is structurally blind to this defect - it cannot score what it never looks at. This is a finding about the criteria, not a scoring bug",
+      "fields_no_criterion_reads": [
+        "untraceable_number_count"
+      ],
+      "mutated_fields": [
+        "untraceable_number_count"
+      ],
+      "passed": false,
+      "relation": "strictly_below",
+      "twin_id": "p01-t03",
+      "twin_total": 21,
+      "twin_type": "claim-without-artifact"
+    },
+    {
+      "against": "p01",
+      "base_total": 21,
+      "criteria_that_moved": [],
+      "delta": 0,
+      "diagnosis": "FAILS because no criterion reads any mutated field. The candidate is structurally blind to this defect - it cannot score what it never looks at. This is a finding about the criteria, not a scoring bug",
+      "fields_no_criterion_reads": [
+        "monitoring_charts_bound_to_data"
+      ],
+      "mutated_fields": [
+        "monitoring_charts_bound_to_data"
+      ],
+      "passed": false,
+      "relation": "strictly_below",
+      "twin_id": "p01-t04",
+      "twin_total": 21,
+      "twin_type": "checkbox-padding"
+    },
+    {
+      "against": "p01",
+      "base_total": 21,
+      "criteria_that_moved": [],
+      "delta": 0,
+      "diagnosis": "passes because nothing moved and nothing was supposed to: no criterion reads any mutated field, which is what a no-change twin requires",
+      "fields_no_criterion_reads": [
+        "interface_framework",
+        "vector_store"
+      ],
+      "mutated_fields": [
+        "interface_framework",
+        "vector_store"
+      ],
+      "passed": true,
+      "relation": "exactly_equal",
+      "twin_id": "p01-t05",
+      "twin_total": 21,
+      "twin_type": "no-change"
+    },
+    {
+      "against": "p01",
+      "base_total": 21,
+      "criteria_that_moved": [],
+      "delta": 0,
+      "diagnosis": "passes because nothing moved and nothing was supposed to: no criterion reads any mutated field, which is what a no-change twin requires",
+      "fields_no_criterion_reads": [
+        "repo_file_count"
+      ],
+      "mutated_fields": [
+        "repo_file_count"
+      ],
+      "passed": true,
+      "relation": "exactly_equal",
+      "twin_id": "p01-t06",
+      "twin_total": 21,
+      "twin_type": "no-change"
+    }
+  ],
+  "written_at": "2026-08-12T13:26:53.668674+00:00"
+}

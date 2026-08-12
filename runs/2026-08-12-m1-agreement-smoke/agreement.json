@@ -1,0 +1,125 @@
+{
+  "baseline": false,
+  "per_case": {
+    "p01": {
+      "executable_layer_total": 21,
+      "identical": false,
+      "median": 22,
+      "median_minus_executable": 1,
+      "samples_parsed": 3,
+      "samples_requested": 3,
+      "samples_unparseable": 0,
+      "spread": 1,
+      "totals": [
+        22,
+        21,
+        22
+      ]
+    },
+    "p01-t01": {
+      "executable_layer_total": 20,
+      "identical": false,
+      "median": 23,
+      "median_minus_executable": 3,
+      "samples_parsed": 3,
+      "samples_requested": 3,
+      "samples_unparseable": 0,
+      "spread": 2,
+      "totals": [
+        23,
+        21,
+        23
+      ]
+    },
+    "p01-t02": {
+      "executable_layer_total": 21,
+      "identical": false,
+      "median": 23,
+      "median_minus_executable": 2,
+      "samples_parsed": 3,
+      "samples_requested": 3,
+      "samples_unparseable": 0,
+      "spread": 2,
+      "totals": [
+        23,
+        23,
+        21
+      ]
+    },
+    "p01-t03": {
+      "executable_layer_total": 21,
+      "identical": false,
+      "median": 21,
+      "median_minus_executable": 0,
+      "samples_parsed": 3,
+      "samples_requested": 3,
+      "samples_unparseable": 0,
+      "spread": 2,
+      "totals": [
+        21,
+        21,
+        23
+      ]
+    },
+    "p01-t04": {
+      "executable_layer_total": 21,
+      "identical": false,
+      "median": 21,
+      "median_minus_executable": 0,
+      "samples_parsed": 3,
+      "samples_requested": 3,
+      "samples_unparseable": 0,
+      "spread": 2,
+      "totals": [
+        21,
+        21,
+        19
+      ]
+    },
+    "p01-t05": {
+      "executable_layer_total": 21,
+      "identical": false,
+      "median": 21,
+      "median_minus_executable": 0,
+      "samples_parsed": 3,
+      "samples_requested": 3,
+      "samples_unparseable": 0,
+      "spread": 3,
+      "totals": [
+        21,
+        21,
+        18
+      ]
+    },
+    "p01-t06": {
+      "executable_layer_total": 21,
+      "identical": false,
+      "median": 21,
+      "median_minus_executable": 0,
+      "samples_parsed": 3,
+      "samples_requested": 3,
+      "samples_unparseable": 0,
+      "spread": 2,
+      "totals": [
+        23,
+        21,
+        21
+      ]
+    },
+    "p02": {
+      "executable_layer_total": 17,
+      "identical": false,
+      "median": 17,
+      "median_minus_executable": 0,
+      "samples_parsed": 3,
+      "samples_requested": 3,
+      "samples_unparseable": 0,
+      "spread": 2,
+      "totals": [
+        19,
+        17,
+        17
+      ]
+    }
+  }
+}
