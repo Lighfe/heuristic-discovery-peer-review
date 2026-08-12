@@ -330,6 +330,48 @@ load-bearing, decide between rewriting `basis` to carry no locators, or
 rendering a stripped variant for prompts while keeping the cited one for
 humans.
 
+### 3k. Three catalogue twin types need a base record that does not already hold the defect — the concrete check for M2
+
+Measured 2026-08-12 against both extracted records. A degradation needs
+somewhere to travel *from*: if every available base already holds the
+defective value, the twin type cannot be built and is **untested, not
+passed** (F1).
+
+The check M2's first corpus extraction answers as a by-product — for each
+type, the field a base must hold *cleanly*:
+
+| catalogue type | field | a base must hold | p01 | p02 | buildable on |
+|---|---|---|---|---|---|
+| `config-drift` | `retrieval_eval_config_matches_shipped` | `matches` | `differs` | `differs` | **neither** |
+| `config-drift` | `llm_eval_config_matches_shipped` | `matches` | `differs` | `differs` | **neither** |
+| `unfailable-eval` | `llm_eval_metric_at_ceiling` | `false` | `true` | `false` | **p02** |
+| `unfailable-eval` | `retrieval_eval_relevance_rule` | finer than `source_level` | `source_level` | `document_level` | **p02** |
+| `circular-eval` | `llm_eval_judge_spotchecked` | `true` | `false` | `false` | **neither** |
+| `circular-eval` | `llm_eval_question_generator` | a committed generator, or a spot-checked judge | `none_committed` | `generator_ties…` | **neither** |
+
+**`unfailable-eval` is already unblocked.** p02 holds the clean value on
+both of its fields, so that type is buildable at M2 with p02 as base and
+needs nothing special.
+
+**`config-drift` and `circular-eval` are not**, and both were already
+present in *both* records (F1). If they hold across p03–p12 the types stay
+unbuildable however large the corpus grows, because the corpus contains no
+clean base to degrade **from**. That is not a sample-size problem and more
+repositories will not fix it.
+
+The fallback, if the corpus confirms it: construct base records that are
+**clean on the field in question**, and build the twin as a degradation from
+those. Costs are real and must be decided rather than drifted into — such a
+base is synthetic, so it is excluded from R1 spread and the G2 rate exactly
+as `synthetic-thin-records` requires, and the twin then demonstrates
+sensitivity against a project that does not exist. That is weaker evidence
+than a twin of a real record and the writeup must grade it as such.
+
+**What `03-milestone-2.md` should ask for:** report, per corpus record,
+the six field values above; then state which catalogue types the corpus can
+support with a real base, and which need a constructed one. One table, from
+data M2 extracts anyway.
+
 ### 4. Group J has accreted — restructure, do not extend
 
 Documentation accuracy is now eight fields, each added to close a gap a

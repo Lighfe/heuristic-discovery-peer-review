@@ -225,6 +225,39 @@ the reproducibility criterion beyond stating the fact**: each attack is a
 single edit to fields the criteria read, or to fields they ignore, and none
 required cleverness. That is the finding — the attack surface is not subtle.
 
+### a4 is not an invented monster — it is two real projects recombined
+
+The obvious objection to a synthetic attack is that no repository would ever
+hold that record. Checked, and it does not survive: **five of a4's six
+answer-evaluation field values are exactly p02's**, a real extracted project.
+
+| field | a4 | p02 (real) | same? |
+|---|---|---|---|
+| `llm_eval_approaches_compared` | 2 | 2 | yes |
+| `llm_eval_role_overlap` | `same_model` | `same_model` | yes |
+| `llm_eval_question_generator` | `generator_ties_question_to_passage` | same | yes |
+| `llm_eval_judge_spotchecked` | `false` | `false` | yes |
+| `llm_eval_present` | `true` | `true` | yes |
+| `llm_eval_metric_at_ceiling` | `true` | `false` | **p01 holds `true`** |
+
+The single differing value is held by the *other* real record. So a4 is p02's
+answer-evaluation profile with p01's ceiling value — every individual value
+observed in a real submission, in a combination nothing prevents. All five
+attack records were type-checked against the schema (340 leaf values, all
+legal).
+
+### The 22nd point comes from one field, and it is the counting clause
+
+`llm_eval_approaches_compared: 1 → 2` moves `llm_evaluation` from 1 to 2 and
+nothing else changes. The tier awarded is *"Multiple approaches are
+evaluated, and the best one is used"*.
+
+So the criterion pays a point for **comparing two things**, and the two
+things being compared are one model's output judged by that same model
+against questions it wrote from the passages. The circularity is not
+overlooked by the criterion — it is the mechanism by which the point is
+earned.
+
 **Limits.** The bar is p01's 21, because the corpus range over two records
 is [17, 21] and too thin to be a range. Zero attacks failed, so this round
 says nothing about where v0's resistance begins — a round where everything
@@ -251,20 +284,72 @@ which this does not stand in for.
 three identical totals.** Spread was 1–3 points on every one of the eight
 cases.
 
-Two observations, both provisional at n=3:
+Two observations. The second was diagnosed from the cached responses
+(0 further requests) and the diagnosis **corrects the first reading of it**.
 
 - **The G4 ceiling check would not trigger.** `agreement-protocol-ceiling`
   declares G4 decorative if the baseline comes back ≥ 0.95. Exact-match
   self-consistency here is 0 of 8, so there is real variance for G4 to
   measure — which makes G4's *form* (the M2 decision) matter rather than
   being moot.
-- **The prose layer may not reproduce the executable layer's twin
-  ordering.** Reviewer medians put `p01-t01` at 23 against p01's 22 — the
-  degraded twin scoring *above* its base, the opposite of the executable
-  result in F3. If that survives M2's larger sample it is a
-  prose↔executable fidelity defect in the current criteria's own wording,
-  not in the transcription. At three samples with a two-point spread it is
-  an observation to test, not a finding.
+
+- **Reviewers apply the retrieval-evaluation criterion as a pure count,
+  ignoring its second clause.** This is the corrected finding, and it is
+  sharper than the one first recorded.
+
+### The apparent twin inversion was the discretionary bonus, not a graded criterion
+
+Reviewer medians put `p01-t01` at 23 against p01's 22 — the degraded twin
+above its base. Read per criterion across all six samples, **no graded
+criterion scored the twin higher.** The gap comes from two places, neither of
+them a criterion working backwards:
+
+- `bonus_discretionary` — one sample awarded the twin 3 discretionary points.
+  That is the criterion v0 declares structurally unscoreable, because the
+  guidance delegates it wholly to reviewer judgment with no stated condition.
+  A human exercising exactly the discretion the text invites.
+- `reproducibility` — one sample gave the twin 1 instead of 2, which pushes
+  the other way.
+
+So the executable layer did not disagree with the prose layer about any
+scored criterion. The earlier reading — *"a prose-versus-executable defect,
+possibly the most expensive finding here"* — was wrong, and is withdrawn.
+
+### What the responses actually show, and it matters more
+
+`retrieval_evaluation` is the **only** criterion v0 moves on between p01 and
+its degraded twin (2 → 1). Reviewers scored it **2 for both, in all six
+samples**, and their stated reasons say why:
+
+> "Four retrieval approaches are evaluated using a metrics table and
+> evaluation script, and the best one is used."
+> "Four different retrieval approaches are evaluated and reported."
+> "Four retrieval approaches are evaluated and compared in the retrieval
+> evaluation."
+
+The criterion reads *"Multiple retrieval approaches are evaluated, **and the
+best one is used**"*. Every justification cites the counting clause. Not one
+of six mentions which approach shipped — including in the twin, where the
+record states in as many words that the shipped approach is not the best.
+
+**The second clause is present in the text and absent from its application.**
+Three consequences:
+
+1. v0's executable layer is **stricter than the criteria as humans apply
+   them** here — v0 catches the harmful-component twin, the reviewers do
+   not. A faithful transcription can be more demanding than the practice it
+   transcribes, and the writeup must not present v0 as "what reviewers do".
+2. It strengthens F2. If reviewers already skip "the best one is used",
+   making the shipped configuration an explicit, checkable condition is not
+   adding burden — it is asking for a check the text already implies and
+   nobody performs.
+3. It is a **prose defect that no executable layer can fix**, since the
+   clause is unambiguous and simply not applied. A candidate must make the
+   check mechanical or drop the clause; leaving it as prose reproduces this.
+
+At three samples per case this is an observation to confirm at M2, not a
+settled result — but it is a specific, falsifiable one, which the first
+reading was not.
 
 **Confound on record:** reviewer prompts render `basis` sentences that cite
 repository paths inline, so citation density varies between fields and may
