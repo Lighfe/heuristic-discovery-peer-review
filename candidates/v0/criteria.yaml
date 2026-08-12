@@ -1,0 +1,413 @@
+# Candidate v0 — the CURRENT course criteria, transcribed. Not a proposal.
+#
+# v0 is the baseline instrument. Its prose layer is the course's own text at
+# courses/llm-zoomcamp-2026/project-evaluation-guidance.md lines 104-150; this
+# file is the executable layer plus the field mapping, and it changes nothing.
+#
+# HOW TO CHECK THIS FILE (the M2 independent diff, decision `v0-independent-diff`)
+# Every criterion carries `guidance_verbatim`, copied character-for-character
+# from the guidance with its line numbers. The check is two comparisons, both
+# mechanical and neither needing the transcriber's reasoning:
+#   1. does `guidance_verbatim` match the guidance at those lines?
+#   2. does each tier's `when` say the same thing as its `text`?
+# Where the guidance says something no record field can express, the criterion
+# carries an `unmappable` list naming the clause. Where a tier had to be
+# interpreted, it carries `interpretation` stating the reading chosen and the
+# reading rejected. Those two keys are where a transcription error would hide,
+# so they are the rows to read first.
+#
+# There is deliberately NO `inference` key anywhere in this file. One was
+# added on 2026-08-12 (requiring the evaluated configuration to be the
+# shipped one) and reverted the same day: it made v0 stricter than the
+# instrument v0 exists to baseline, and it blinded v0 to the
+# harmful-component twin that the literal criteria catch. The idea was good
+# and is queued as candidate material in `docs/findings.md` F2. If a future
+# edit needs a condition the guidance does not state, that belongs in a
+# candidate, never here. See `superseded.md`, `v0-requires-config-match`.
+#
+# TIER SEMANTICS
+# Tiers are evaluated top-down and the FIRST match wins. A record matching no
+# tier scores the criterion's `fallback` and is reported as `unmatched` — never
+# silently defaulted, because a tier set with a hole is a finding about the
+# criteria, not a bug in the scorer.
+#
+# CONDITION SYNTAX
+#   {field: value}                exact equality
+#   {field: {in: [a, b]}}         membership
+#   {field: {">=": 5}}            numeric comparison; null never satisfies one
+#   several keys in one `when`    all must hold (AND)
+
+schema_version: 0
+candidate: v0
+source: courses/llm-zoomcamp-2026/project-evaluation-guidance.md
+source_lines: "104-150"
+pass_threshold: 11        # owner-confirmed, decision `pass-threshold-11`
+pass_threshold_source: courses/llm-zoomcamp-2026/sources.md
+
+criteria:
+
+  - id: problem_description
+    guidance_lines: "108-111"
+    guidance_verbatim: |
+      * Problem description
+          * 0 points: The problem is not described
+          * 1 point: The problem is described but briefly or unclearly
+          * 2 points: The problem is well-described and it's clear what problem the project solves
+    max_points: 2
+    reads: [problem_statement]
+    tiers:
+      - points: 2
+        text: "The problem is well-described and it's clear what problem the project solves"
+        when: {problem_statement: specific}
+      - points: 1
+        text: "The problem is described but briefly or unclearly"
+        when: {problem_statement: brief}
+      - points: 0
+        text: "The problem is not described"
+        when: {problem_statement: absent}
+    fallback: 0
+
+  - id: retrieval_flow
+    guidance_lines: "112-115"
+    guidance_verbatim: |
+      * Retrieval flow
+          * 0 points: No knowledge base or LLM is used
+          * 1 point: No knowledge base is used, and the LLM is queried directly
+          * 2 points: Both a knowledge base and an LLM are used in the flow
+    max_points: 2
+    reads: [retrieval_flow]
+    tiers:
+      - points: 2
+        text: "Both a knowledge base and an LLM are used in the flow"
+        when: {retrieval_flow: kb_and_llm}
+      - points: 1
+        text: "No knowledge base is used, and the LLM is queried directly"
+        when: {retrieval_flow: llm_only}
+      - points: 0
+        text: "No knowledge base or LLM is used"
+        when: {retrieval_flow: no_kb_no_llm}
+    fallback: 0
+
+  - id: retrieval_evaluation
+    guidance_lines: "116-119"
+    guidance_verbatim: |
+      * Retrieval evaluation
+          * 0 points: No evaluation of retrieval is provided
+          * 1 point: Only one retrieval approach is evaluated
+          * 2 points: Multiple retrieval approaches are evaluated, and the best one is used
+    max_points: 2
+    reads:
+      - retrieval_eval_present
+      - retrieval_eval_approaches_compared
+      - retrieval_best_approach_shipped
+    tiers:
+      - points: 0
+        text: "No evaluation of retrieval is provided"
+        when: {retrieval_eval_present: false}
+      - points: 2
+        text: "Multiple retrieval approaches are evaluated, and the best one is used"
+        when:
+          retrieval_eval_approaches_compared: {">=": 2}
+          # "yes" quoted deliberately: YAML 1.1 parses bare yes as boolean true,
+          # which would silently never match the string value the record holds.
+          retrieval_best_approach_shipped: {in: ["yes", mixed_result]}
+      - points: 1
+        text: "Only one retrieval approach is evaluated"
+        when: {retrieval_eval_approaches_compared: 1}
+      - points: 1
+        text: "Multiple approaches evaluated, but the best is not the one shipped"
+        when:
+          retrieval_eval_approaches_compared: {">=": 2}
+          # "no" quoted for the same reason as "yes" above: YAML 1.1 reads a
+          # bare no as boolean false, which matches no record value at all.
+          retrieval_best_approach_shipped: {in: ["no", undeterminable]}
+    fallback: 1
+    interpretation: >
+      THE MOST CONSEQUENTIAL INTERPRETATION IN v0, and the first row a
+      reviewer of this transcription should attack. Two clauses need a
+      reading the guidance does not supply.
+
+      (a) `mixed_result` counts toward the two-point tier. When a project's
+      own metrics disagree about which approach wins, there is no single
+      "best one", so a reviewer cannot find that the best was not used. The
+      rejected reading is strict `yes` only, which would drop both extracted
+      records from 2 to 1 and would make the tier unreachable for any project
+      whose metrics trade off against each other - the common case.
+
+      (b) A project evaluating two or more approaches but demonstrably NOT
+      shipping the best matches no *written* tier: it is not "only one
+      approach", and it fails the two-point clause. The guidance has a
+      genuine hole here. Owner, M1 phase 6: **a fallback is not a rule**, so
+      that case is now a written tier of its own scoring 1, rather than
+      arriving at `fallback` by omission. `undeterminable` is grouped with it
+      on the same reading - neither can support "the best one is used".
+
+      The 1-point tiers therefore now cover every case the guidance leaves
+      open, and `fallback` is unreachable for any record whose
+      `retrieval_eval_present` is true. It is retained only so that a
+      malformed record fails loudly rather than silently.
+
+  - id: llm_evaluation
+    guidance_lines: "120-123"
+    guidance_verbatim: |
+      * LLM evaluation
+          * 0 points: No evaluation of final LLM output is provided
+          * 1 point: Only one approach (e.g., one prompt) is evaluated
+          * 2 points: Multiple approaches are evaluated, and the best one is used
+    max_points: 2
+    reads: [llm_eval_present, llm_eval_approaches_compared]
+    tiers:
+      - points: 0
+        text: "No evaluation of final LLM output is provided"
+        when: {llm_eval_present: false}
+      - points: 2
+        text: "Multiple approaches are evaluated, and the best one is used"
+        when: {llm_eval_approaches_compared: {">=": 2}}
+      - points: 1
+        text: "Only one approach (e.g., one prompt) is evaluated"
+        when: {llm_eval_approaches_compared: 1}
+    fallback: 1
+    unmappable:
+      - clause: "and the best one is used"
+        why: >
+          No record field states which answer-generation approach was shipped.
+          The schema has `retrieval_best_approach_shipped` for retrieval and
+          no counterpart for generation, so the two-point tier is scored on
+          the approach count and the configuration match alone. A project
+          comparing two prompts and shipping the worse one scores the same as
+          one shipping the better. Still open after the `inference` above.
+
+  - id: interface
+    guidance_lines: "124-127"
+    guidance_verbatim: |
+      * Interface
+         * 0 points: No way to interact with the application at all
+         * 1 point: Command line interface, a script, or a Jupyter notebook
+         * 2 points: UI (e.g., Streamlit), web application (e.g., Django), or an API (e.g., built with FastAPI)
+    max_points: 2
+    reads: [interface_kind]
+    tiers:
+      - points: 2
+        text: "UI (e.g., Streamlit), web application (e.g., Django), or an API (e.g., built with FastAPI)"
+        when: {interface_kind: {in: [web_ui, api]}}
+      - points: 1
+        text: "Command line interface, a script, or a Jupyter notebook"
+        when: {interface_kind: {in: [cli, script_or_notebook]}}
+      - points: 0
+        text: "No way to interact with the application at all"
+        when: {interface_kind: none}
+    fallback: 0
+
+  - id: ingestion_pipeline
+    guidance_lines: "128-131"
+    guidance_verbatim: |
+      * Ingestion pipeline
+         * 0 points: No ingestion
+         * 1 point: Semi-automated ingestion of the dataset into the knowledge base, e.g., with a Jupyter notebook or a Python script
+         * 2 points: Automated ingestion with a special tool (e.g., Kestra, dlt, Airflow, Prefect)
+    max_points: 2
+    reads: [ingestion_kind]
+    tiers:
+      - points: 2
+        text: "Automated ingestion with a special tool (e.g., Kestra, dlt, Airflow, Prefect)"
+        when: {ingestion_kind: orchestrated_tool}
+      - points: 1
+        text: "Semi-automated ingestion of the dataset into the knowledge base"
+        when: {ingestion_kind: script_or_notebook}
+      - points: 0
+        text: "No ingestion"
+        when: {ingestion_kind: none}
+    fallback: 1
+    interpretation: >
+      `ingestion_kind: manual` matches no written tier. It is not "no
+      ingestion", and it is not "semi-automated ... with a notebook or a
+      script". It takes `fallback: 1` on the reading that ingestion happened.
+      Rejected: scoring it 0, which would read "no ingestion" as "no
+      automated ingestion" - a stricter rule than the text states.
+
+  - id: monitoring
+    guidance_lines: "132-135"
+    guidance_verbatim: |
+      * Monitoring
+         * 0 points: No monitoring
+         * 1 point: User feedback is collected OR there's a monitoring dashboard
+         * 2 points: User feedback is collected and there's a dashboard with at least 5 charts
+    max_points: 2
+    reads: [monitoring_kind, monitoring_chart_count]
+    tiers:
+      - points: 2
+        text: "User feedback is collected and there's a dashboard with at least 5 charts"
+        when:
+          monitoring_kind: feedback_and_dashboard
+          monitoring_chart_count: {">=": 5}
+      - points: 1
+        text: "User feedback is collected OR there's a monitoring dashboard"
+        when: {monitoring_kind: {in: [feedback_only, dashboard_only, feedback_and_dashboard]}}
+      - points: 0
+        text: "No monitoring"
+        when: {monitoring_kind: none}
+    fallback: 0
+    interpretation: >
+      A `null` chart count cannot satisfy "at least 5 charts", because no
+      committed chart can be counted (deferred-to-m2 item 3a). This is a
+      known prose-versus-executable divergence: a reviewer who runs a project
+      whose dashboard is a stock tool UI sees panels and counts them, while
+      the executable layer sees no committed definitions. Recorded before it
+      was measured, not after.
+
+  - id: containerization
+    guidance_lines: "136-139"
+    guidance_verbatim: |
+      * Containerization
+          * 0 points: No containerization
+          * 1 point: Dockerfile is provided for the main application OR there's a docker-compose for the dependencies only
+          * 2 points: Everything is in docker-compose
+    max_points: 2
+    reads: [containerization_kind]
+    tiers:
+      - points: 2
+        text: "Everything is in docker-compose"
+        when: {containerization_kind: compose_full}
+      - points: 1
+        text: "Dockerfile is provided for the main application OR there's a docker-compose for the dependencies only"
+        when: {containerization_kind: {in: [dockerfile_only, compose_dependencies_only]}}
+      - points: 0
+        text: "No containerization"
+        when: {containerization_kind: none}
+    fallback: 0
+
+  - id: reproducibility
+    guidance_lines: "140-143"
+    guidance_verbatim: |
+      * Reproducibility
+          * 0 points: No instructions on how to run the code, the data is missing, or it's unclear how to access it
+          * 1 point: Some instructions are provided but are incomplete, OR instructions are clear and complete, the code works, but the data is missing
+          * 2 points: Instructions are clear, the dataset is accessible, it's easy to run the code, and it works. The versions for all dependencies are specified.
+    max_points: 2
+    reads: [run_instructions, data_accessible, dependency_versions_pinned]
+    tiers:
+      - points: 0
+        text: "No instructions on how to run the code, the data is missing, or it's unclear how to access it"
+        when: {run_instructions: none}
+      - points: 0
+        text: "... the data is missing, or it's unclear how to access it"
+        when: {data_accessible: missing}
+      - points: 2
+        text: "Instructions are clear, the dataset is accessible, it's easy to run the code, and it works. The versions for all dependencies are specified."
+        when:
+          run_instructions: complete
+          data_accessible: automated_or_committed
+          dependency_versions_pinned: {in: [lockfile_committed, exact_pins]}
+      - points: 1
+        text: "Some instructions are provided but are incomplete, OR instructions are clear and complete, the code works, but the data is missing"
+        when: {run_instructions: {in: [partial, complete]}}
+    fallback: 1
+    unmappable:
+      - clause: "it's easy to run the code, and it works"
+        why: >
+          No record field states that the code runs. `run_instructions`
+          records whether the written procedure is COMPLETE, not whether
+          following it produces a working system - the schema separates those
+          into `run_instructions` and `run_instructions_gap_count`, and the
+          current criterion conflates them in one sentence. v0 reads only the
+          enum, which is faithful: the criterion as written asks a reviewer
+          for a judgment the record cannot supply, and inventing a mapping to
+          the gap count would be an improvement, not a transcription.
+
+  - id: best_practice_hybrid_search
+    guidance_lines: "145"
+    guidance_verbatim: |
+          * [ ] Hybrid search: combining both text and vector search (at least evaluating it) (1 point)
+    max_points: 1
+    reads: [hybrid_search.present]
+    tiers:
+      - points: 1
+        text: "Hybrid search: combining both text and vector search (at least evaluating it)"
+        when: {hybrid_search.present: true}
+      - points: 0
+        text: "not present"
+        when: {hybrid_search.present: false}
+    fallback: 0
+
+  - id: best_practice_reranking
+    guidance_lines: "146"
+    guidance_verbatim: |
+          * [ ] Document re-ranking (1 point)
+    max_points: 1
+    reads: [reranking.present]
+    tiers:
+      - points: 1
+        text: "Document re-ranking"
+        when: {reranking.present: true}
+      - points: 0
+        text: "not present"
+        when: {reranking.present: false}
+    fallback: 0
+    interpretation: >
+      Presence alone. The clause is a bare checkbox naming a component, with
+      no mention of evaluation or effect - unlike hybrid search, which at
+      least says "at least evaluating it". Reading anything about whether the
+      re-ranker helped would be a proposal, not a transcription. This tier is
+      the one `project-evaluation-issues.md` section 2 is about, and v0 must
+      reproduce it exactly for the twin test to mean anything.
+
+  - id: best_practice_query_rewriting
+    guidance_lines: "147"
+    guidance_verbatim: |
+          * [ ] User query rewriting (1 point)
+    max_points: 1
+    reads: [query_rewriting.present]
+    tiers:
+      - points: 1
+        text: "User query rewriting"
+        when: {query_rewriting.present: true}
+      - points: 0
+        text: "not present"
+        when: {query_rewriting.present: false}
+    fallback: 0
+
+  - id: bonus_cloud_deployment
+    guidance_lines: "149"
+    guidance_verbatim: |
+          * [ ] Deployment to the cloud (2 points)
+    max_points: 2
+    reads: [cloud_deployment]
+    tiers:
+      - points: 2
+        text: "Deployment to the cloud"
+        when: {cloud_deployment: deployment_code_committed}
+      - points: 0
+        text: "not deployed"
+        when: {cloud_deployment: none}
+    fallback: 0
+    interpretation: >
+      `cloud_deployment: documented_only` - a README claiming a deployment
+      with no committed deployment code - matches no tier and takes
+      `fallback: 0`. Rejected: awarding 2, which would credit a claim with no
+      artifact behind it. The guidance is a bare checkbox and settles
+      neither way; this reading is the transcription's, and is flagged.
+
+  - id: bonus_discretionary
+    guidance_lines: "150"
+    guidance_verbatim: |
+          * [ ] Up to 3 extra bonus points if you want to award for something extra (write in feedback for what)
+    max_points: 3
+    reads: []
+    tiers: []
+    fallback: 0
+    unscoreable: true
+    unmappable:
+      - clause: "Up to 3 extra bonus points if you want to award for something extra"
+        why: >
+          Structurally unscoreable by any executable layer, and not because
+          the schema is missing a field. The clause delegates entirely to
+          reviewer discretion with no stated condition, so there is nothing
+          to transcribe. v0 always scores it 0 and reports it as unscoreable
+          rather than as earned-zero, because the two are different facts: a
+          project may well have deserved these points from a human.
+
+          Consequence for every comparison: v0's totals are a LOWER BOUND on
+          what a human reviewer would award, by 0 to 3 points per project.
+          Any claim about v0's certification rate inherits that, and the
+          writeup must say so rather than presenting v0's totals as the
+          scores projects actually received.

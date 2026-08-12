@@ -210,6 +210,105 @@ needs. Then a twin genuinely can differ in one field and the allowance is
 not needed at all. Not mandated by the ruling — recorded because the
 alternative is an allowlist that grows one owner decision at a time.
 
+## Raised 2026-08-12 (owner's completed extraction-validation checklist)
+
+**All 136 rows answered** across both records — the full checklist, not the
+flagged subset. 133 `yes`, 2 `no`, 1 `can't tell`. Every disagreement turned
+out to be a schema question rather than an extraction mistake, which is a
+meaningful result in itself: the extractor recorded what was there in 133 of
+136 cases, and the three exceptions are all fields whose *definition* is
+underspecified, not fields whose value was misread.
+
+### 3f. `llm_eval_role_overlap` is undefined when no model generated the questions
+
+Owner answered **can't tell** for p01's `same_family`. Correctly: p01's
+question set is a committed literal with no generator
+(`llm_eval_question_generator: none_committed`), so the "generator" role has
+no model in it at all. The recorded `same_family` is really about the
+*answer generator* (gpt-4o) and the *judge* (gpt-4o-mini) — two of the three
+roles the field's own documentation names.
+
+The field conflates a three-way overlap with a two-way one and says nothing
+about which it measured. p02 has one model in all three roles, so
+`same_model` is unambiguous there; p01 exposes that the field has no defined
+reading when a role is unoccupied. Fix at M2: state that an unoccupied role
+is excluded and which roles remain compared, or split into per-pair fields.
+
+### 3g. `decision_documented` requires justification *from measurements*, and its name does not say so
+
+Owner answered **no** for p02's `hybrid_search.decision_documented: false`,
+citing the README arguing that dense embeddings suit the domain better than
+keyword search — so a reason *is* documented, even one the owner disagrees
+with.
+
+The recorded `false` is correct **under the schema as written**:
+`decision_documented` requires the choice to be "stated **and** justified by
+the project's own measurements", and this is an a-priori argument about the
+domain, not a measurement the project made. But nothing in the field's
+*name* carries the measurement requirement, and a reader checking it will
+reasonably answer as the owner did.
+
+This matters beyond naming: the field cannot distinguish **"undocumented"**
+from **"documented, but argued rather than measured"**, and a criterion
+might well want to score those differently. A three-way value (`none` /
+`argued` / `measured`) is the obvious shape. Note this is the field added
+*because* p02's reranking case mattered — its first contact with a second
+technique already found a gap.
+
+### 3h. A second `document_code_conflicts` candidate on p02, not counted
+
+Owner answered **no** for `document_code_conflicts: 1`, raising a second
+conflict: the README says the system answers "based strictly on
+peer-reviewed or pre-print literature", while ingestion indexes only paper
+**abstracts** (`metadata["abstracts"][0]`, with `if not abstract: continue`).
+Answers are grounded in abstracts of that literature, not the literature.
+
+**Deliberately not changed**, because the counting rule for this field is
+itself unfixed (item 4) and bumping a count without a rule adds noise rather
+than accuracy. The borderline is the useful part: is a claim overstating
+*depth of source* a document-code conflict, or a weaker separate category?
+Decide the rule at M2, then recount both records under it.
+
+### 3i. Validation cost is a design constraint, and it binds hardest on the fields twins need
+
+**The most consequential item in this file.** Owner, having completed the
+checklist: it took a *lot* of time, cannot be repeated often, and **the
+counting fields cannot be precisely guaranteed** — verifying
+`untraceable_number_count: 18` means recounting eighteen figures across two
+documents and confirming for each that no committed artifact produces it.
+
+This is in direct tension with decision `counts-over-coarse-enums`, and the
+tension is real rather than a wording problem:
+
+- **Counts are better for twins.** A twin can move a count by one, giving
+  strict ordering instead of a tie. Coarse enums are what give `p01-t03` its
+  likely tie (item 3d).
+- **Counts are worse for humans.** An enum is a judgment made once; a count
+  is an exhaustive recount that must be exactly right, and an off-by-one
+  silently invalidates every measurement built on it.
+
+Neither wins outright, and the resolution is probably per-field: keep counts
+where a twin needs headroom and the count is small and bounded
+(`document_number_conflicts`, `broken_reference_count`,
+`run_instructions_gap_count`), reconsider where it is large and open-ended
+(`untraceable_number_count`, 18 for p01).
+
+**Sizing decisions to settle at M2 sealing:**
+
+1. `plan.md` promises "a light spot-check … a few fields per record" across
+   the ten non-owner-reviewed repos. That must be **sampled and sized to
+   what the owner can afford**, using the derived leverage rule (fields a
+   twin mutates, fields a candidate reads) — never exhaustive.
+2. Any extraction-validity claim states **how many fields were checked, by
+   whom, and which were not**. For M1 that is 136 of 136 by the owner, on
+   two records — complete for those two, and no basis at all for the other
+   ten, which is the number the writeup must carry.
+3. A field nobody can validate cheaply is one the project is *trusting*
+   rather than *knowing*. Acceptable if stated; not acceptable if a gate
+   rests on it unremarked.
+
+### 4. Group J has accreted — restructure, do not extend
+
 Documentation accuracy is now eight fields, each added to close a gap a
 single repository exposed: `headline_numbers_traceable`,
 `untraceable_number_count`, `document_number_conflicts`,

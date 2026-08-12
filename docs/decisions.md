@@ -49,16 +49,11 @@ diff over record fields with a direction known by construction; anything
 else is rejected mechanically. This is the enforcement mechanism for the
 CLAUDE.md rule that twins encode structural facts, not taste.
 
-**twin-entailed-change-scoped** — CLAUDE.md's "differs in exactly one way"
-means one *fact*: a field the first change makes arithmetically false is the
-same fact recorded twice, not a second defect. Owner, M1 twin gate —
-**scoped to `p01-t01`/`p01-t02` only, explicitly refused as a standing rule
-any future twin-builder may invoke by analogy.** Enforced by
-`APPROVED_ENTAILMENTS` in `tools/generate_twins.py`; an unlisted entailment
-fails the build. Underlying cause is schema non-normalisation
-(`retrieval_best_approach_shipped` summarises the technique effects), so
-every `harmful-component-kept` twin on p01 moves two fields — see
-`docs/deferred-to-m2.md`.
+**twin-entailed-change-scoped** — "One way" means one *fact*: a field the
+first change makes arithmetically false is that fact twice, not a second
+defect. Owner, M1 twin gate — **scoped to `p01-t01`/`p01-t02`, refused as a
+standing rule invocable by analogy**, enforced by `APPROVED_ENTAILMENTS`
+(unlisted entailment fails the build). Cause: `deferred-to-m2.md` 3e.
 
 **twin-fields-disjoint** — Degraded mutations must be categorical (flip a
 fact any reasonable criterion tiers on); no-change mutations touch only
@@ -195,6 +190,12 @@ baseline findings (review-01 B2 — old-G6 would have failed v0: a fact about
 the gate). Asymmetry stated once in `objective.md`. Rejected: discardable
 v0 (the baseline must exist) and silent exemption (hides gate defects).
 
+**v0-literal-no-inferences** — v0 encodes only what the guidance states; a
+condition the course does not impose belongs in a candidate. Measured: one
+such condition blinded v0 to the harmful-component twin (21→20 became a
+tie). Criterion ideas go to `findings.md`, which the proposer reads.
+Supersedes: `v0-requires-config-match`, see `superseded.md`.
+
 **v0-post-seal-correction** — A v0 transcription error found after M2
 sealing (review-01 B6): fix the executable layer, bump v0's version, rerun
 every scorer-based comparison (deterministic, zero requests), log error and
@@ -233,8 +234,7 @@ term that rewards agreement, per the CLAUDE.md epistemics.
 budgeted red-team rounds find no new successful attack, bounded by a round
 cap with a defined outcome, plus an attempt-clocked provider-failure stop
 distinct from quota pauses (A6; both in `objective.md`). The cap is **8 and
-uncalibrated** — no round has run; a stop-and-look point, resized as pace
-emerges.
+uncalibrated** — a stop-and-look point, resized as pace emerges.
 
 **writeup-gate-bindingness** — The final writeup and `proposed-guidance.md`
 report per-gate bindingness — which gates bound, which were decorative or
@@ -262,12 +262,11 @@ values on every enum. Conflating them destroys the schema's only signal
 about its own inadequacy: `other` accumulating across the corpus is the
 evidence that an enum was drawn from too few projects.
 
-**counts-over-coarse-enums** — Where a defect has magnitude, the field is an
-integer with each instance named in `basis`, not a two- or three-value enum:
-`document_number_conflicts`, `untraceable_number_count`,
-`run_instructions_gap_count`, `artifacts_unreferenced_count`. Reason: one
-bucket spanning a rounding error and a wholly wrong document is not a
-measurement, and a twin could only move it by flipping the whole field.
+**counts-over-coarse-enums** — Where a defect has magnitude the field is an
+integer with each instance named in `basis`, never a two- or three-value
+enum. Reason: one bucket spanning a rounding error and a wholly wrong
+document is not a measurement, and a twin could only move it by flipping the
+whole field. Applies to the four `*_count` fields in the schema.
 
 **traceable-means-reproducible-in-principle** — A headline number is
 traceable only if the committed artifact could yield it, not if a
@@ -290,26 +289,23 @@ first (commit unpinned, and `self` role tests less of the pipeline).
 
 ## Process
 
-**record-decisions-when-made** — A `decisions.md` entry is written when the
-choice is made and *before* the work implementing it, never batched at a
-commit. Batching loses the reasoning if a session is interrupted, and an
-entry reverse-engineered from finished code silently drops the rejected
-alternatives — the part of an entry worth keeping. Same rule for
-`findings.md`: written as its run completes, naming the run.
+**record-decisions-when-made** — An entry is written when the choice is
+made and *before* the work implementing it, never batched at a commit.
+Batching loses the reasoning if a session is interrupted; an entry
+reverse-engineered from finished code drops the rejected alternatives, which
+is the part worth keeping. Same rule for `findings.md`, naming its run.
 
-**extraction-in-clean-context** — Evidence records are produced by a session
-holding only the extractor prompt, the schema and the clone, never one that
-has read the diagnosis or twin catalogue. Owner, M1 gate. The rule is
-categorical — a corrupted context is corrupted — and needs no argument about
-which reader performs better. Isolation is currently instruction-based, not
-enforced; compliance is auditable from the transcript, not prevented.
+**extraction-in-clean-context** — Records are produced by a session holding
+only the extractor prompt, the schema and the clone, never one that has read
+the diagnosis or catalogue. Owner, M1 gate. Categorical — a corrupted
+context is corrupted — needing no claim about which reader does better.
+Isolation is instruction-based: auditable from the transcript, not prevented.
 
-**extraction-agreement-needs-notes** — An extraction-agreement statistic
-computed over field values may not be reported as extraction validity. The
-reason is structural, not statistical: `extraction_notes` carry what the
-schema cannot express, and no value-level comparison reads them, so two
-records can agree on every field while disagreeing about whether the
-repository has a fatal defect. Binds at M2 (`plan.md`).
+**extraction-agreement-needs-notes** — A value-level agreement statistic
+may not be reported as extraction validity. Structural, not statistical:
+`extraction_notes` carry what the schema cannot express and no value
+comparison reads them, so two records can agree on every field while
+disagreeing about whether the repo has a fatal defect. Binds at M2.
 
 **negative-claims-name-their-search** — Review-01 A1's root cause: an
 approved document asserted "no pass threshold exists" when the truth was

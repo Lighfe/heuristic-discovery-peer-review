@@ -65,3 +65,64 @@ not passed. If the same holds across the M2 corpus, `config-drift` and
 `circular-eval` need base records constructed *without* the defect so the
 degradation has somewhere to travel from — the inverse of the usual twin
 direction, and worth deciding at M2 sealing.
+
+---
+
+## F2 — Both extracted projects evaluate a configuration that is not the one they ship
+
+**Date:** 2026-08-12
+**Artifacts:** `cases/records/p01.yaml`, `cases/records/p02.yaml`
+(`retrieval_eval_config_matches_shipped`, `llm_eval_config_matches_shipped`),
+`candidates/v0/criteria.yaml`, `docs/superseded.md`
+**Status:** measured on two records under candidate v0. **This is candidate
+material** — the proposer reads `findings.md` (`plan.md`, roles table), and
+this entry exists so the idea below is picked up rather than lost.
+
+### The defect
+
+Both records hold `differs` on **both** configuration fields. The evaluation
+each project reports was not run against the system it ships:
+
+- **p01** evaluates four retrieval approaches at `k=20`, reranking to
+  `top_k=10`, with no query rewriting — and ships `k=50`, `top_k=5`, with
+  rewriting on.
+- **p02** measured every reported number against an index built from one
+  source, while both committed ingestion scripts build the same-named
+  collection from a different source with incompatible id types, so the
+  evaluation cannot be re-run against the shipped index at all.
+
+### What the current criteria do about it
+
+**Nothing.** v0 awards p01 the full two points for retrieval evaluation:
+four approaches were compared and the best-performing one is shipped, which
+is what the criterion asks. That the comparison was run at different
+parameters is invisible to it, because the criterion never asks.
+
+The consequence is the §3 pattern from `project-evaluation-issues.md` made
+concrete: *the measured system is not the shipped system*, present in both
+projects examined, scored by nothing.
+
+### The candidate idea, and why it is not in v0
+
+Requiring `config_matches_shipped: matches` for the two-point tier was
+tried in v0 on 2026-08-12 and reverted the same day. It belongs in a
+**candidate**: as a change it can be measured against the baseline by R1,
+whereas in v0 it silently pre-improves the reference every candidate is
+compared to. It also, as built, cost G1 its signal on the
+harmful-component twin — both p01 and its degraded twin landed in the same
+one-point tier and the twin's distinction vanished. Full reasoning and the
+numbers: `docs/superseded.md`, `v0-requires-config-match`.
+
+A candidate adopting it must therefore handle two things that version did
+not: keep the harmful-component distinction scoreable alongside the
+config-drift denial, and stay inside a point scale where both denials
+currently collapse to the same tier.
+
+### Limits
+
+Two repositories, both `owner_reviewed`, so not a random sample of the
+corpus — M2's extraction is the first honest base rate. The p01 field value
+was confirmed by the owner's field-level validation (2026-08-12); p02's was
+too, and its extraction note records that a literal reading of the field's
+own definition would have returned `matches`, since every parameter the
+definition names does match and the divergence is the corpus itself.
