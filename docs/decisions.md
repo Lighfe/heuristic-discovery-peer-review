@@ -79,6 +79,13 @@ catalogue despite sitting near the excluded "badly written README" example
 (artifact exists, no path from the README reaches it), expressible as a
 record-field diff — which "badly written" is not. The taste guard holds.
 
+**retrieval-best-approach-reading-flagged** — v0's one clean G1 pass
+(`p01-t01` vs `p01`) holds only under the 2-point retrieval tier accepting
+`mixed_result` alongside `yes` — `criteria.yaml`'s own flagged
+interpretation. Under the stricter `yes`-only reading the pair ties and G1
+fails on it; `p02` also moves. `findings.md` F3 states the dependency; the
+M2 independent v0 fidelity diff is not a neutral check on it (review-m1 A2/A3).
+
 **synthetic-thin-records** — The corpus has no near-threshold project, so
 synthetic thin records are constructed at the certification boundary to
 probe gate G2. They are labelled synthetic, kept out of spread statistics
@@ -242,6 +249,36 @@ compliance checks — never a bare "passed all six gates". Review-01 B11: if
 G2 is near-vacuous, G4 ceilings out, and G5/G6 are compliance, the honest
 claim is one real test plus qualifiers, and no more may be presented.
 
+**g1-not-below-defined** — G1 gains a third relation, `not_below` (≥), for
+documented-mitigation twins (harmful-component-kept's removal variant,
+circular-eval's spot-checked variant): the M1 scorer manifest was already
+recording it for `p01-t02` before `objective.md` defined it (review-m1 A6).
+Fixed in `objective.md` 2026-08-13; `plan.md`'s catalogue already required
+this relation in prose.
+
+**agreement-total-recomputed** — `loop/agreement.py` recomputes each
+sample's total from `criteria[].points`, never trusting the model's
+self-reported `total` field. Reason: 16 of 24 M1 smoke samples (67%) had a
+self-reported total disagreeing with the sum of their own listed points, by
+1–3 points — arithmetic noise the harness was silently treating as
+judgment disagreement. Found and fixed 2026-08-13 (review-m1 A1).
+
+**attack-mechanism-count-distinct** — R2 write-ups report both the
+successful-attack count and the count of distinct underlying mechanisms:
+M1's 5 successful attacks trace to 1 mechanism (mutating a field no
+criterion reads) plus a4's distinct one (the `llm_evaluation` counting
+clause). One fix can defeat every attack sharing a mechanism; count alone
+overstates that. Review-m1 A4.
+
+**real-score-dataset-scoped** — A proposed ten-repo real-score dataset
+splits into two checks: (1) does v0's code match reviewers' real
+application of the same written criteria — safe, in scope, feeds the M2 v0
+fidelity diff; (2) does the *current checklist* measure quality well —
+unsafe, it would grade the checklist using the checklist's own output,
+excluded now and from any M3 candidate. Sourcing questions (commit hashes,
+score provenance, overlap with the owner's own reviews) stay open before
+this enters `plan.md` (review-m1 A7).
+
 ## Schema
 
 **schema-proposals-via-owner** — Loop agents may *propose* a new enum value
@@ -273,6 +310,31 @@ traceable only if the committed artifact could yield it, not if a
 plausibly-named file exists. Found at the M1 gate: p01's marimo notebooks
 import none of the names they use and store no outputs, so 18 reported
 figures had nothing behind them under the looser reading.
+
+**checklist-generator-scoped-by-base-case** —
+`tools/make_validation_checklist.py` attributes a "mutated by" flag to a
+field only within its twin's actual base case; the earlier version keyed
+by field name alone, so p02's `untraceable_number_count` was wrongly
+flagged "mutated by p01-t03" (that twin mutates p01). Fixed 2026-08-13; the
+already-answered `checklist.md` is not regenerated — only the annotation
+was wrong, never the owner's yes/no answers (review-m1 B3).
+
+**a4-not-prose-fidelity-material** — a4's mutated fields carry
+`basis: constructed for the M1 red-team round`, placeholder text a
+reviewer model would read as prose, not a repository fact. Confirmed
+(review-m1 B1): a4 stays valid for R2 (an executable-layer attack) but must
+not enter the agreement probe or any prose-fidelity measurement.
+
+**render-includes-basis-confirmed** — Checked directly: `loop/render.py`
+renders every field's `basis`. p01-t06's rendered line reads
+`- repo_file_count: 41` where p01's reads `- repo_file_count: 53` — the
+content genuinely changes; the two full rendered records are merely the
+same *length* (both are 2-digit-for-2-digit swaps), which is why their
+`input_tokens` match. p01-t05's rendered record is 10 characters longer
+than p01's (`Flask app, served by gunicorn` → `FastAPI app, served by
+uvicorn`). Neither twin is vacuous at the render layer; the identical
+`input_tokens` is a tokenizer coincidence on near-identical rendered text,
+not a renderer omission (review-m1 B2).
 
 ## Corpus and inputs
 

@@ -88,13 +88,28 @@ def summarise(cases, candidate, specs, responses) -> dict:
     out = {}
     for name, samples in by_case.items():
         good = [s for s in samples if s]
-        totals = [int(s["total"]) for s in good if isinstance(s.get("total"), int)]
+        # The model's self-reported `total` is not trusted: found at the M1
+        # owner review (review-m1.md A1) that it disagrees with the sum of
+        # the model's own listed per-criterion points in 16 of 24 M1 smoke
+        # samples (67%) — by up to 3 points. This measurement is about
+        # per-criterion judgment consistency, not the model's arithmetic, so
+        # the total is recomputed mechanically from `criteria[].points`
+        # rather than read off the field the prompt asked the model to sum.
+        totals = [
+            sum(c["points"] for c in s["criteria"] if isinstance(c.get("points"), int))
+            for s in good
+        ]
+        reported_total_mismatches = sum(
+            1 for s, t in zip(good, totals, strict=True)
+            if isinstance(s.get("total"), int) and s["total"] != t
+        )
         executable = score(cases[name], candidate).total
         out[name] = {
             "samples_requested": len(samples),
             "samples_parsed": len(good),
             "samples_unparseable": len(samples) - len(good),
             "totals": totals,
+            "reported_total_mismatches": reported_total_mismatches,
             "identical": len(set(totals)) == 1 if totals else None,
             "spread": (max(totals) - min(totals)) if totals else None,
             "median": statistics.median(totals) if totals else None,

@@ -93,10 +93,15 @@ each project reports was not run against the system it ships:
 
 ### What the current criteria do about it
 
-**Nothing.** v0 awards p01 the full two points for retrieval evaluation:
-four approaches were compared and the best-performing one is shipped, which
-is what the criterion asks. That the comparison was run at different
-parameters is invisible to it, because the criterion never asks.
+**Nothing.** v0 awards p01 the full two points for retrieval evaluation, but
+not because the best-performing approach is shipped: the record holds
+`retrieval_best_approach_shipped: mixed_result`, meaning the project's own
+metrics disagree about which approach wins, and the two points come from
+v0's 2-point tier accepting `mixed_result` alongside `yes` —
+`criteria.yaml`'s own flagged interpretation (`retrieval_evaluation.interpretation`),
+not from an actual best-approach match. That the comparison was run at
+different parameters is invisible to it either way, because the criterion
+never asks.
 
 The consequence is the §3 pattern from `project-evaluation-issues.md` made
 concrete: *the measured system is not the shipped system*, present in both
@@ -167,9 +172,27 @@ a tier, because a totals table renders the two identically:
   diagnosis, confirmed.
 
 The criteria cannot score what they never look at, and both defects are
-checkable facts about two committed files.
+checkable facts about two committed files. This is one mechanism, not two:
+both mutated fields sit outside every criterion's read-set, the same
+mechanism behind four of F4's five successful attacks.
 
-### What passes, and the one thing that genuinely works
+### What passes, and the one thing that genuinely works — and the reading it rides on
+
+`p01-t01`'s ordering holds under v0's 2-point retrieval tier accepting
+`retrieval_best_approach_shipped: mixed_result` alongside `yes` —
+`criteria.yaml`'s own flagged interpretation, named there as "the most
+consequential interpretation in v0, and the first row a reviewer of this
+transcription should attack." Under the stricter `yes`-only reading, p01
+falls from 21 to 20 (its own value is `mixed_result`, not `yes`) while
+`p01-t01` stays at 20 (its own value is `no`, which already took the
+1-point tier under either reading): the pair ties and G1 fails on it. `p02`
+holds `mixed_result` too, so the same reading choice moves its score.
+
+`plan.md` schedules an independent v0 fidelity diff at M2 — a fresh
+session, no access to the transcription rationale, checking guidance
+against mapping line by line. That diff is not a neutral check on this
+finding: if it settles on the strict reading, the one clean pass among the
+degraded twins goes with it.
 
 `p01-t01`/`p01-t02` is the pair the incentive argument turns on, and **v0
 handles it**: shipping a component its own numbers condemn scores 20, while
@@ -213,7 +236,51 @@ judgment; the constructed records are committed so the claim is auditable.
 | a4 | one model writes, answers and judges; metric at ceiling | **22** | **+1** |
 | a5 | 9 unfollowable steps, 12 dead paths, 6 claims the code contradicts | 21 | +0 |
 
-**a4 is the sharpest result in M1.** A fully circular evaluation — one model
+**Five attacks, one mechanism, plus one that is different.** a1, a2, a3 and
+a5 all mutate fields no criterion reads — the same mechanism behind both G1
+failures in F3. a4 is the exception: it moves a field `llm_evaluation` does
+read (`llm_eval_approaches_compared`), which is why it is the only attack
+that gains a point rather than merely holding score.
+
+| # | field(s) mutated | read by any criterion? |
+|---|---|---|
+| a1 | 9 technique fields (`present`/`shipped_enabled`/`evaluated`/`measured_effect`) | no |
+| a2 | `headline_numbers_traceable`, `untraceable_number_count` | no |
+| a3 | `monitoring_charts_bound_to_data` | no |
+| a5 | `run_instructions_gap_count`, `broken_reference_count`, `document_code_conflicts` | no |
+| a4 | `llm_eval_approaches_compared` (plus three circularity fields none of them read) | yes, one |
+
+Reported for R2's ranking, this is **5 successful attacks, 1 distinct
+mechanism**: a candidate that reads any documentation-accuracy or
+dashboard-binding field defeats a1, a2, a3 and a5 at once, and needs a
+separate fix for a4.
+
+### The circularity is already rewarded on real, shipped projects — no attack needed
+
+a4 corroborates this; it is not the load-bearing case. p01 and p02, both
+real extracted repositories, already show the criteria paying for circular
+evaluation with no constructed record involved:
+
+- **p01** holds `llm_eval_role_overlap: same_family` (the answer generator
+  and the judge are different sizes of one model line) and scores 1 of 2 for
+  `llm_evaluation` — capped by `llm_eval_approaches_compared: 1`, not by any
+  check on role overlap. No criterion reads `llm_eval_role_overlap`, so the
+  cap comes entirely from having one approach; role overlap costs it
+  nothing further.
+- **p02** holds `llm_eval_role_overlap: same_model`,
+  `llm_eval_question_generator: generator_ties_question_to_passage` and
+  `llm_eval_judge_spotchecked: false` — one model writes the question set,
+  generates one of the two compared answers, and judges both, including the
+  rival it loses to — and scores the **full 2 of 2** for `llm_evaluation`
+  (`runs/2026-08-12-m1-scorer-v0/manifest.json`, `per_criterion.llm_evaluation`
+  for p02). The triple role overlap costs it nothing; the criterion counts
+  approaches compared and stops there.
+
+p02 needs no approach-count caveat: it clears the two-point tier outright,
+on a real, already-shipped submission, holding every circularity field a4
+later assembles synthetically.
+
+**a4 is the sharpest constructed result in M1.** A fully circular evaluation — one model
 generating the questions from the passages, producing the answers, judging
 its own output, no spot-check, reported metric pinned at its maximum —
 scores **one point higher than the real project it was built from**, because
@@ -268,10 +335,13 @@ built to resist, where failed attacks become informative.
 
 ## F5 — Same-model self-consistency, smoke test only
 
-**Date:** 2026-08-12
-**Run:** `runs/2026-08-12-m1-agreement-smoke/` (24 requests,
-`gemini-3.5-flash-lite`, temperature 0.7, protocol 1)
-**Artifacts:** `agents/reviewer/v1/prompt.md`, `.../agreement.json`
+**Date:** 2026-08-12, corrected 2026-08-13
+**Runs:** `runs/2026-08-12-m1-agreement-smoke/` (24 requests,
+`gemini-3.5-flash-lite`, temperature 0.7, protocol 1) — original;
+`runs/2026-08-13-m1-agreement-smoke-recomputed/` (0 requests, 24 cache hits)
+— same responses, totals recomputed after the bug below was fixed.
+**Artifacts:** `agents/reviewer/v1/prompt.md`, `.../agreement.json`,
+`loop/agreement.py`, `.cache/`
 
 **NOT A BASELINE.** The task labels this a pipeline smoke test; the baseline
 is measured at M2 over the full corpus. It is *same-model self-consistency*
@@ -280,76 +350,97 @@ is measured at M2 over the full corpus. It is *same-model self-consistency*
 (decision `g4-is-self-consistency`). The real process medians three humans,
 which this does not stand in for.
 
-24 requests, 24 parsed, **zero unparseable**. Result: **no case produced
-three identical totals.** Spread was 1–3 points on every one of the eight
-cases.
+### The harness trusted the model's arithmetic, and the model's arithmetic was often wrong
 
-Two observations. The second was diagnosed from the cached responses
-(0 further requests) and the diagnosis **corrects the first reading of it**.
+Found at the M1 owner review while checking a discrepancy in this entry.
+`loop/agreement.py` read a sample's total straight from the `total` field
+the model was asked to report, rather than summing the `points` the same
+response listed per criterion. Checked directly against the cached response
+text: **16 of the 24 M1 smoke samples (67%) have a self-reported `total`
+that does not equal the sum of that response's own per-criterion points**,
+off by 1 to 3 points, in both directions. This has nothing to do with
+criterion-level judgment — it is the model failing to add thirteen small
+integers correctly — and it was inflating every spread and median number
+this entry originally reported.
 
-- **The G4 ceiling check would not trigger.** `agreement-protocol-ceiling`
-  declares G4 decorative if the baseline comes back ≥ 0.95. Exact-match
-  self-consistency here is 0 of 8, so there is real variance for G4 to
-  measure — which makes G4's *form* (the M2 decision) matter rather than
-  being moot.
+**Fixed**: `loop/agreement.py` now recomputes each sample's total from its
+`criteria[].points`, mechanically, and ignores the model's own sum. Rerun on
+the existing cache at zero further requests
+(`runs/2026-08-13-m1-agreement-smoke-recomputed/agreement.json`). Every
+number below is the corrected one.
 
-- **Reviewers apply the retrieval-evaluation criterion as a pure count,
-  ignoring its second clause.** This is the corrected finding, and it is
-  sharper than the one first recorded.
+### Corrected results
 
-### The apparent twin inversion was the discretionary bonus, not a graded criterion
+| case | totals | spread | median | v0 | diff |
+|---|---|---|---|---|---|
+| p01 | 21, 21, 21 | 0 | 21 | 21 | 0 |
+| p02 | 17, 17, 17 | 0 | 17 | 17 | 0 |
+| p01-t01 | 21, 20, 24 | 4 | 21 | 20 | +1 |
+| p01-t02 | 24, 21, 20 | 4 | 21 | 21 | 0 |
+| p01-t03 | 21, 19, 24 | 5 | 21 | 21 | 0 |
+| p01-t04 | 20, 19, 19 | 1 | 19 | 21 | −2 |
+| p01-t05 | 20, 21, 19 | 2 | 20 | 21 | −1 |
+| p01-t06 | 23, 20, 21 | 3 | 21 | 21 | 0 |
 
-Reviewer medians put `p01-t01` at 23 against p01's 22 — the degraded twin
-above its base. Read per criterion across all six samples, **no graded
-criterion scored the twin higher.** The gap comes from two places, neither of
-them a criterion working backwards:
+The two real records are now **exactly self-consistent**: all three samples
+of p01 and all three of p02 land on the same total once the model's own
+addition error is removed. The spread the original entry reported for these
+two cases (1–3 points on every case) was entirely an artifact of the bug.
+The constructed twins still show real spread, 1 to 5 points — this is not a
+measurement problem, it is same-model self-consistency doing what it says.
 
-- `bonus_discretionary` — one sample awarded the twin 3 discretionary points.
-  That is the criterion v0 declares structurally unscoreable, because the
-  guidance delegates it wholly to reviewer judgment with no stated condition.
-  A human exercising exactly the discretion the text invites.
-- `reproducibility` — one sample gave the twin 1 instead of 2, which pushes
-  the other way.
+`agreement-protocol-ceiling` declares G4 decorative if the baseline comes
+back ≥ 0.95. Exact-match self-consistency is 2 of 8 corrected, not 0 of 8 —
+still well short of a ceiling, so real variance remains for G4 to measure
+and its *form* (the M2 decision) still matters.
 
-So the executable layer did not disagree with the prose layer about any
-scored criterion. The earlier reading — *"a prose-versus-executable defect,
-possibly the most expensive finding here"* — was wrong, and is withdrawn.
+### The reviewer model applies the retrieval-evaluation criterion as a pure count, ignoring its second clause
 
-### What the responses actually show, and it matters more
+`retrieval_evaluation` is the only criterion v0 moves on between p01 (2) and
+its degraded twin `p01-t01` (1). The reviewer model scored it **2 in all six
+samples**, both cases. But only three of those six samples test anything:
+p01 holds `retrieval_best_approach_shipped: mixed_result` — the project's
+own metrics disagree about which approach wins, so there is no single "best"
+to check against, and scoring 2 there is correct, not a missed check. Only
+`p01-t01` holds `retrieval_best_approach_shipped: no`, the value where the
+clause has something to bite on: a single best approach is clearly named by
+the record, and it is not the one shipped. Its three stated reasons:
 
-`retrieval_evaluation` is the **only** criterion v0 moves on between p01 and
-its degraded twin (2 → 1). Reviewers scored it **2 for both, in all six
-samples**, and their stated reasons say why:
-
-> "Four retrieval approaches are evaluated using a metrics table and
-> evaluation script, and the best one is used."
-> "Four different retrieval approaches are evaluated and reported."
+> "Four different retrieval approaches are evaluated and reported in the
+> retrieval evaluation."
+> "Four retrieval approaches are evaluated and reported in a metrics table."
 > "Four retrieval approaches are evaluated and compared in the retrieval
 > evaluation."
 
-The criterion reads *"Multiple retrieval approaches are evaluated, **and the
-best one is used**"*. Every justification cites the counting clause. Not one
-of six mentions which approach shipped — including in the twin, where the
-record states in as many words that the shipped approach is not the best.
+None of the three mentions which approach shipped, in a record that states
+in as many words that the shipped approach is not the best-measured one.
+**On n=3, the reviewer model applied the counting clause and skipped the
+shipping clause.** Three consequences:
 
-**The second clause is present in the text and absent from its application.**
-Three consequences:
-
-1. v0's executable layer is **stricter than the criteria as humans apply
-   them** here — v0 catches the harmful-component twin, the reviewers do
-   not. A faithful transcription can be more demanding than the practice it
-   transcribes, and the writeup must not present v0 as "what reviewers do".
-2. It strengthens F2. If reviewers already skip "the best one is used",
+1. v0's executable layer is **stricter than this reviewer model applies the
+   same text** on this one case — v0 catches the harmful-component twin,
+   the model does not. A faithful transcription can be more demanding than
+   the practice it transcribes, and the writeup must not present v0 as what
+   a reviewer generally does.
+2. It strengthens F2. If the shipping clause is already skipped in practice,
    making the shipped configuration an explicit, checkable condition is not
    adding burden — it is asking for a check the text already implies and
-   nobody performs.
-3. It is a **prose defect that no executable layer can fix**, since the
-   clause is unambiguous and simply not applied. A candidate must make the
-   check mechanical or drop the clause; leaving it as prose reproduces this.
+   this sample never performs.
+3. It is a **prose defect no executable layer can fix**, since the clause is
+   unambiguous and simply not applied here. A candidate must make the check
+   mechanical or drop the clause; leaving it as prose reproduces this.
 
-At three samples per case this is an observation to confirm at M2, not a
-settled result — but it is a specific, falsifiable one, which the first
-reading was not.
+At three informative samples this is an observation to confirm at M2 over
+the full corpus, not a settled result, but it is specific and falsifiable.
+
+A second, open explanation this does not rule out: `criteria.yaml` notes
+the guidance has no written tier for "multiple approaches compared, the best
+one not shipped," and the reviewer prompt instructs the model not to refuse
+to score. A model facing an untiered case may award the nearest tier rather
+than skipping the clause — a rational response to a gap in the guidance,
+not necessarily evidence the clause is ignored when a tier exists for it.
+The two explanations point to different fixes (make the clause mechanical,
+versus write the missing tier) and this sample cannot separate them.
 
 **Confound on record:** reviewer prompts render `basis` sentences that cite
 repository paths inline, so citation density varies between fields and may

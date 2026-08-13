@@ -54,14 +54,23 @@ def v0_read_fields() -> dict[str, list[str]]:
     return {spec["id"]: list(spec.get("reads", [])) for spec in doc["criteria"]}
 
 
-def twin_mutated_fields() -> dict[str, set[str]]:
-    """field -> the twin ids that mutate it."""
-    out: dict[str, set[str]] = {}
+def twin_mutated_fields() -> dict[str, dict[str, set[str]]]:
+    """base_case_id -> field -> the twin ids (of that base) that mutate it.
+
+    Keyed by base case as well as field name. An earlier version keyed by
+    field name alone, so a twin of p01 got attributed to every record
+    holding a field of that name — p02's `untraceable_number_count` was
+    flagged "mutated by p01-t03" even though that twin mutates p01, not
+    p02. Found at the M1 owner review (review-m1.md B3).
+    """
+    out: dict[str, dict[str, set[str]]] = {}
     for path in sorted(TWINS.glob("*.yaml")):
         twin = yaml.safe_load(path.read_text(encoding="utf-8"))["twin"]
+        base = twin["base_case_id"]
+        per_field = out.setdefault(base, {})
         for entry in twin["diff"]:
             field = entry["field"].removeprefix("fields.").removesuffix(".value")
-            out.setdefault(field, set()).add(twin["twin_id"])
+            per_field.setdefault(field, set()).add(twin["twin_id"])
     return out
 
 
@@ -76,9 +85,10 @@ def fmt(value: Any) -> str:
 
 
 def main() -> int:
-    mutated = twin_mutated_fields()
+    mutated_by_base = twin_mutated_fields()
+    mutated_fields_any_base = {f for per_field in mutated_by_base.values() for f in per_field}
     v0_fields = {f for names in v0_read_fields().values() for f in names}
-    high = set(mutated) | v0_fields
+    high = mutated_fields_any_base | v0_fields
 
     out = [
         "# Extraction validation checklist — p01 and p02",
@@ -129,14 +139,17 @@ def main() -> int:
         "Fields mutated by twins, with the twins that depend on them:",
         "",
     ]
-    for field in sorted(mutated):
-        out.append(f"- `{field}` — {', '.join(sorted(mutated[field]))}")
+    for base in sorted(mutated_by_base):
+        for field in sorted(mutated_by_base[base]):
+            twins = ", ".join(sorted(mutated_by_base[base][field]))
+            out.append(f"- `{field}` (of `{base}`) — {twins}")
     out += ["", "---", ""]
 
     total = flagged = 0
     for case in ("p01", "p02"):
         doc = yaml.safe_load((RECORDS / f"{case}.yaml").read_text(encoding="utf-8"))
         out += [f"## {case} — commit `{doc['commit']}`", ""]
+        case_mutated = mutated_by_base.get(case, {})
 
         def emit(name: str, node: dict, qualified: str) -> None:
             nonlocal total, flagged
@@ -146,8 +159,8 @@ def main() -> int:
                 mark, _ = "⚑ ", None
                 flagged += 1
             why = []
-            if qualified in mutated:
-                why.append("mutated by " + ", ".join(sorted(mutated[qualified])))
+            if qualified in case_mutated:
+                why.append("mutated by " + ", ".join(sorted(case_mutated[qualified])))
             if qualified in v0_fields or name in v0_fields:
                 why.append("read by v0")
             suffix = f"  *({'; '.join(why)})*" if why else ""
@@ -184,9 +197,9 @@ def main() -> int:
     DEST.write_text("\n".join(out), encoding="utf-8")
     print(f"wrote {DEST.relative_to(REPO)}")
     print(f"  {total} rows, {flagged} flagged high-leverage")
-    print(f"  derived from {len(mutated)} twin-mutated + {len(v0_fields)} v0-read fields")
+    print(f"  derived from {len(mutated_fields_any_base)} twin-mutated + {len(v0_fields)} v0-read fields")
 
-    missed = [f for f in mutated if f not in high]
+    missed = [f for f in mutated_fields_any_base if f not in high]
     print("  ! twin-mutated fields not flagged:", missed) if missed else \
         print("  every twin-mutated field is flagged")
     return 0

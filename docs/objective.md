@@ -30,7 +30,17 @@ caught by exactly this check. The asymmetry is deliberate, and stated once.
 - **G1 — twin ordering.** Every sealed twin pair is ordered correctly by the
   executable layer: the degraded twin scores strictly below its original on
   the total, and **ties count as failures**. No-change twins must score
-  exactly equal — any movement is a failure. This gate alone eliminates the
+  exactly equal — any movement is a failure. Documented-mitigation twins
+  (harmful-component-kept's removal variant, circular-eval's spot-checked
+  variant — `plan.md`'s catalogue) require a third relation, **`not_below`**:
+  the mitigated twin scores no less than the case it mitigates (≥, not
+  necessarily >, since documenting a sound decision need not outscore a
+  record that already made the same call). Added 2026-08-13, formalising
+  what the catalogue already required in prose; `p01-t02` used this relation
+  in the M1 scorer manifest before it was defined here (review-m1.md A6).
+  Only these three relations — `strictly_below`, `exactly_equal`,
+  `not_below` — are defined; a scorer manifest recording any other relation
+  name is a bug, not a result. This gate alone eliminates the
   degenerate optimum. *Satisfiability is engineered, not hoped for*: the two
   halves bind on **disjoint field sets** — degraded mutations flip a
   categorical fact any reasonable criterion tiers on; no-change mutations
