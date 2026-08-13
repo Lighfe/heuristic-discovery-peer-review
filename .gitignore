@@ -9,6 +9,11 @@
 courses/*/repos.yaml
 !courses/*/repos.example.yaml
 
+# Candidate real-score dataset staging file (docs/decisions.md
+# `real-score-dataset-scoped`): a URL plus a real grade is identifying,
+# same reasoning as repos.yaml above.
+courses/*/real-score-candidates.yaml
+
 # Cloned capstone repositories. Someone else's code, usually with no licence
 # attached — read it, never redistribute it. Facts about a project are ours
 # to publish; the project is not.
