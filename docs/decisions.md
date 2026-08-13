@@ -275,9 +275,10 @@ splits into two checks: (1) does v0's code match reviewers' real
 application of the same written criteria — safe, in scope, feeds the M2 v0
 fidelity diff; (2) does the *current checklist* measure quality well —
 unsafe, it would grade the checklist using the checklist's own output,
-excluded now and from any M3 candidate. Sourcing questions (commit hashes,
-score provenance, overlap with the owner's own reviews) stay open before
-this enters `plan.md` (review-m1 A7).
+excluded now and from any M3 candidate. Sourcing resolved 2026-08-13: ten
+repos sourced by the owner, commits pinned to 2026-08-04, checked against
+`repos.yaml` for overlap (`courses/llm-zoomcamp-2026/real-score-candidates.yaml`),
+none excluded. Entered `plan.md` M2 (e) (review-m1 A7).
 
 ## Schema
 

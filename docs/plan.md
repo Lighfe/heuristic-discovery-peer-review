@@ -205,7 +205,7 @@ tomorrow; nothing is re-spent.
   (`objective.md` G4), the R-term noise bands
   (R1's bootstrapped over records — the scorer is deterministic, so re-run
   variance is zero), and the M3 round cap — every measurement parameter is
-  fixed before any candidate is compared. Two M2 obligations follow from
+  fixed before any candidate is compared. Five M2 obligations follow from
   review: (a) an **independent v0 fidelity diff** — a fresh session, with
   no access to the transcription rationale, diffs guidance criterion →
   mapping → field list line by line, because v0 anchors G3/R3 and the
@@ -226,7 +226,19 @@ tomorrow; nothing is re-spent.
   corpus re-extraction after it; (d) effort is weighted toward the **twin catalogue**, where
   the objective's real discriminating power concentrates — G2 may prove
   near-vacuous, G4 may ceiling out, and G5/G6 are compliance checks,
-  leaving G1 plus the catalogue as the project's validity.
+  leaving G1 plus the catalogue as the project's validity; (e) **ten real,
+  scored repos** (`courses/llm-zoomcamp-2026/real-score-candidates.yaml`,
+  sourced by the owner, commits pinned, checked against `repos.yaml` for
+  overlap — decision `real-score-dataset-scoped`) are extracted and join
+  `role: corpus`, growing the base to 22. Their scores are used for **check
+  1 only** — feeding (a)'s independent fidelity diff with real reviewer
+  behaviour instead of code-reading alone, and settling the `mixed_result`
+  reading dispute that F3's one clean G1 pass rides on (decision
+  `retrieval-best-approach-reading-flagged`) — never for grading the
+  checklist itself, which the same review rejected as circular (**check
+  2**, not run, not at M2 and not against any M3 candidate). One of the ten
+  scores exactly 11, the pass threshold, partially closing the "no real
+  near-threshold project" gap.
 - **M3 — discovery rounds.** Propose → score → red-team → critique, until
   the stopping criterion in `objective.md` is met **or its round cap (8,
   resizable at M2) is reached** — the cap's outcome is defined in
