@@ -65,10 +65,10 @@ caught by exactly this check. The asymmetry is deliberate, and stated once.
   Churn is allowed — a repo that passes today may fail under a candidate,
   provided the rate holds. 75% is a **minimum acceptable, not a target**:
   do not optimise toward it. It is a **rate, not a count** (decision
-  `g2-rate-not-count`): ≥9 of 12 today; a thirteenth *corpus* repo — the
-  hoped-for real thin repo, since p13 is `role: self` and never counts —
-  would make it ≥10. `role: self` and synthetic records are excluded
-  throughout. *Non-vacuity guard*: constructed below-floor records (empty
+  `g2-rate-not-count`): ≥9 of 12 today. `plan.md` M2(e) grows the corpus by
+  ten real, scored repos to 22 total — the floor recomputes against
+  whatever the corpus is at M2 sealing, never carried forward as ≥9 of 12.
+  `role: self` and synthetic records are excluded throughout. *Non-vacuity guard*: constructed below-floor records (empty
   repo; no knowledge base or LLM in the flow) must **fail** certification —
   a candidate that certifies everything fails here, not in the rankings.
   *Baseline obligation (M2)*: measure v0's own certification rate r₀ over
@@ -137,9 +137,11 @@ the right unit of variation. R1's scorer is deterministic — re-run variance
 is exactly zero — so its band comes from **bootstrapping over the corpus
 records**; sampled measurements (G4, R2) band on measured re-run variation.
 Within a band the term is a tie and the next term is consulted. Expected
-consequence, accepted: with twelve records the R1 band is wide, R1 ties
-will be common, and R2 carries more of the ranking work than its position
-suggests.
+consequence, accepted at twelve records and re-checked once `plan.md`
+M2(e)'s ten additional repos are sealed: the R1 band is wide on a corpus
+this size, R1 ties will be common, and R2 carries more of the ranking work
+than its position suggests. The bootstrap is recomputed against whichever
+corpus exists at M2 sealing, never carried forward from twelve.
 
 - **R1 — discrimination.** Spread of candidate scores over the `role:
   corpus` records versus v0's spread on the same records: count of distinct
@@ -187,10 +189,11 @@ summaries are not evidence.
   checkable** — it appears only behind the cohort login. It sets v0's
   certification line and therefore r₀; a stale figure would move the
   baseline, not the 75% floor.
-- **No real near-threshold project is in the corpus.** Synthetic thin
-  records probe the certification boundary partially; the gap closes only
-  when a real thin repo is added, and until then every G2 claim carries
-  this caveat.
+- **No real near-threshold project is in the corpus yet.** Synthetic thin
+  records probe the certification boundary partially; one of the ten repos
+  in `plan.md` M2(e) scores exactly 11, the pass threshold, and the gap
+  closes once it is extracted and sealed — until then every G2 claim
+  carries this caveat.
 - **Twin tests validate the scoring layer only** (evidence→score). The
   repo→evidence step is covered separately by extraction validation and the
   prose↔executable fidelity measurement, and the final writeup may not
