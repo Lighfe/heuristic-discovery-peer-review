@@ -1,0 +1,344 @@
+schema_version: 1
+case_id: p18
+commit: "d0a6e5eab04377dbdcdbfd1156d975051e596574"
+extracted_by: agents/extractor/v2
+extracted_on: "2026-08-17"
+
+fields:
+  knowledge_base_present:
+    value: present
+    evidence: ["data/processed/chunks.json", "data/processed/embeddings.npy", "data/indexes/keyword.db"]
+    basis: "committed chunk store, embedding vectors, and keyword index"
+
+  llm_in_flow:
+    value: present
+    evidence: ["src/rag.py:78-81"]
+    basis: "request handler calls client.responses.create with an OpenAI model"
+
+  retrieval_flow:
+    value: kb_and_llm
+    evidence: ["src/rag.py:43-45", "src/rag.py:78-81"]
+    basis: "answer_question queries the hybrid searcher (src/hybrid_search.py) and then calls the LLM in the same request path"
+
+  problem_statement:
+    value: specific
+    evidence: ["README.md:1-13"]
+    basis: "README states the question answered (rewriting code across FastAPI/Pydantic/SQLAlchemy version upgrades) and the audience (developers upgrading these frameworks) in the title line and Problem section"
+
+  interface_kind:
+    value: [web_ui]
+    evidence: ["app.py:1-130"]
+    basis: "Streamlit chat-style UI is the only way to submit a migration question to the assistant; dashboard.py is a separate telemetry viewer, not an interface to the core task"
+
+  interface_evidence_kind:
+    value: code_and_recording
+    evidence: ["docs/screenshot/assistant.gif", "docs/usage.md:42-44"]
+    basis: "an animated .gif recording of the running app is committed and linked from docs/usage.md, in addition to the code"
+
+  ingestion_kind:
+    value: script_or_notebook
+    evidence: ["scripts/build_dataset.py:1-24"]
+    basis: "plain Python scripts chained by build_dataset.py; README.md:49 states no orchestrator (Airflow/Prefect/Kestra) is used"
+
+  ingestion_single_command:
+    value: true
+    evidence: ["scripts/build_dataset.py:12-21", "docs/setup.md:99-119"]
+    basis: "uv run python scripts/build_dataset.py runs download, chunk, embed, and index steps in sequence"
+
+  ingestion_output_stated:
+    value: true
+    evidence: ["data/processed/embedding_metadata.json"]
+    basis: "committed metadata file states num_chunks (4306) and embedding dimensions (384)"
+
+  retrieval_eval_present:
+    value: true
+    evidence: ["evaluation/02_evaluate_search.py:1-78"]
+    basis: ""
+
+  retrieval_eval_approaches_compared:
+    value: 6
+    evidence: ["evaluation/02_evaluate_search.py:54-75"]
+    basis: "keyword-only, vector-only, and hybrid at 4 weight ratios (1:1, 2:1, 5:1, 10:1), each with reported Hit Rate@5/MRR@5"
+
+  retrieval_eval_set_committed:
+    value: committed
+    evidence: ["data/evaluation/ground_truth.csv"]
+    basis: "250-row question set is committed and is the input evaluation/02_evaluate_search.py reads"
+
+  retrieval_eval_set_size:
+    value: 250
+    evidence: ["data/evaluation/ground_truth.csv"]
+    basis: "row count of the committed ground-truth CSV"
+
+  retrieval_eval_relevance_rule:
+    value: document_level
+    evidence: ["evaluation/02_evaluate_search.py:26-36"]
+    basis: "a hit requires the retrieved chunk's id, truncated to the part before its final '-<n>' suffix, to equal the source chunk's file-level id, so any sub-chunk of the same source file counts as a hit"
+
+  retrieval_eval_config_matches_shipped:
+    value: matches
+    evidence: ["evaluation/02_evaluate_search.py:29-34", "src/hybrid_search.py:14-19", "src/rag.py:39,45"]
+    basis: "eval's keyword-only arm and the shipped default (HybridSearcher with kw_weight=1.0, vec_weight=0.0) both retrieve at limit=5; with vec_weight=0 the RRF score is a monotonic function of keyword rank alone, so the shipped path returns the same top-5 as the eval's keyword-only arm"
+
+  retrieval_eval_uncertainty_stated:
+    value: false
+    evidence: ["docs/evaluation.md:15-55"]
+    basis: "Hit Rate@5/MRR@5 are reported as point values with no interval, variance or repeated-run statement"
+
+  retrieval_best_approach_shipped:
+    value: yes
+    evidence: ["docs/evaluation.md:45-47", "src/hybrid_search.py:14-19"]
+    basis: "keyword-only scored highest on both Hit Rate@5 and MRR@5 and is the shipped default"
+
+  retrieval_eval_reproducible:
+    value: reproducible_as_committed
+    evidence: ["evaluation/02_evaluate_search.py:1-78", "data/indexes/keyword.db", "data/processed/embeddings.npy", "data/processed/embedding_metadata.json"]
+    basis: "script imports resolve, and its inputs (keyword.db, embeddings.npy, chunks.json) are committed and mutually consistent: embedding_metadata.json and keyword.db both report 4306 chunks, matching chunks.json's length"
+
+  llm_eval_present:
+    value: true
+    evidence: ["evaluation/03_evaluate_rag.py:1-77", "evaluation/04_llm_judge.py:1-145"]
+    basis: ""
+
+  llm_eval_approaches_compared:
+    value: 2
+    evidence: ["evaluation/03_evaluate_rag.py:16-27"]
+    basis: "RAG pipeline answer vs. no-context baseline answer, same underlying model, compared per question"
+
+  llm_eval_judge_kind:
+    value: model_judge
+    evidence: ["evaluation/04_llm_judge.py:48-68"]
+    basis: "gpt-5.4-mini with structured output (VersionComplianceEvaluation) judges each answer"
+
+  llm_eval_judge_spotchecked:
+    value: false
+    evidence: ["docs/evaluation.md:66-93", "evaluation/04_llm_judge.py:1-145"]
+    basis: "no step in the judge script or its documentation checks a sample of judge verdicts by hand or reports such a check"
+
+  llm_eval_question_generator:
+    value: generator_ties_question_to_passage
+    evidence: ["evaluation/01_generate_ground_truth.py:35-56", "data/evaluation/ground_truth.csv"]
+    basis: "committed generator produces each question from one sampled chunk and records that chunk's id in the 'document' column of the committed ground-truth CSV"
+
+  llm_eval_metric_at_ceiling:
+    value: true
+    evidence: ["data/evaluation/version_compliance_evaluations.csv"]
+    basis: "both reported metrics are failure rates (best value = 0%, minimum direction): baseline/RAG contains_legacy_syntax rates are 4.0%/4.4% (95.6-96.0% of items at the best value), baseline/RAG contains_version_blending rates are 5.0%/3.8% (95.0-96.2% at the best value); all four meet the >=95% ceiling threshold"
+
+  llm_eval_role_overlap:
+    value: same_model
+    evidence: ["evaluation/01_generate_ground_truth.py:43", "src/config.py:20", "evaluation/03_evaluate_rag.py:24", "evaluation/04_llm_judge.py:51"]
+    basis: "the question generator, both compared answer-generation arms (RAG's LLM_MODEL_NAME and the hardcoded baseline call), and the judge all invoke gpt-5.4-mini"
+
+  llm_eval_config_matches_shipped:
+    value: matches
+    evidence: ["evaluation/03_evaluate_rag.py:7,17,47", "src/rag.py:37-113"]
+    basis: "the RAG arm of the eval instantiates MigrationAssistant and calls answer_question exactly as app.py does, same model and system prompt"
+
+  llm_eval_reproducible:
+    value: traceable_not_reproducible
+    evidence: ["data/evaluation/ground_truth.csv", "data/evaluation/rag_answers.csv", "data/evaluation/version_compliance_evaluations.csv"]
+    basis: "rag_answers.csv and version_compliance_evaluations.csv both have 500 rows, of which 250 questions are absent from the currently committed 250-row ground_truth.csv; the resumable pipeline (evaluation/03_evaluate_rag.py's skip-already-answered logic) cannot regenerate the committed 500-row outputs from the currently committed ground truth, but every per-item verdict behind the reported rates is readable directly from the committed CSVs"
+
+  monitoring_kind:
+    value: feedback_and_dashboard
+    evidence: ["app.py:116-130", "dashboard.py:1-70"]
+    basis: "in-app 👍/👎 feedback buttons plus a separate telemetry dashboard app"
+
+  monitoring_dashboard_provenance:
+    value: committed_definitions
+    evidence: ["dashboard.py:1-70"]
+    basis: "dashboard panels are defined in committed Streamlit code, not a stock observability image"
+
+  monitoring_instrumentation:
+    value: traced_on_request_path
+    evidence: ["src/rag.py:95-103", "src/monitoring.py:51-69"]
+    basis: "save_conversation is called synchronously inside MigrationAssistant.answer_question, the code that serves each request, logging per-request cost/latency/tokens"
+
+  monitoring_chart_count:
+    value: 5
+    evidence: ["dashboard.py:29-60"]
+    basis: "5 committed chart calls: cost over time, response time over time, per-library volume, token usage distribution, feedback score distribution"
+
+  monitoring_charts_bound_to_data:
+    value: all
+    evidence: ["dashboard.py:29-60", "src/monitoring.py:26-47"]
+    basis: "every column each chart queries (timestamp, cost, response_time, library, total_tokens, score) exists in the conversations/feedback tables defined in src/monitoring.py"
+
+  containerization_kind:
+    value: compose_full
+    evidence: ["docker-compose.yml:1-23"]
+    basis: "docker-compose.yml defines both the assistant and dashboard services, not just dependency containers"
+
+  run_instructions:
+    value: complete
+    evidence: ["docs/setup.md:1-146"]
+    basis: "setup, dependencies, environment variables, and run commands for both local (uv) and Docker paths are all stated"
+
+  run_instructions_gap_count:
+    value: 1
+    evidence: ["docs/setup.md:5", "pyproject.toml:6", ".python-version", "Dockerfile:1"]
+    basis: "docs/setup.md states Python 3.12 'matches the Dockerfile base image', but pyproject.toml declares requires-python = '>=3.14' (matching .python-version's 3.14) while Dockerfile installs into a python:3.12-slim image; following the documented Docker build step with a 3.12 interpreter conflicts with the declared requires-python constraint"
+
+  dependency_versions_pinned:
+    value: lockfile_committed
+    evidence: ["uv.lock"]
+    basis: "uv.lock is committed alongside pyproject.toml's lower-bound (>=) specifiers"
+
+  data_accessible:
+    value: automated_or_committed
+    evidence: [".gitignore", "data/processed/chunks.json", "data/indexes/keyword.db", "data/evaluation/ground_truth.csv"]
+    basis: "generated knowledge base, indexes and evaluation outputs are tracked in git (.gitignore excludes only data/raw/, which is regenerable via a committed script)"
+
+  hybrid_search:
+    present:
+      value: true
+      evidence: ["src/hybrid_search.py:14-53"]
+      basis: "HybridSearcher fuses keyword and vector result rankings with Reciprocal Rank Fusion"
+    shipped_enabled:
+      value: false
+      evidence: ["src/hybrid_search.py:15,21-28", "src/rag.py:39,45"]
+      basis: "shipped default is kw_weight=1.0/vec_weight=0.0; search() only runs vector retrieval when vec_weight>0, so the request path never fuses two signals, only keyword ranks"
+    evaluated:
+      value: true
+      evidence: ["evaluation/02_evaluate_search.py:57-75"]
+      basis: "4 hybrid weight ratios are evaluated for Hit Rate@5/MRR@5 against keyword-only and vector-only baselines"
+    measured_effect:
+      value: hurts
+      evidence: ["docs/evaluation.md:34-45"]
+      basis: "keyword-only Hit Rate@5 0.8800/MRR@5 0.7592 beats every tested hybrid weighting, including the best hybrid (10:1) at 0.8720/0.7091"
+    decision_basis:
+      value: measured
+      evidence: ["src/hybrid_search.py:6-13", "docs/evaluation.md:47"]
+      basis: "code comment and doc state the keyword-only default was chosen because it outperformed hybrid on the project's own evaluation"
+    decision_axes: ["hit_rate", "mrr"]
+
+  reranking:
+    present:
+      value: false
+      evidence: ["README.md:54"]
+      basis: "README states re-ranking is not implemented; no reranking code found in src/"
+    shipped_enabled:
+      value: false
+      evidence: ["README.md:54"]
+      basis: "not present, so not active on the request path"
+    evaluated:
+      value: false
+      evidence: ["README.md:54"]
+      basis: "not present, no evaluation of it exists"
+    measured_effect:
+      value: not_measured
+      evidence: []
+      basis: "not implemented, nothing to measure"
+    decision_basis:
+      value: none
+      evidence: ["README.md:60"]
+      basis: "the only mention is a forward-looking 'Possible Improvements' item, not a stated reason for its current absence"
+    decision_axes: []
+
+  query_rewriting:
+    present:
+      value: false
+      evidence: ["README.md:55"]
+      basis: "README states query rewriting is not implemented; no such code found in src/"
+    shipped_enabled:
+      value: false
+      evidence: ["README.md:55"]
+      basis: "not present, so not active on the request path"
+    evaluated:
+      value: false
+      evidence: ["README.md:55"]
+      basis: "not present, no evaluation of it exists"
+    measured_effect:
+      value: not_measured
+      evidence: []
+      basis: "not implemented, nothing to measure"
+    decision_basis:
+      value: none
+      evidence: ["README.md:62"]
+      basis: "the only mention is a forward-looking 'Possible Improvements' item, not a stated reason for its current absence"
+    decision_axes: []
+
+  cloud_deployment:
+    value: none
+    evidence: ["README.md:56"]
+    basis: "README states cloud deployment is not implemented; runs only via local Docker Compose"
+
+  headline_numbers_traceable:
+    value: all_traceable
+    evidence: ["docs/evaluation.md:34-45", "data/evaluation/version_compliance_evaluations.csv"]
+    basis: "retrieval Hit Rate/MRR figures are reproducible from the committed script and indexes; the LLM-judge percentage-point deltas stated in prose match means computed from the committed version_compliance_evaluations.csv booleans"
+
+  untraceable_number_count:
+    value: 0
+    evidence: []
+    basis: "no headline figure found without a committed artifact able to produce it"
+
+  document_number_conflicts:
+    value: 0
+    evidence: []
+    basis: "no figure found stated differently between two committed documents"
+
+  document_code_conflicts:
+    value: 2
+    evidence: ["docs/setup.md:113", "scripts/download_docs.py:35-49", "data/processed/chunks.json", "docs/setup.md:5", "pyproject.toml:6", "Dockerfile:1"]
+    basis: "(1) docs/setup.md claims Pydantic v1+v2 and SQLAlchemy 1.4+2.0 docs are both ingested, but download_docs.py's clone/checkout calls sit outside the per-version loop so only the last version per library is ever cloned, and the committed chunks.json contains zero pydantic-v1 or sqlalchemy-v1.4 chunks; (2) docs/setup.md claims Python 3.12 matches the Dockerfile base image, but pyproject.toml/.python-version require >=3.14"
+
+  broken_reference_count:
+    value: 1
+    evidence: ["docs/architecture.md:7-8,24"]
+    basis: "docs/architecture.md names 'src/embedding.py' (twice) as the embedding module; the committed file is src/embeddings.py"
+
+  limitations_section:
+    value: includes_structural
+    evidence: ["docs/evaluation.md:89-93", "README.md:58-63"]
+    basis: "evaluation.md's Discussion states a measurement limitation ('a single evaluation metric is insufficient to judge overall RAG quality'); README's Possible Improvements names missing retrieval techniques"
+
+  artifact_reference_strength:
+    value: all_referenced
+    evidence: ["README.md:19-22,40-56", "docs/setup.md:74-119"]
+    basis: "the evaluation scripts, ground-truth set, dashboard, ingestion entry point and docker-compose.yml are all named (as plain-text paths or code spans) somewhere in the docs, but code files are not hyperlinked, only docs/*.md files are"
+
+  artifacts_unreferenced_count:
+    value: 0
+    evidence: []
+    basis: "all five checklist artifacts present in the repository (eval script, eval question set, monitoring dashboard, ingestion entry point, deployment config) are named somewhere in the documentation"
+
+  corpus_language:
+    value: en
+    evidence: ["README.md:1-67"]
+    basis: ""
+
+  corpus_domain:
+    value: "Python web-framework version-migration assistance (FastAPI, Pydantic, SQLAlchemy)"
+    evidence: ["README.md:1-13"]
+    basis: ""
+
+  interface_framework:
+    value: streamlit
+    evidence: ["app.py:1", "dashboard.py:1"]
+    basis: ""
+
+  vector_store:
+    value: in_memory
+    evidence: ["src/vector_search.py:1-85"]
+    basis: "NumPy cosine similarity over an in-memory array loaded from embeddings.npy, no external vector database"
+
+  llm_provider:
+    value: openai
+    evidence: ["src/rag.py:2", "src/config.py:20"]
+    basis: ""
+
+  repo_file_count:
+    value: 44
+    evidence: ["<repo>"]
+    basis: "git ls-files | wc -l at the pinned commit"
+
+extraction_notes:
+  - "Group H reminder followed: every hybrid_search/reranking/query_rewriting sub-field below is written as its own {value, evidence, basis} mapping nested under the technique name, never a bare value."
+  - "Schema does not state whether a `false` boolean requires a nonempty `evidence` list when the fact is an absence (llm_eval_judge_spotchecked, reranking/query_rewriting present, hybrid_search shipped_enabled, measured_effect: not_measured). I resolved this by citing the location that would carry the positive fact if it existed (a README line, or the file/script that would contain the missing step), rather than leaving evidence empty, consistent with the schema's rule that empty evidence means only `undeterminable`. Flagging this as a formatting choice rather than a specified convention."
+  - "scripts/download_docs.py has a structural bug: the git clone/sparse-checkout/checkout subprocess calls are indented one level less than the inner per-version loop, so they execute once per library using the last-iterated version's target_dir/url rather than once per version. This is verifiable purely by reading the script's indentation; its downstream effect (only the latest version's docs ever get cloned) is independently confirmed by counting (library, version) pairs in the committed data/processed/chunks.json, which contains zero 'pydantic'/'v1' or 'sqlalchemy'/'v1.4' chunks despite both being named in docs/setup.md's pipeline description. Recorded under document_code_conflicts (group J) since it is the sharpest field for it, but the underlying fact (a project whose stated purpose is version-to-version migration assistance ships a knowledge base missing the 'from' version for two of its three libraries) is larger than that one count and is noted here for visibility."
+  - "data/evaluation/rag_answers.csv and version_compliance_evaluations.csv (500 rows each) contain 250 questions that do not appear in the currently committed data/evaluation/ground_truth.csv (250 rows) -- apparently orphaned from an earlier ground-truth generation. This drove llm_eval_reproducible to traceable_not_reproducible rather than reproducible_as_committed; recorded here since the schema has no single field naming a mismatch between two committed evaluation artifacts directly (it is not `document_number_conflicts`, since no two documents state disagreeing figures -- one artifact simply contains rows absent from the other)."
+  - "problem_statement is the schema's flagged weakest field (judgment-based). I read 'specific' from the README title line plus the Problem section stating both the question (how to migrate code across major framework versions) and the audience (developers doing such upgrades); noting the call per the schema's own guidance to record disagreement here rather than adjust the field's definition."
+  - "interface_kind was scoped to app.py only (web_ui); dashboard.py's Streamlit UI was treated as belonging to the monitoring fields (group F) rather than as a second interface, since it is a telemetry viewer rather than a way to perform the system's core task. Flagging this scoping choice as a judgment call the schema does not resolve explicitly."
+  - "Did not execute or install anything from the repository; all findings (including the download_docs.py loop-indentation bug and the requires-python/Dockerfile mismatch) are read directly from committed source and committed data files. The requires-python vs. Dockerfile-base-image conflict's practical consequence (a failing `uv pip install -r pyproject.toml` under Python 3.12) is inferred from ordinary uv/packaging behavior (uv enforces requires-python against the invoking interpreter), not from running it -- flagged per the schema's rule that load-bearing general software knowledge be named explicitly."

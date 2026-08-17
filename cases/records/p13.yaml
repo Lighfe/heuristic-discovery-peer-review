@@ -1,0 +1,319 @@
+schema_version: 1
+case_id: p13
+commit: "514d951590bb733db359ff0c731dd10ed7889b09"
+extracted_by: agents/extractor/v2
+extracted_on: "2026-08-14"
+
+fields:
+  # A. System shape
+  knowledge_base_present:
+    value: present
+    evidence: ["app/search.py:168-227"]
+    basis: "search() queries an Elasticsearch index (BM25 + kNN) inside the request handler."
+  llm_in_flow:
+    value: present
+    evidence: ["app/rag.py:57-116", "app/answer.py"]
+    basis: "answer() calls answer_question() (an LLM call) on the retrieved chunks."
+  retrieval_flow:
+    value: kb_and_llm
+    evidence: ["app/rag.py:80-85"]
+    basis: "answer() retrieves from Elasticsearch via search() then composes with an LLM via answer_question(), in the same request handler."
+  problem_statement:
+    value: specific
+    evidence: ["README.md:1-32"]
+    basis: "README states the question answered (spoiler-safe Q&A over a fan wiki) and the audience (a reader partway through the book series, who declares a 'clearance')."
+
+  # B. Interface
+  interface_kind:
+    value: [web_ui, cli]
+    evidence: ["app/ui.py:137-183", "app/rag.py:180-222"]
+    basis: "app/ui.py is a Streamlit web app (st.title/st.button/st.text_input); app/rag.py:main() is an argparse CLI answering one question per invocation."
+  interface_evidence_kind:
+    value: code_and_screenshot
+    evidence: ["README.md:6-7", "docs/images/streamlit_ui_1.png", "docs/images/streamlit_ui_2.png"]
+    basis: "Two Streamlit UI screenshots are committed under docs/images/ and embedded in the README; no recording."
+
+  # C. Ingestion
+  ingestion_kind:
+    value: script_or_notebook
+    evidence: ["scripts/run_pipeline.py:55-78"]
+    basis: "run_pipeline.py is a plain Python subprocess loop over four CLI stages; no orchestration tool (Airflow/Prefect/dbt/etc.) is used."
+  ingestion_single_command:
+    value: true
+    evidence: ["Makefile:118-129", "scripts/run_pipeline.py:1-36"]
+    basis: "`make ingest` / `make ingest-free` each run scripts/run_pipeline.py, which runs all four stages end to end and stops at the first failure."
+  ingestion_output_stated:
+    value: true
+    evidence: ["README.md:203-210", "data/manifest.json", "data/chunks_manifest.json", "data/elasticsearch_index_manifest.json"]
+    basis: "README states 464 pages, 1,761 chunks/passages, and 1,761 indexed documents; each stage writes a manifest with these counts."
+
+  # D. Retrieval evaluation
+  retrieval_eval_present:
+    value: true
+    evidence: ["docs/retrieval-evaluation.md"]
+    basis: null
+  retrieval_eval_approaches_compared:
+    value: 5
+    evidence: ["docs/retrieval-evaluation.md:1-16", "docs/retrieval-evaluation.md:91-289"]
+    basis: "The document's own count: BM25 field boosts, three embedding models, hybrid BM25+vector fusion, cross-encoder reranking, and LLM query rewriting, each with reported numbers (sections 3-7)."
+  retrieval_eval_set_committed:
+    value: committed
+    evidence: ["data/eval/questions_v3_full.jsonl"]
+    basis: "File is tracked in the repository (git ls-files data/eval/questions_v3_full.jsonl)."
+  retrieval_eval_set_size:
+    value: 200
+    evidence: ["docs/retrieval-evaluation.md:70", "data/eval/questions_v3_full_manifest.json"]
+    basis: "200 rows = 100 target chunks x {clean, noisy}."
+  retrieval_eval_relevance_rule:
+    value: passage_level
+    evidence: ["docs/retrieval-evaluation.md:38-44"]
+    basis: "Ground truth is one exact-match chunk_id per question; a chunk is a passage-sized section of wiki text."
+  retrieval_eval_config_matches_shipped:
+    value: matches
+    evidence: ["app/search.py:72-93", "tests/test_app_search.py:89-107"]
+    basis: "app/search.py's RETRIEVAL_CONFIG (rank_window_size, rank_constant, infobox correction off, embedding model, cross-encoder) is built from the same constants the cited eval artifact (reranking_v3_full_nocorr.json) measured; a test asserts the pin names that artifact."
+  retrieval_eval_uncertainty_stated:
+    value: true
+    evidence: ["docs/retrieval-evaluation.md:46-56", "ingest/significance_check.py"]
+    basis: "Every headline comparison reports a bootstrap same_sign_fraction (10,000 resamples) alongside the point estimate."
+  retrieval_best_approach_shipped:
+    value: mixed_result
+    evidence: ["docs/retrieval-evaluation.md:280-312"]
+    basis: "The measured-best embedding model ships and hybrid fusion is kept, but reranking ships despite failing the project's own 0.90 significance bar (0.854) and the infobox correction (a real gain on one stratum) was removed; the numbers disagree across techniques about whether the best-measured configuration is what ships."
+  retrieval_eval_reproducible:
+    value: reproducible_as_committed
+    evidence: ["docs/retrieval-evaluation.md:316-337", "tests/test_hybrid_search_rrf.py", "tests/test_significance_check.py", "tests/test_reranker.py"]
+    basis: "Each evaluation stage has a committed, tested CLI with an exact re-run command and stated cost; docs/evidence-inventory.md's precision note independently verified fetch/chunk/merge determinism by hash."
+
+  # E. Answer evaluation
+  llm_eval_present:
+    value: true
+    evidence: ["docs/llm-evaluation.md", "app/eval_prompts.py"]
+    basis: null
+  llm_eval_approaches_compared:
+    value: 3
+    evidence: ["docs/llm-evaluation.md:22-30", "app/prompts.py:90"]
+    basis: "Three system-prompt variants (no_instruction_baseline, strict_refusal, in_world_deflection) scored on identical retrieved context."
+  llm_eval_judge_kind:
+    value: model_judge
+    evidence: ["app/eval_prompts.py:422-489", "docs/llm-evaluation.md:16-18"]
+    basis: "An LLM (gpt-5.4-mini) scores each answer via structured-output judge calls (TrapJudgment/ControlJudgment)."
+  llm_eval_judge_spotchecked:
+    value: true
+    evidence: ["docs/llm-evaluation.md:129-156", "data/eval/prompt_eval_judge_audit.md"]
+    basis: "All 30 trap answers from the shipping variant were read by hand and compared to the judge's verdicts (agreement 18/30), with the result reported."
+  llm_eval_question_generator:
+    value: generator_ties_question_to_passage
+    evidence: ["app/eval_prompts.py:268-390", "ingest/generate_questions.py:47"]
+    basis: "A committed generator builds each trap/control question either from a specific corpus chunk (own-corpus pool, target_chunk_id) or from a fetched Wikipedia excerpt (wikipedia pool), rather than leaving provenance to assertion."
+  llm_eval_metric_at_ceiling:
+    value: true
+    evidence: ["docs/llm-evaluation.md:95-99"]
+    basis: "Per-metric ceiling check on the reported answer-evaluation metrics: pooled leakage (0.70-0.73, an error-type rate, minimum-is-best) is not at its floor for any variant; groundedness (0.90-0.97, quality, maximum-is-best) is not confirmed at ceiling at the item level; over-refusal (an error/refusal rate, minimum-is-best) is 0.0 for all three variants — 30/30 controls answered for each, i.e. 100% of scored items at the metric's best possible value (0), which clears the >=95% rule. At least one qualifying metric makes the field true."
+  llm_eval_role_overlap:
+    value: same_model
+    evidence: ["app/answer.py:34", "ingest/generate_questions.py:47", "app/eval_prompts.py:268-295", "docs/llm-evaluation.md:17-18"]
+    basis: "The question generator (both the corpus-chunk generator and the Wikipedia-trap generator), the answer-composing model, and the judge are all gpt-5.4-mini (MODEL constant shared across app/answer.py and ingest/generate_questions.py, and passed as the default model into the trap generator and judge calls)."
+  llm_eval_config_matches_shipped:
+    value: matches
+    evidence: ["app/eval_prompts.py:598", "app/search.py:168"]
+    basis: "The leakage evaluation calls app.search.search() directly, the same function and default parameters serving uses, rather than a separate reimplementation."
+  llm_eval_reproducible:
+    value: reproducible_as_committed
+    evidence: ["docs/llm-evaluation.md:204-216", "app/eval_prompts.py"]
+    basis: "A committed CLI (app.eval_prompts) reproduces the run with a --dry-run cost estimate and a --report-only re-render path; pools are drawn with a fixed seed."
+
+  # F. Monitoring
+  monitoring_kind:
+    value: feedback_and_dashboard
+    evidence: ["app/db.py:71-78", "monitoring/grafana/dashboards/kingkiller.json"]
+    basis: "A feedback table (thumbs up/down) is written from the UI, and a 7-panel Grafana dashboard is provisioned from committed definitions."
+  monitoring_dashboard_provenance:
+    value: committed_definitions
+    evidence: ["monitoring/grafana/dashboards/kingkiller.json", "monitoring/grafana/provisioning"]
+    basis: "The dashboard's panels and datasource are committed JSON/YAML provisioned automatically on startup, not a stock tool's own UI."
+  monitoring_instrumentation:
+    value: traced_on_request_path
+    evidence: ["app/rag.py:79-93", "app/search.py:191-227", "app/db.py:144-177"]
+    basis: "Per-stage timings (rewrite/embed/bm25/knn/rerank/answer) are captured inline during request handling and written to the interactions table that the Latency p50/p95 panel reads."
+  monitoring_chart_count:
+    value: 7
+    evidence: ["monitoring/grafana/dashboards/kingkiller.json"]
+    basis: "Counted panel objects in the committed dashboard JSON: 7."
+  monitoring_charts_bound_to_data:
+    value: all
+    evidence: ["monitoring/grafana/dashboards/kingkiller.json", "app/db.py:43-78"]
+    basis: "All 7 panel queries reference columns that exist in the committed interactions/feedback DDL (ts, total_ms, cost_usd, rating, clearance, insufficient_context, max_retrieved_book_level)."
+
+  # G. Containerization and reproducibility
+  containerization_kind:
+    value: compose_full
+    evidence: ["docker-compose.yml:1-118"]
+    basis: "docker-compose.yml defines all four running services, including the application itself (service `app`, `build: .`), not only its dependencies."
+  run_instructions:
+    value: complete
+    evidence: ["README.md:41-174"]
+    basis: "Setup, dependencies (uv, Docker), configuration (.env), required variables, and run commands are all stated."
+  run_instructions_gap_count:
+    value: 0
+    evidence: ["README.md:41-174", "Makefile:33-64", "docker-compose.yml:67-113"]
+    basis: "Desk walk-through of the documented `make quickstart` path (check -> models -> elasticsearch up --wait -> ingest-free -> up): every stage's inputs are produced by an earlier stage or are already committed (e.g. data/chunk_labels.jsonl), and every service dependency in docker-compose.yml is gated by an explicit healthcheck rather than assumed ordering. No step found that cannot be carried out as written."
+  dependency_versions_pinned:
+    value: lockfile_committed
+    evidence: ["uv.lock", "pyproject.toml", "Dockerfile:13-14"]
+    basis: "uv.lock is committed and `uv sync --frozen` is the documented/Dockerfile install mechanism."
+  data_accessible:
+    value: automated_or_committed
+    evidence: ["README.md:151-156", "scripts/run_pipeline.py:12-24", "data/chunk_labels.jsonl"]
+    basis: "The corpus prose itself is gitignored, but a single command (`make ingest-free`) re-fetches and re-chunks it from the source wiki and reattaches the committed labels, with no manual step."
+
+  # H. Techniques
+  hybrid_search:
+    present:
+      value: true
+      evidence: ["ingest/hybrid_search_rrf.py"]
+      basis: null
+    shipped_enabled:
+      value: true
+      evidence: ["app/search.py:72-93"]
+      basis: null
+    evaluated:
+      value: true
+      evidence: ["docs/retrieval-evaluation.md:142-171"]
+      basis: null
+    measured_effect:
+      value: mixed
+      evidence: ["docs/retrieval-evaluation.md:149-157"]
+      basis: "Hybrid ties or narrowly beats vector-only on MRR@10 (0.8679 vs 0.8667, not sign-stable) but is lower than vector-only on hit@10 (0.9797 vs 0.9932); the reported metrics do not agree on which arm wins."
+    decision_basis:
+      value: measured
+      evidence: ["docs/decisions/evaluation.md:503-514"]
+      basis: "The decision log's stated reason (1) for keeping hybrid is that it is never simultaneously worse than both single-method baselines at the overall level, a claim read directly off the reported per-config table, alongside two non-measurement reasons (rubric compliance, a named limitation with a fix path)."
+    decision_axes:
+      value: ["mrr@10", "hit_rate"]
+      evidence: ["docs/decisions/evaluation.md:481-501"]
+      basis: null
+  reranking:
+    present:
+      value: true
+      evidence: ["ingest/reranker.py"]
+      basis: null
+    shipped_enabled:
+      value: true
+      evidence: ["app/search.py:72-93"]
+      basis: null
+    evaluated:
+      value: true
+      evidence: ["docs/retrieval-evaluation.md:175-238"]
+      basis: null
+    measured_effect:
+      value: improves
+      evidence: ["docs/retrieval-evaluation.md:183-192"]
+      basis: "Reranking improves every reported metric over fusion alone (hit@1, hit@3, hit@5, hit@10, MRR@10), though the overall MRR@10 gain is not sign-stable at the project's 0.90 bar (0.854)."
+    decision_basis:
+      value: measured
+      evidence: ["docs/retrieval-evaluation.md:205-211"]
+      basis: "Shipping despite failing the significance bar is justified by a stratified re-measurement: MRR@10 gain +0.0165 on clean questions vs +0.0413 on typo-corrupted ones, cited as the reason it ships."
+    decision_axes:
+      value: ["mrr@10"]
+      evidence: ["docs/retrieval-evaluation.md:205-211"]
+      basis: null
+  query_rewriting:
+    present:
+      value: true
+      evidence: ["app/rewrite.py"]
+      basis: null
+    shipped_enabled:
+      value: false
+      evidence: ["app/rag.py:52"]
+      basis: "REWRITE_DEFAULT = False."
+    evaluated:
+      value: true
+      evidence: ["docs/retrieval-evaluation.md:242-276"]
+      basis: null
+    measured_effect:
+      value: mixed
+      evidence: ["docs/retrieval-evaluation.md:249-253"]
+      basis: "Three measurement runs disagree in sign: v1 +0.0034, v3 original prompt -0.0016, v3 typo-repair prompt +0.0021; none sign-stable at the 0.90 bar."
+    decision_basis:
+      value: measured
+      evidence: ["app/rag.py:38-52", "docs/retrieval-evaluation.md:242-253"]
+      basis: "Kept off by default because two independently measured prompt arms on the 200-row benchmark both fail the pre-registered same_sign>=0.90 rule."
+    decision_axes:
+      value: ["mrr@10"]
+      evidence: ["docs/retrieval-evaluation.md:249-253"]
+      basis: null
+
+  # I. Deployment and bonus
+  cloud_deployment:
+    value: none
+    evidence: ["docs/evidence-inventory.md:182"]
+    basis: "The bonus-points table lists cloud deployment as 'not done - explicitly out of scope'; no deployment code (Terraform/k8s manifests/cloud CLI scripts) found."
+
+  # J. Documentation accuracy
+  headline_numbers_traceable:
+    value: all_traceable
+    evidence: ["docs/evidence-inventory.md"]
+    basis: "Every headline number checked (page/chunk/index counts, labeling gate results, retrieval and answer-eval metrics) is backed by a committed manifest or eval artifact named alongside it; docs/evidence-inventory.md independently maps each scored criterion's claims to an artifact."
+  untraceable_number_count:
+    value: 0
+    evidence: ["docs/evidence-inventory.md"]
+    basis: "No reported figure found without a named committed artifact, within the documentation and code actually read for this extraction."
+  document_number_conflicts:
+    value: 0
+    evidence: ["docs/spoiler-gate.md:142-156", "docs/llm-evaluation.md:184-192"]
+    basis: "The one pair of differing figures found (a withdrawn 5.6% screen count vs. a corrected 4.1% hand-classified count) is presented within the same narrative as a stated retraction and correction, not as an unexplained disagreement between two documents."
+  document_code_conflicts:
+    value: 0
+    evidence: ["app/search.py:72-93", "tests/test_app_search.py:89-107"]
+    basis: "No instance found, within the code and docs read, of a documented claim the code contradicts; the one config-pin claim checked is enforced by a test."
+  broken_reference_count:
+    value: 0
+    evidence: ["README.md"]
+    basis: "Every file path linked from README.md (app/, ingest/, docs/, docker-compose.yml, Dockerfile, docs/images/*.png) resolves to a tracked file, within the links checked."
+  limitations_section:
+    value: includes_structural
+    evidence: ["README.md:236-239", "docs/spoiler-gate.md:172-176"]
+    basis: "README states a measured 4.1% mislabeled-chunk residual risk in the system's own filtering method; spoiler-gate.md states an unmeasured exposure (no book-2-to-book-3 audit exists) as an open limitation of the measurement itself."
+  artifact_reference_strength:
+    value: all_referenced
+    evidence: ["README.md:183-211", "docs/evidence-inventory.md:98"]
+    basis: "The five checklist artifacts are each named by path somewhere in the documentation, but not all as markdown links: the evaluation question set and the monitoring dashboard JSON appear only as inline code-span paths (not hyperlinks), while the ingestion entry point and deployment configuration are markdown-linked from README's reviewer table."
+  artifacts_unreferenced_count:
+    value: 0
+    evidence: ["README.md:183-211", "docs/evidence-inventory.md:98"]
+    basis: "All five fixed-checklist artifacts (evaluation script, evaluation question set, monitoring dashboard definition, ingestion entry point, deployment configuration) are named by path somewhere in the documentation."
+
+  # K. Descriptive
+  corpus_language:
+    value: en
+    evidence: ["README.md:1-10"]
+    basis: null
+  corpus_domain:
+    value: "fan wiki content for a fantasy novel series"
+    evidence: ["README.md:1-22"]
+    basis: null
+  interface_framework:
+    value: streamlit
+    evidence: ["app/ui.py:46"]
+    basis: null
+  vector_store:
+    value: elasticsearch
+    evidence: ["app/search.py:51", "docker-compose.yml:2-3"]
+    basis: null
+  llm_provider:
+    value: openai
+    evidence: ["app/answer.py:34", "README.md:53"]
+    basis: null
+  repo_file_count:
+    value: 212
+    evidence: ["<repo>"]
+    basis: "git ls-files | wc -l at commit 514d951590bb733db359ff0c731dd10ed7889b09."
+
+extraction_notes:
+  - "decision_basis on hybrid_search is a close call. The decision-log entry (D44) grounds keeping hybrid partly in a measured comparison ('never simultaneously worse than both single-method baselines') and partly in a-priori reasons (rubric compliance, a named limitation with a known fix path) — this record follows the decision log and calls it 'measured'. The polished README (retrieval-evaluation.md S9) later frames the same decision as resting on 'stated judgment... not because the evidence compels it', which reads closer to 'argued'. Both framings exist in the repository for the same decision; a reader preferring the README's framing would score this field differently."
+  - "llm_eval_metric_at_ceiling required the new M2 ceiling rule to resolve correctly: this repo's reported metrics are a mix of quality scores (groundedness, maximum-is-best, not clearly at ceiling) and error/refusal rates (pooled leakage and over-refusal, minimum-is-best). Over-refusal is 0.0 for all three prompt variants (0/30 controls refused, i.e. 100% of items at the metric's own best value), which is exactly the floor-is-best case the schema's M2 revision was written to handle explicitly, and it alone makes the field true. Evaluated strictly per-metric, never averaged, per the schema's instruction."
+  - "This repository is unusually deep (212 tracked files, ~3,600 lines of decision log, 30 test modules) and extraction under the time available to one pass was necessarily selective: README, all seven top-level docs/*.md, the core app/ and top of ingest/ modules, docker-compose.yml, Dockerfile, pyproject.toml, Makefile, .env.example, scripts/run_pipeline.py, the monitoring dashboard JSON, and the D44/D46/D55/D56-adjacent sections of docs/decisions/evaluation.md were read in full or targeted; the bulk of docs/decisions/{pipeline,project,serving,labeling}.md (over 1,700 lines) and most of ingest/*.py and scripts/*.py were not read. document_number_conflicts, document_code_conflicts, broken_reference_count and untraceable_number_count are therefore 'none found in the scope read', not a verified zero over the whole repository — the same caveat the schema itself gives for headline_numbers_traceable."
+  - "retrieval_eval_approaches_compared (5) follows the project's own count in retrieval-evaluation.md's summary ('Five retrieval approaches were measured'), which treats the three-way embedding-model comparison as one approach. A strict per-configuration count (three embedding models as three separate compared configurations) would give a different number; the schema does not define which granularity 'distinct strategies' means, and this is exactly the kind of case docs/decisions/evaluation.md flags for retrieval_best_approach_shipped's own derivation-rule gap."
+  - "problem_statement remains, as the schema itself documents, a coherence-blind field: it credits README for stating audience and question, without checking whether the two cohere. Not re-litigated here."
+  - "The 'basis' rule change (v2, closing the M1 leak) was followed throughout: no scoreable field's basis names the corpus subject, the LLM vendor, or any other descriptive-group fact beyond what that specific field checks."

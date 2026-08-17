@@ -1,0 +1,292 @@
+schema_version: 1
+case_id: p04
+commit: "7128f87ee468e17372f8bbeca392338593ae1261"
+extracted_by: agents/extractor/v2
+extracted_on: "2026-08-14"
+
+fields:
+  # A. System shape
+  knowledge_base_present:
+    value: present
+    evidence: ["data/activities.json", "src/search.py:184-305"]
+    basis: "activities.json is a curated catalog loaded and queried by retrieve_activities."
+  llm_in_flow:
+    value: present
+    evidence: ["src/llm.py:65-127", "docs/rag.md:14-16"]
+    basis: "generate_itinerary_narrative and generate_itinerary_change_proposals call the OpenAI Responses API on the request path (narration / adjustment features)."
+  retrieval_flow:
+    value: kb_and_llm
+    evidence: ["src/search.py:184-305", "src/llm.py:65-127", "src/ui.py:2398-2402"]
+    basis: "The request handler retrieves from the activity catalog (retrieve_activities) and, for narration/adjustments, calls an LLM."
+  problem_statement:
+    value: specific
+    evidence: ["README.md:1-9", "README.md:31"]
+    basis: "The intro states the question answered (turning group preferences into recommendations and an itinerary) and the audience (README.md:31: groups of 2 to 6 travelers)."
+
+  # B. Interface
+  interface_kind:
+    value: [web_ui, cli]
+    evidence: ["src/ui.py:2401", "app.py", "README.md:174-198"]
+    basis: "Streamlit web UI is the primary interface (app.py); documented CLI commands (src.catalog_batch, src.catalog_dlt, src.catalog_import) also operate on the system."
+  interface_evidence_kind:
+    value: code_only
+    evidence: []
+    basis: "No screenshot or recording file is committed to the repository."
+
+  # C. Ingestion
+  ingestion_kind:
+    value: orchestrated_tool
+    evidence: ["src/catalog_dlt.py:1-119", "docs/catalog-ingestion.md:1-63", ".github/workflows/catalog-ingestion.yml"]
+    basis: "Candidate discovery uses the dlt pipeline library with a DuckDB destination, run manually or by a scheduled GitHub Actions workflow."
+  ingestion_single_command:
+    value: true
+    evidence: ["docs/catalog-ingestion.md:28-34"]
+    basis: "python -m src.catalog_dlt --limit 50 runs discovery, candidate-file writing, and provenance logging in one documented command; publishing to the catalog is a separate, intentional human step."
+  ingestion_output_stated:
+    value: true
+    evidence: ["src/catalog_dlt.py:164-165"]
+    basis: "main() prints a per-city saved-candidate count after each run."
+
+  # D. Retrieval evaluation
+  retrieval_eval_present:
+    value: true
+    evidence: ["evaluation/retrieval.py:133-194"]
+  retrieval_eval_approaches_compared:
+    value: 3
+    evidence: ["evaluation/retrieval.py:197-223"]
+    basis: "compare_retrieval_modes evaluates text, vector, and hybrid modes with reported numbers."
+  retrieval_eval_set_committed:
+    value: committed
+    evidence: ["evaluation/retrieval_cases.json"]
+  retrieval_eval_set_size:
+    value: 12
+    evidence: ["evaluation/retrieval_cases.json"]
+    basis: "12 labeled case objects in the committed file."
+  retrieval_eval_relevance_rule:
+    value: document_level
+    evidence: ["evaluation/retrieval.py:99-130"]
+    basis: "score_ranked_ids counts a hit when a retrieved activity ID exactly matches one of a case's listed relevant_activity_ids (one activity record = one document)."
+  retrieval_eval_config_matches_shipped:
+    value: differs
+    evidence: ["evaluation/retrieval.py:159-165", "src/ui.py:2398-2402"]
+    basis: "The evaluation script passes limit=k directly to retrieve_activities; the shipped request path (src/ui.py) calls retrieve_activities with no limit argument."
+  retrieval_eval_uncertainty_stated:
+    value: false
+    evidence: []
+  retrieval_best_approach_shipped:
+    value: mixed_result
+    evidence: ["evaluation/README.md:50-60", "src/ui.py:61-63"]
+    basis: "Shipped default is hybrid (src/ui.py:61-63). Reported numbers disagree on which mode is best: hybrid has the best MRR@5 (0.958) but vector has the best Mean Recall@5 (0.958 vs hybrid's 0.875)."
+  retrieval_eval_reproducible:
+    value: reproducible_as_committed
+    evidence: ["evaluation/retrieval.py:292-335", "evaluation/retrieval_cases.json", "data/activities.json"]
+    basis: "evaluation/retrieval.py loads committed activities.json and retrieval_cases.json and computes reported metrics with no missing imports or undefined names; vector/hybrid modes additionally require the sentence-transformers model, downloaded at Docker build time (Dockerfile:19-21)."
+
+  # E. Answer evaluation
+  llm_eval_present:
+    value: true
+    evidence: ["evaluation/llm.py:168-289"]
+  llm_eval_approaches_compared:
+    value: 2
+    evidence: ["evaluation/README.md:169-179"]
+    basis: "The recorded model-selection table compares two named models (Luna, Terra) with reported per-check rates."
+  llm_eval_judge_kind:
+    value: offline_metric
+    evidence: ["evaluation/llm.py:211-258"]
+    basis: "Pass/fail is computed by deterministic Python comparisons (schema parse success, exact scheduled-ID-and-order match, day-count match, and whether a proposal applies against the deterministic planner) — no model or human assigns a score."
+  llm_eval_judge_spotchecked:
+    value: false
+    evidence: []
+  llm_eval_question_generator:
+    value: none_committed
+    evidence: ["evaluation/llm_cases.json", "evaluation/llm_holdout_cases.json"]
+    basis: "Both case files are static committed JSON with no generator script producing them."
+  llm_eval_metric_at_ceiling:
+    value: true
+    evidence: ["evaluation/README.md:169-179"]
+    basis: "Reported metrics are pass rates (schema/grounding/completeness/applicability, maximum direction). Terra scores 1.000 on schema, grounding, and completeness in the 20-case contract suite (>=95% of items at maximum), qualifying at least one metric as at ceiling."
+  llm_eval_role_overlap:
+    value: same_model
+    evidence: ["evaluation/llm.py:191-233", "src/llm.py:37"]
+    basis: "The answer-generator model (default gpt-5.6-terra) is the only model in the pipeline; the judge is offline_metric (no model), so the only comparable role-pair is generator-vs-generator across compared models, i.e. no distinct judge model exists to overlap with."
+  llm_eval_config_matches_shipped:
+    value: matches
+    evidence: ["evaluation/llm.py:191-233", "src/llm.py:65-127"]
+    basis: "The evaluation live path calls the same generate_itinerary_narrative / generate_itinerary_change_proposals functions used by the shipped app, with the same default model resolution."
+  llm_eval_reproducible:
+    value: traceable_not_reproducible
+    evidence: ["evaluation/llm.py:168-289", "src/llm.py:65-127"]
+    basis: "Free fixture mode is deterministic and reproducible; the recorded model-comparison numbers came from --live runs against the OpenAI API, which require a paid key and are not guaranteed to reproduce the exact recorded figures on a re-run, though every step from request to reported rate is inspectable in committed code."
+
+  # F. Monitoring
+  monitoring_kind:
+    value: feedback_and_dashboard
+    evidence: ["src/feedback.py", "src/feedback_ui.py:134-215"]
+    basis: "Both user feedback collection and an admin feedback dashboard are implemented."
+  monitoring_dashboard_provenance:
+    value: committed_definitions
+    evidence: ["src/feedback_ui.py:33-215", "src/feedback_insights.py:141-215"]
+    basis: "The five dashboard charts are built from committed aggregation code (feedback_dashboard_data) over the app's own feedback tables."
+  monitoring_instrumentation:
+    value: logged
+    evidence: ["src/feedback.py", "src/feedback_insights.py:53-116"]
+    basis: "Feedback records (ratings, thumbs, comments) are written to SQLite/Supabase on explicit user submission; there is no tracing/span instrumentation on the retrieval or generation request path."
+  monitoring_chart_count:
+    value: 5
+    evidence: ["src/feedback_ui.py:134-215"]
+    basis: "Five committed chart blocks: daily_submissions, helpful_rates, thumb_counts, rating_averages, score_distribution."
+  monitoring_charts_bound_to_data:
+    value: all
+    evidence: ["src/feedback_insights.py:141-215", "src/feedback.py"]
+    basis: "Each chart's data comes from feedback_dashboard_data, which reads only fields present on the committed FeedbackRecord/OverallExperienceRecord tables."
+
+  # G. Containerization and reproducibility
+  containerization_kind:
+    value: compose_full
+    evidence: ["docker-compose.yml", "Dockerfile"]
+    basis: "docker-compose.yml builds and runs the complete application from the committed Dockerfile with one command."
+  run_instructions:
+    value: complete
+    evidence: ["README.md:49-124"]
+    basis: "Setup, dependencies, configuration, environment variables, and run commands are all stated for local, Docker Compose, and Docker paths."
+  run_instructions_gap_count:
+    value: 1
+    evidence: ["README.md:49-59", "src/search.py:82-88", "Dockerfile:19-21"]
+    basis: "Local setup (venv + pip install + streamlit run) never downloads the sentence-transformers model; _embedding_model() loads it with local_files_only=True, so on a fresh local install the shipped default hybrid mode's semantic step raises and silently falls back to text-only (src/search.py:247-250) — only the Docker build path pre-downloads the model."
+  dependency_versions_pinned:
+    value: other
+    evidence: ["requirements.txt"]
+    basis: "Every dependency has both a lower and upper bound (e.g. numpy>=2,<3) — not an exact pin and no lockfile."
+  data_accessible:
+    value: automated_or_committed
+    evidence: ["data/activities.json"]
+    basis: "The activity catalog used by the app is committed directly in the repository."
+
+  # H. Techniques
+  hybrid_search:
+    present:
+      value: true
+      evidence: ["src/search.py:16", "src/search.py:229-277"]
+    shipped_enabled:
+      value: true
+      evidence: ["src/ui.py:61-63"]
+      basis: "RETRIEVAL_MODE defaults to hybrid unless overridden by an environment variable."
+    evaluated:
+      value: true
+      evidence: ["evaluation/retrieval.py:197-223", "evaluation/README.md:50-60"]
+    measured_effect:
+      value: mixed
+      evidence: ["evaluation/README.md:50-60"]
+      basis: "Hybrid has the best MRR@5 (0.958) but not the best Mean Recall@5 (vector's 0.958 beats hybrid's 0.875)."
+    decision_basis:
+      value: measured
+      evidence: ["README.md:214-216", "evaluation/README.md:50-60"]
+      basis: "README states hybrid is the default because it handles exact and semantic matches, pointing to the compared-mode evaluation numbers."
+    decision_axes:
+      value: ["mrr", "recall"]
+      evidence: ["evaluation/README.md:58-60"]
+  reranking:
+    present:
+      value: false
+      evidence: []
+    shipped_enabled:
+      value: false
+      evidence: []
+    evaluated:
+      value: false
+      evidence: []
+    measured_effect:
+      value: not_measured
+      evidence: []
+    decision_basis:
+      value: none
+      evidence: []
+    decision_axes:
+      value: []
+      evidence: []
+  query_rewriting:
+    present:
+      value: false
+      evidence: []
+    shipped_enabled:
+      value: false
+      evidence: []
+    evaluated:
+      value: false
+      evidence: []
+    measured_effect:
+      value: not_measured
+      evidence: []
+    decision_basis:
+      value: none
+      evidence: []
+    decision_axes:
+      value: []
+      evidence: []
+
+  # I. Deployment and bonus
+  cloud_deployment:
+    value: deployment_code_committed
+    evidence: [".streamlit/config.toml", "Dockerfile", "README.md:9", "README.md:120-124"]
+    basis: "A committed .streamlit/config.toml and Dockerfile support the documented Streamlit Cloud / container deployment (public demo link is separate evidence, not code)."
+
+  # J. Documentation accuracy
+  headline_numbers_traceable:
+    value: all_traceable
+    evidence: ["evaluation/retrieval.py:292-335", "evaluation/itinerary.py", "evaluation/llm.py:411-463"]
+    basis: "Every headline number (retrieval, itinerary, LLM contract) has a corresponding committed, importable evaluation script able to produce that kind of figure from committed data."
+  untraceable_number_count:
+    value: 0
+    evidence: []
+  document_number_conflicts:
+    value: 3
+    evidence: ["docs/retrieval.md:49-51", "evaluation/README.md:37-43", "docs/itinerary.md:84", "evaluation/README.md:111"]
+    basis: "docs/retrieval.md states MRR@5 0.938 and Mean Recall@5 1.000 for text retrieval; evaluation/README.md states 0.917 and 0.819 for the same metric and mode (2 conflicting figures). docs/itinerary.md states mean fairness 0.666; evaluation/README.md states 0.704 for the same six-case baseline (1 conflicting figure)."
+  document_code_conflicts:
+    value: 1
+    evidence: ["docs/retrieval.md:44", "evaluation/retrieval_cases.json"]
+    basis: "docs/retrieval.md says the benchmark uses eight labeled trip requests; the committed evaluation/retrieval_cases.json contains 12."
+  broken_reference_count:
+    value: 0
+    evidence: []
+    basis: "Every path named in README.md and docs/ was checked and exists in the repository."
+  limitations_section:
+    value: includes_structural
+    evidence: ["docs/rag.md:93-96", "evaluation/README.md:115-118"]
+    basis: "docs/rag.md states structural validation cannot prove factual correctness and that human review of usefulness/tone is not yet in place; evaluation/README.md names a measured fairness weakness in the planner's own ranking as the next needed improvement."
+  artifact_reference_strength:
+    value: partially_referenced
+    evidence: ["README.md", "docs/", "evaluation/README.md", "src/feedback_ui.py"]
+    basis: "Evaluation scripts, evaluation question sets, the ingestion entry point, and deployment configuration are each named by path somewhere in the documentation; the monitoring dashboard's implementing file is never named by path, only described narratively."
+  artifacts_unreferenced_count:
+    value: 1
+    evidence: ["src/feedback_ui.py", "src/feedback_insights.py"]
+    basis: "Of the fixed checklist (evaluation script, evaluation question set, monitoring dashboard definition, ingestion entry point, deployment configuration), only the monitoring dashboard definition file is named nowhere in the documentation."
+
+  # K. Descriptive
+  corpus_language:
+    value: en
+    evidence: ["README.md"]
+  corpus_domain:
+    value: "group travel / trip itinerary planning"
+    evidence: ["README.md:1-9"]
+  interface_framework:
+    value: streamlit
+    evidence: ["app.py", "requirements.txt"]
+  vector_store:
+    value: in_memory
+    evidence: ["src/search.py:82-88", "src/search.py:229-277"]
+    basis: "Semantic vectors are computed at request time via sentence-transformers and compared in-process (np.dot); no persistent vector database is used."
+  llm_provider:
+    value: openai
+    evidence: ["src/llm.py:11-17", "requirements.txt"]
+  repo_file_count:
+    value: 85
+    evidence: ["<repo>"]
+    basis: "git ls-files | wc -l at the pinned commit."
+
+extraction_notes:
+  - "interface_evidence_kind's enum (none/code_only/code_and_screenshot/code_and_recording) has no slot for a live, runnable public demo URL (README.md:9, tripsync.streamlit.app), which is stronger reviewer-facing evidence than a screenshot but isn't a repository artifact either. Recorded as code_only per the letter of the field; the live-demo fact is noted here rather than invented into the enum."
+  - "llm_eval_role_overlap's three roles (question generator, system under comparison, judge) don't cleanly fit this project: the question generator is none_committed (static fixture files) and the judge is offline_metric (deterministic code, not a model), so only one model role exists at all (the answer generator, compared across two named models). same_model was chosen as the closest fit to 'no distinct judge model to overlap with', but the field's intended failure mode (one model occupying several roles) doesn't really apply here — there's no circularity risk since nothing but the generator is a model."
+  - "retrieval_eval_relevance_rule choice between document_level and human_labelled was ambiguous: the code path checks exact document(activity)-ID membership (document_level, the coding-level fact), while the case labels also read as curated/human-selected ground truth (human_labelled, a provenance fact). Chose document_level per the instruction to read the rule off the scoring function rather than the label's provenance; flagging in case a future extractor reads this differently."
+  - "The catalog curation tag vocabulary in docs/curation-standard.md is not enforced anywhere in code (src/models.py's Activity.interests accepts any normalized string) — a documented convention with no structural check. No schema field currently captures 'documented controlled vocabulary not code-enforced'; noted here rather than forced into an existing field."

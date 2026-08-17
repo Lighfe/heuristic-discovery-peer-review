@@ -98,6 +98,21 @@ milestone whose goal is catching catastrophic failure cheaply (review-01
 B5). Before M2 sealing, a light spot-check verifies a few fields per record,
 as facts in the repo, across the non-owner-reviewed corpus.
 
+**claim-without-artifact-base-switch** — `claim-without-artifact` moves off
+p01 (headroom of only 18→21 on `untraceable_number_count`) to one of {p04,
+p06, p07, p08, p09, p11, p12, p13} — all `all_traceable` with zero
+untraceable numbers currently, far larger single-fact headroom. Specific
+base chosen at step 5. Resolves `deferred-to-m2.md` item 3d.
+
+**constructed-base-policy** — Real bases are used wherever the extended
+six-field table shows one; a synthetic base is constructed only for a
+sub-mutation still showing zero real bases after step 4 extends the corpus
+to 22. `config-drift` is now unblocked (p07, p09, p13 hold `matches` on
+both config fields at once); `circular-eval`'s `llm_eval_judge_spotchecked:
+true` sub-case still has only one real base (p13) — thin, not zero.
+Resolves item 3k; the final buildable/not-buildable list is produced at
+step 5, not here.
+
 ## Loop protocol
 
 **reviewer-independence** — Each reviewer call is stateless, scores one case,
@@ -337,13 +352,185 @@ uvicorn`). Neither twin is vacuous at the render layer; the identical
 `input_tokens` is a tokenizer coincidence on near-identical rendered text,
 not a renderer omission (review-m1 B2).
 
+**M2 schema closure (2026-08-13).** `schema_version` bumped 0 → 1,
+`agents/extractor` bumped v1 → v2. Source: 21 items in `deferred-to-m2.md`,
+worked through in `runs/2026-08-13-m2-schema-closure/proposal.md`, owner
+sign-off recorded there. Twenty of twenty-one resolved below; item 3e
+stays open, entry below states why. Not yet sealed (`tasks/03-milestone-2.md`
+step 8 is a separate, later gate).
+
+**cell-locator-confirmed** — The `path:cellN` notebook-locator convention
+(`cases/schema.md` "Locators inside notebooks") was already settled when
+p02 hit it and never entered the M2-deferred queue. Confirmed at schema
+closure as already resolved, not re-litigated. No change.
+
+**llm-eval-ceiling-threshold** — `llm_eval_metric_at_ceiling` is `true` iff
+at least one reported metric has ≥95% of items at its best value (max for
+quality scores, min for error/refusal rates), never averaged across
+metrics; `null` when no aggregate metric exists to check at all. 95%
+matches G4's ceiling threshold (`agreement-protocol-ceiling`). Resolves
+item 1.
+
+**knowledge-provenance-rule** — General programming/library knowledge
+(e.g. a `pandas` dtype quirk, `bash echo` semantics) is admissible under
+schema rule 1 (procedural, not domain); when load-bearing for a value it
+must be named in `extraction_notes`. Formalizes the owner's 2026-08-10
+ruling as an explicit rule in `cases/schema.md` and `agents/extractor/v2`.
+Resolves item 2.
+
+**per-evaluation-reproducibility** — Two new fields,
+`retrieval_eval_reproducible` and `llm_eval_reproducible` (groups D/E),
+each `reproducible_as_committed` \| `traceable_not_reproducible` \|
+`neither`, replacing a rejected four-sub-field sketch. States whether an
+evaluation pipeline would work if run, not whether its numbers are good;
+distinct from group J's traceability/conflict fields. Resolves item 3.
+
+**monitoring-divergence-no-change** — p02's `monitoring_chart_count: null`
+under a stock-tool dashboard cannot satisfy "at least N charts" — confirmed
+as the final v0 mapping rule, already stated in `deferred-to-m2.md` §3a and
+unchanged by M2. Does not move p02's score (`monitoring_kind:
+dashboard_only` caps it at 1 point regardless). Resolves item 3a, no
+schema change.
+
+**run-instructions-pair-clarified** — `run_instructions` (coverage) and
+`run_instructions_gap_count` (correctness) measure different things and
+are not redundant; a criterion checking whether instructions actually work
+should read the count, never the enum alone. Clarifying prose only, added
+to `cases/schema.md` group G; v0 is unchanged (`v0-literal-no-inferences`).
+Resolves item 3b.
+
+**basis-descriptive-leak-tighten-not-retrofit** — Scoreable-field `basis`
+text embedding descriptive facts (audience, domain, vendor) blocks two of
+three no-change twin kinds; fixed going forward only (`agents/extractor/v2`
+rule: scoreable `basis` states only the scored fact), not retrofitted
+across the 13 already-written records. Tech-swap already satisfies G1's
+no-change half; dataset-domain-swap and cosmetic-rename stay flagged as
+not-yet-buildable. Resolves item 3c.
+
+**decision-basis-three-way** — `decision_documented: bool` (group H) is
+replaced by `decision_basis: none \| argued \| measured`, distinguishing no
+stated reasoning from an a-priori argument from reasoning tied to the
+project's own measurements. The old name implied "a reason was stated,"
+not what the field actually required. Every technique block on every
+record needs re-answering under the new rule at step 3. Resolves item 3g.
+
+**role-overlap-generator-absent** — `llm_eval_role_overlap` compares only
+the answer-generator and judge roles when `llm_eval_question_generator` is
+`none_committed` — the generator role has no model to overlap with.
+`basis` must say so explicitly. Clarifying prose only, `cases/schema.md`
+group E. Resolves item 3f.
+
+**untraceable-count-sampled-validation** — `untraceable_number_count`
+stays an exact count (twins need the headroom); validation of it is
+explicitly sampled (5 cited figures per record, or all if fewer), never
+exhaustive recounting. `document_number_conflicts`, `broken_reference_count`,
+`run_instructions_gap_count`, `document_code_conflicts` stay exact counts
+unchanged, all observed in a small bounded range (0–13). The counting rule
+itself ("individual figures, not tables or claims") predates M2 and needed
+no further decision. Resolves item 3i(a)/(b) and item 3h (folds p02's
+second uncounted conflict candidate into this rule; recount at step 3).
+
+**spot-check-medium** — Step 6's extraction spot-check samples 8 fields ×
+20 non-owner-reviewed records (160 checks): the six-field table's
+config-match pair, `llm_eval_metric_at_ceiling`, `untraceable_number_count`,
+`retrieval_eval_relevance_rule`, `llm_eval_judge_spotchecked`,
+`llm_eval_question_generator`, `document_code_conflicts`. Sized by the
+leverage rule (fields a twin mutates, fields a candidate reads); includes
+reading `extraction_notes`, not only field values
+(`extraction-agreement-needs-notes`). Resolves item 3i(c), confirms item 8.
+
+**basis-locators-stripped-at-render** — `loop/render.py` strips
+path-shaped citations from `basis` text specifically in the copy sent to
+reviewer prompts; the committed record's `basis` is untouched.
+`protocol_version` bumped 1→2 (`loop/config.toml`). A regex strip can miss
+an unusual citation style — named as a residual risk, spot-check before
+step 9a's agreement pass becomes load-bearing on it. Resolves item 3j.
+
+**retrieval-best-approach-not-normalised-open** —
+`retrieval_best_approach_shipped` stays a hand-maintained, non-normalised
+summary of group H's `measured_effect` values; M2 schema closure does
+**not** implement the deferred item's proposed fix (derive it at scoring
+time). Reason: this field anchors the single most contested interpretation
+in v0 (`retrieval-best-approach-reading-flagged`, findings F2/F3), and a
+derivation formula needs dedicated owner review, not a bundled sign-off.
+Item 3e stays open; `APPROVED_ENTAILMENTS` still governs any twin on it.
+
+**group-j-restructure-deferred** — Group J (documentation accuracy, 8
+fields) is not restructured at M2 schema closure. Owner ruling stands:
+restructure once, after twin/red-team work (step 5+) shows which fields
+carry signal. Explicitly deferred with a revisit point (end of M2 or M3
+planning), not silently dropped. Resolves item 4.
+
+**single-repo-fields-kept** — `decision_basis`/`decision_axes`,
+`llm_eval_role_overlap`, `monitoring_instrumentation`,
+`monitoring_dashboard_provenance` are kept unchanged: all four show
+genuine variation across the extended 13-record corpus, not just p02,
+closing the "motivated by exactly one repository" concern by evidence
+(`runs/2026-08-13-m2-schema-closure/proposal.md` item 5 has the per-field
+data). Resolves item 5.
+
+**corpus-language-iso-639-1** — `corpus_language` (group K) is constrained
+to lowercase ISO 639-1 codes, replacing unconstrained free text that
+returned `pt`/`portuguese`/`Russian`/`de`/`English` inconsistently across
+the 13-record corpus. `corpus_domain` stays free text. Group-K string
+equality is explicitly excluded from any extraction-agreement or
+spot-check statistic. Resolves item 6.
+
+**interface-kind-list** — `interface_kind` (group B) becomes `list[enum]`,
+replacing a single enum that silently dropped a second interface on
+repeated recurrence (p01, p02, p08, p11). `candidates/v0/score.py`'s
+condition evaluator now treats `in`/equality against a list field as
+membership-of-any-element; p01/p02 totals unchanged (rerun and verified).
+Resolves item 7.
+
+**binds-line-going-forward** — New `decisions.md` entries from 2026-08-13
+onward carry an implicit `Binds:` obligation (a plan item, an enforcement
+point, or `inert` with a one-line justification), per the mechanism
+proposed in `deferred-to-m2.md` item 9, amended to require `inert` entries
+to justify themselves. Not retrofitted across the ~50 existing entries —
+an optional follow-up, not an M2 blocker. Resolves item 9.
+
+**course-materials-anchor** — A capstone cannot be required to exceed what
+`06-best-practices` and `07-project-example` demonstrate; this bounds what
+a criterion may *demand* (holdouts, sample sizes, significance testing a
+learner could not have known to require), never what a reviewer may
+*notice* when a project's own claims contradict its own artifacts
+(`document_code_conflicts` and friends are unaffected). Not everything the
+course does is written down, so this anchor sets a floor on documented
+rigor, never a ceiling on found inconsistency. Resolves item 10.
+
+**group-h-worked-example-post-hoc** — During M2 step 3 (re-extraction),
+three independent subagents (p08, p10, p12) made the identical mistake of
+writing group H's technique sub-fields as bare values instead of nested
+`{value, evidence, basis}`. Fixed by adding a worked YAML example to
+`cases/schema.md` group H — but the schema is read-only to every agent
+from step 2's sign-off onward, and this edit was made and used before
+being reported, not proposed and approved first. Flagged by owner review
+after the fact. **Ratified as documentation-only, no `schema_version`
+bump** (it states no new rule, only makes an existing one concrete) —
+but the process gap is real: the fix should have been reported and
+approved before being applied and used by further extractions, per the
+same principle item 3e's handling protects (an agent may not make the
+call the process reserves for the owner). Binds: none going forward
+beyond this record: the "schema read-only after sign-off" rule stands
+unchanged; this entry exists so the exception is visible, not repeated
+silently.
+
 ## Corpus and inputs
 
-**corpus-twelve** — `repos.yaml` pins twelve `role: corpus` repos plus p13
-(`role: self`). p13 is **feasibility only**: it checks the pipeline on a
-repo the owner can fully verify, and enters no distribution statistic and
-no G2 rate (review-01 B7) — a thirteenth *corpus* repo could only be the
-hoped-for thin one. p13's commit is TODO; that blocks **M2**, not M1.
+**corpus-twelve** — Original M1 state: `repos.yaml` pinned twelve
+`role: corpus` repos plus p13 (`role: self`). p13 is **feasibility only**:
+it checks the pipeline on a repo the owner can fully verify, and enters no
+distribution statistic and no G2 rate (review-01 B7). **Grown to 22 at M2
+step 4** (2026-08-14), per `real-score-dataset-scoped` and `plan.md`
+M2(e): ten real, scored repos join `role: corpus`, sourced by the owner,
+commits pinned 2026-08-04, checked for overlap with the original twelve
+(none). p13 stays `role: self`, still excluded from every distribution
+statistic and the G2 rate — a thirteenth *corpus* repo could only have
+been the hoped-for thin one, and none of the ten changes that. Slug kept
+for cross-reference continuity; see
+`runs/2026-08-14-m2-corpus-extraction/step4-real-score-extraction.md` for
+the extraction record.
 
 **milestone1-p01** — M1 extracts p01 first: it is `owner_reviewed`, so
 extraction can be validated against a careful human reading immediately.

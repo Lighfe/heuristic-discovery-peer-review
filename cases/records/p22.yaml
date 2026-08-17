@@ -1,0 +1,313 @@
+schema_version: 1
+case_id: p22
+commit: "987e10c86c0a99d6a4282a2346729fa56ebc1b40"
+extracted_by: agents/extractor/v2
+extracted_on: "2026-08-17"
+
+fields:
+  # A. System shape
+  knowledge_base_present:
+    value: present
+    evidence: ["src/db.py:13-27", "src/db.py:91-101"]
+    basis: "a vector store persists retrieved records with embeddings and is queried at request time"
+  llm_in_flow:
+    value: present
+    evidence: ["src/rag.py:119-146", "src/rag.py:206-322"]
+    basis: "a model call performs keyword extraction and the final response generation on the request path"
+  retrieval_flow:
+    value: kb_and_llm
+    evidence: ["app.py:69-95"]
+    basis: "the request handler queries the vector store, then calls the model with the retrieved results before returning a response"
+  problem_statement:
+    value: specific
+    evidence: ["README.md:31-43"]
+    basis: "a named section states the specific question the system answers and names its intended audience"
+
+  # B. Interface
+  interface_kind:
+    value: [web_ui]
+    evidence: ["app.py:1-20"]
+    basis: "a script renders a browser-based interactive UI and is the sole interface; no CLI or API entrypoint is defined"
+  interface_evidence_kind:
+    value: code_only
+    evidence: []
+    basis: "no image or video artifact is committed or linked from any document"
+
+  # C. Ingestion
+  ingestion_kind:
+    value: script_or_notebook
+    evidence: ["src/ingest.py:24-50"]
+    basis: "ingestion is implemented as plain function calls in a source file, not a dedicated orchestration tool"
+  ingestion_single_command:
+    value: false
+    evidence: ["setup.md:39-52", "usage.md:7-16"]
+    basis: "no documented command runs ingestion standalone; it is invoked programmatically from inside application code under a conditional gate"
+  ingestion_output_stated:
+    value: false
+    evidence: []
+    basis: "no document states a count of ingested records, chunks, or vectors"
+
+  # D. Retrieval evaluation
+  retrieval_eval_present:
+    value: true
+    evidence: ["src/eval.py:9-68"]
+    basis: "a committed script computes hit-rate and MRR over a committed query set"
+  retrieval_eval_approaches_compared:
+    value: 3
+    evidence: ["README.md:147-151", "evaluation_results.md:60-64"]
+    basis: "three retrieval strategies are reported with hit-rate and MRR figures across two documents"
+  retrieval_eval_set_committed:
+    value: committed
+    evidence: ["data/ground_truth.json"]
+    basis: "a fixed query set with an expected identifier per item is committed"
+  retrieval_eval_set_size:
+    value: 12
+    evidence: ["data/ground_truth.json"]
+    basis: "count of entries in the committed evaluation set file"
+  retrieval_eval_relevance_rule:
+    value: document_level
+    evidence: ["src/eval.py:41-49"]
+    basis: "a hit is scored when one specific expected record identifier appears among the retrieved identifiers; no passage- or source-level rule is used"
+  retrieval_eval_config_matches_shipped:
+    value: differs
+    evidence: ["src/eval.py:9,33-38,70-71", "app.py:42-43,68-78", "src/search.py:8-15"]
+    basis: "the evaluation script fixes a smaller result depth and supplies a pre-written per-item term list for the store-population step, in place of the request-time term-generation stage the shipped path runs before every query; the shipped path's default result depth is also larger and user-adjustable"
+  retrieval_eval_uncertainty_stated:
+    value: false
+    evidence: []
+    basis: "no interval, variance, or confidence figure accompanies any reported metric"
+  retrieval_best_approach_shipped:
+    value: "yes"
+    evidence: ["src/db.py:91-101", "src/search.py:17-26", "README.md:147-151"]
+    basis: "the strategy scoring highest in the reported comparison is the only strategy the shipped search path calls"
+  retrieval_eval_reproducible:
+    value: neither
+    evidence: ["src/eval.py:20-24", "src/api_client.py:15-67", "README.md:147-151"]
+    basis: "two of the three reported strategies have no committed script computing them at all; the one strategy a committed script does compute depends, in its primary path, on a live external call whose response is not committed or pinned, with a deterministic fallback used only if that call fails"
+
+  # E. Answer evaluation
+  llm_eval_present:
+    value: false
+    evidence: []
+    basis: "no committed script measures generated-answer quality against any judge, human label, or offline metric"
+  llm_eval_approaches_compared:
+    value: 0
+    evidence: []
+    basis: "no committed script reports a comparison of generation configurations"
+  llm_eval_judge_kind:
+    value: none
+    evidence: []
+    basis: "no judge role is implemented in any committed script"
+  llm_eval_judge_spotchecked:
+    value: false
+    evidence: []
+    basis: "no judge exists to spot-check"
+  llm_eval_question_generator:
+    value: none_committed
+    evidence: []
+    basis: "no committed generator produces the retrieval query set or any answer-evaluation question set"
+  llm_eval_metric_at_ceiling:
+    value: null
+    evidence: []
+    basis: "no aggregate answer-quality metric exists in any committed artifact to check for ceiling behavior"
+  llm_eval_role_overlap:
+    value: undeterminable
+    evidence: []
+    basis: "no answer-evaluation pipeline exists, so there are no roles to compare"
+  llm_eval_config_matches_shipped:
+    value: undeterminable
+    evidence: []
+    basis: "no answer-evaluation configuration exists to compare against the shipped path"
+  llm_eval_reproducible:
+    value: neither
+    evidence: []
+    basis: "no answer-evaluation pipeline is committed to run"
+
+  # F. Monitoring
+  monitoring_kind:
+    value: none
+    evidence: []
+    basis: "no feedback-capture code, dashboard definition, or dashboard-serving configuration is committed"
+  monitoring_dashboard_provenance:
+    value: none
+    evidence: []
+    basis: "no dashboard of any kind is committed or deployed by committed configuration"
+  monitoring_instrumentation:
+    value: none
+    evidence: []
+    basis: "no logging, tracing, or span-emission code exists on the request path"
+  monitoring_chart_count:
+    value: null
+    evidence: []
+    basis: "not applicable; no dashboard is committed or deployed"
+  monitoring_charts_bound_to_data:
+    value: not_applicable
+    evidence: []
+    basis: "no dashboard exists to bind"
+
+  # G. Containerization and reproducibility
+  containerization_kind:
+    value: compose_dependencies_only
+    evidence: ["docker-compose.yml:1-17"]
+    basis: "the compose file defines only a single backing data-store dependency; no service definition packages the application itself"
+  run_instructions:
+    value: complete
+    evidence: ["setup.md:1-67"]
+    basis: "documented steps name environment setup, dependency installation, dependency-service startup, and the run command"
+  run_instructions_gap_count:
+    value: 1
+    evidence: ["src/search.py:8-15", "README.md:70-80", "complete_project_architecture_and_workflow.md:62-67"]
+    basis: "the documented flow states that an empty local index triggers a fetch-and-populate step regardless of backend; the actual gating condition in code only allows that step to run when the primary backing store failed to connect, which is the opposite of the state the documented setup steps produce, so following the documented steps in order never populates the store"
+  dependency_versions_pinned:
+    value: lower_bounds_only
+    evidence: ["requirements.txt:1-16"]
+    basis: "declared dependencies use minimum-version bounds only; no lockfile or exact pin is committed"
+  data_accessible:
+    value: automated_or_committed
+    evidence: ["src/api_client.py:15-67"]
+    basis: "the record source is fetched programmatically with a deterministic, committed fallback used when the live call is unavailable"
+
+  # H. Techniques
+  hybrid_search:
+    present:
+      value: true
+      evidence: ["src/db.py:91-101,174-209"]
+      basis: "two retrieval signals are combined via a rank-fusion computation before results are returned"
+    shipped_enabled:
+      value: true
+      evidence: ["src/search.py:17-26"]
+      basis: "the fusion function is the only retrieval path called by the shipped search entrypoint"
+    evaluated:
+      value: true
+      evidence: ["src/eval.py:33-38,56-68"]
+      basis: "hit-rate and MRR are computed for this strategy by a committed script"
+    measured_effect:
+      value: improves
+      evidence: ["README.md:147-151"]
+      basis: "reported hit-rate and MRR for the combined strategy exceed both single-signal strategies in the same table"
+    decision_basis:
+      value: measured
+      evidence: ["README.md:160-167"]
+      basis: "the shipped choice is justified by referencing the same reported metrics comparison"
+    decision_axes: ["hit_rate", "mrr"]
+
+  reranking:
+    present:
+      value: false
+      evidence: []
+      basis: "no separate re-ranking pass over an initial candidate list exists; the fusion step produces final ranking directly"
+    shipped_enabled:
+      value: false
+      evidence: []
+      basis: "not present, so not active on the request path"
+    evaluated:
+      value: false
+      evidence: []
+      basis: "not present, so no effect is measured"
+    measured_effect:
+      value: not_measured
+      evidence: []
+      basis: "not present"
+    decision_basis:
+      value: none
+      evidence: []
+      basis: "no ship/do-not-ship reasoning is stated because the technique is not present"
+    decision_axes: []
+
+  query_rewriting:
+    present:
+      value: false
+      evidence: ["src/rag.py:119-146", "src/search.py:17-26"]
+      basis: "the extraction step feeds an external data-fetch call, not the query passed into the retrieval function, which always receives the original input text unmodified"
+    shipped_enabled:
+      value: false
+      evidence: []
+      basis: "not present as a retrieval-query transformation"
+    evaluated:
+      value: false
+      evidence: []
+      basis: "not present, so no effect is measured"
+    measured_effect:
+      value: not_measured
+      evidence: []
+      basis: "not present"
+    decision_basis:
+      value: none
+      evidence: []
+      basis: "no ship/do-not-ship reasoning is stated because the technique is not present"
+    decision_axes: []
+
+  # I. Deployment and bonus
+  cloud_deployment:
+    value: none
+    evidence: []
+    basis: "no deployment configuration or documentation names a cloud target"
+
+  # J. Documentation accuracy
+  headline_numbers_traceable:
+    value: some_traceable
+    evidence: ["src/eval.py:9-68", "README.md:147-151", "monitoring_and_evaluation_report.md:22-35,68-77"]
+    basis: "one committed script can produce one of three reported comparison-row figures; the other two comparison rows and a separate results table have no committed artifact able to produce them"
+  untraceable_number_count:
+    value: 19
+    evidence: ["README.md:149-150", "evaluation_results.md:62-63", "monitoring_and_evaluation_report.md:22-35,68-77"]
+    basis: "2 figures in one comparison row, 2 in another comparison row, 12 per-item score figures in a separate table, and 3 summary rate figures in a further table have no committed artifact able to produce them (2+2+12+3=19); identical figures repeated verbatim across documents are counted once"
+  document_number_conflicts:
+    value: 0
+    evidence: ["README.md:147-151", "evaluation_results.md:60-64"]
+    basis: "the same figures recur identically across the two documents that report them; no disagreement found between any two documents"
+  document_code_conflicts:
+    value: 1
+    evidence: ["README.md:70-80", "complete_project_architecture_and_workflow.md:62-67", "src/search.py:8-15"]
+    basis: "a documented flow step states that an empty local index triggers a fetch-and-populate action regardless of backend; the code's gating condition only allows that action when the primary backing store failed to connect, the opposite of the state the documented setup produces"
+  broken_reference_count:
+    value: 0
+    evidence: ["README.md, complete_project_architecture_and_workflow.md, evaluation_results.md, monitoring_and_evaluation_report.md, usage.md, setup.md"]
+    basis: "every file path cited in documentation resolves to a tracked file"
+  limitations_section:
+    value: absent
+    evidence: []
+    basis: "no document contains a section naming limitations of the system or its measurement"
+  artifact_reference_strength:
+    value: all_referenced
+    evidence: ["README.md:57-64"]
+    basis: "every expected-artifact category present in the repository is named by path somewhere in documentation, via inline code-formatted paths rather than markdown links"
+  artifacts_unreferenced_count:
+    value: 0
+    evidence: []
+    basis: "every present expected artifact is named somewhere in documentation"
+
+  # K. Descriptive
+  corpus_language:
+    value: en
+    evidence: ["README.md:1-227"]
+    basis: "documentation and interface text are in English"
+  corpus_domain:
+    value: "patent prior-art search and infringement risk assessment"
+    evidence: ["README.md:31-50"]
+    basis: "stated subject area of the system"
+  interface_framework:
+    value: streamlit
+    evidence: ["app.py:1"]
+    basis: "the UI import and page-configuration calls used"
+  vector_store:
+    value: pgvector
+    evidence: ["src/db.py:1-20,53-66"]
+    basis: "primary backing store, with an in-memory fallback when unavailable"
+  llm_provider:
+    value: ollama
+    evidence: ["src/rag.py:6,115-117"]
+    basis: "client library and local endpoint used for all model calls"
+  repo_file_count:
+    value: 18
+    evidence: ["<repo>"]
+    basis: "git ls-files | wc -l at the pinned commit"
+
+extraction_notes:
+  - "query_rewriting: a term-extraction step exists (src/rag.py extract_keywords_from_design_doc), but it feeds a keyword list to the external data-fetch/ingestion call, not a rewritten query passed into the retrieval function — src/search.py's search_prior_art always embeds and searches the original input text unmodified. Recorded present:false on the reading that this schema's 'query rewriting' concerns the retrieval-time query, not an ingestion-time term extraction; flagged because the schema does not state this distinction explicitly and a different extractor could read it the other way."
+  - "retrieval_eval_approaches_compared counts 3 because three strategies are reported with numeric figures in prose documents, per the field's literal definition ('distinct strategies with reported numbers'). That count is disjoint from headline_numbers_traceable/untraceable_number_count, which record that only 1 of those 3 has any committed code producing it. A reader relying on retrieval_eval_approaches_compared alone would not see this gap."
+  - "retrieval_eval_reproducible: judged 'neither' rather than 'traceable_not_reproducible' because the group-D definition asks about 'the retrieval-evaluation pipeline' as a whole and two of the three reported rows have zero committed producing artifact (not merely non-reproducible, but non-traceable — there is nothing to inspect). If a stricter reading confines this field to whatever single script exists (src/eval.py) and ignores rows no script attempts, 'traceable_not_reproducible' would be the alternative answer, since that script's steps are inspectable even though its primary data path is an uncommitted live external call. Recording both readings since the schema does not resolve which scope this field takes when a report exceeds what any single script attempts."
+  - "run_instructions_gap_count: the gap found (src/search.py:8-15's ingestion trigger is gated on the primary backing store having failed to connect) is structurally the same class of gap the schema's own worked example describes for a different repository (schema.md group G) — found only by tracing a documented step into the code it calls, not visible from the documentation alone."
+  - "problem_statement judgment: audience and question are both named (README.md:31-43) but the schema itself flags this field's check as the one judgment call in the schema; recorded 'specific' on a literal reading of 'named' rather than any view on strength or coherence of the stated audience/question pairing."
+  - "untraceable_number_count: the schema specifies counting individual figures, not rows or claims, but does not specify how to treat a figure repeated verbatim across two documents. This record counts each distinct fact once rather than once per on-page occurrence; a different convention (counting every occurrence in every document) would roughly double the figures that appear in both README.md and evaluation_results.md."
+  - "No file path, evidence string, or basis in this record names the repository, its owner, or any contributor."

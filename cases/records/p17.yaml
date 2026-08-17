@@ -1,0 +1,309 @@
+schema_version: 1
+case_id: p17
+commit: "03c1d2aceabf6fd25cfbc6075ac52b4e3189bc36"
+extracted_by: agents/extractor/v2
+extracted_on: "2026-08-17"
+
+fields:
+  # A. System shape
+  knowledge_base_present:
+    value: present
+    evidence: ["ingestion/store.py:38-48", "rag/retrieval.py:36-45"]
+    basis: "a vector store collection is created and queried on the request path"
+  llm_in_flow:
+    value: present
+    evidence: ["rag/qa.py:20-26"]
+    basis: "a chat-completion call runs on the request path"
+  retrieval_flow:
+    value: kb_and_llm
+    evidence: ["rag/qa.py:17-26"]
+    basis: "the request handler retrieves from the vector store, then calls an LLM with the retrieved context"
+  problem_statement:
+    value: brief
+    evidence: ["README.md:11-19"]
+    basis: "a named 'Problem' section states what the system does and what gap it addresses, but does not name an intended audience"
+
+  # B. Interface
+  interface_kind:
+    value: [web_ui]
+    evidence: ["app/streamlit_app.py:12-14", "Dockerfile.app"]
+    basis: "the only committed interface is a Streamlit app; no CLI entrypoint or API server is defined"
+  interface_evidence_kind:
+    value: code_and_recording
+    evidence: ["README.md:7-9"]
+    basis: "README embeds both a gif and an mp4 recording of the interface alongside the code"
+
+  # C. Ingestion
+  ingestion_kind:
+    value: orchestrated_tool
+    evidence: ["ingestion/flow.py:1-53"]
+    basis: "ingestion is defined as flow/task-decorated functions run by an orchestration library"
+  ingestion_single_command:
+    value: true
+    evidence: ["README.md:102-106"]
+    basis: "one documented command runs ingestion end to end"
+  ingestion_output_stated:
+    value: true
+    evidence: ["ingestion/flow.py:43,46,52"]
+    basis: "the ingestion flow prints fetched-document, new-document and chunk counts as it runs"
+
+  # D. Retrieval evaluation
+  retrieval_eval_present:
+    value: true
+    evidence: ["eval/evaluate_retrieval.py:1-67"]
+    basis: "a script compares retrieval strategies and reports Hit Rate/MRR"
+  retrieval_eval_approaches_compared:
+    value: 3
+    evidence: ["eval/evaluate_retrieval.py:13"]
+    basis: "three named strategies are evaluated"
+  retrieval_eval_set_committed:
+    value: referenced_not_committed
+    evidence: ["eval/generate_golden_set.py:14"]
+    basis: "the evaluation set path is referenced in code but the file is not tracked in the repository"
+  retrieval_eval_set_size:
+    value: 60
+    evidence: ["README.md:144", "eval/generate_golden_set.py:37"]
+    basis: "README states approximately 60 generated questions; the generator's default sample size is 60"
+  retrieval_eval_relevance_rule:
+    value: passage_level
+    evidence: ["eval/evaluate_retrieval.py:20-25"]
+    basis: "a retrieval counts as a hit only when the specific chunk the question was generated from is present in the retrieved set"
+  retrieval_eval_config_matches_shipped:
+    value: differs
+    evidence: ["eval/evaluate_retrieval.py:21", "rag/qa.py:14,17-18"]
+    basis: "the eval script retrieves on the raw question; the default answer path rewrites the question before retrieval"
+  retrieval_eval_uncertainty_stated:
+    value: false
+    evidence: []
+    basis: "no interval, variance, or uncertainty statement accompanies the reported metrics"
+  retrieval_best_approach_shipped:
+    value: undeterminable
+    evidence: []
+    basis: "no results file or evaluation set is committed, so which strategy the project's own numbers favor cannot be checked"
+  retrieval_eval_reproducible:
+    value: neither
+    evidence: []
+    basis: "neither the evaluation set nor a results file is committed, so the pipeline cannot be run from committed inputs nor traced to a reported figure"
+
+  # E. Answer evaluation
+  llm_eval_present:
+    value: true
+    evidence: ["eval/evaluate_rag.py:1-113"]
+    basis: "a script compares prompt/model variants using a model judge"
+  llm_eval_approaches_compared:
+    value: 3
+    evidence: ["eval/evaluate_rag.py:20-28"]
+    basis: "three named variants are evaluated"
+  llm_eval_judge_kind:
+    value: model_judge
+    evidence: ["eval/evaluate_rag.py:38-52"]
+    basis: "scoring is produced by a chat-completion call"
+  llm_eval_judge_spotchecked:
+    value: false
+    evidence: []
+    basis: "no sample of judge verdicts is checked by hand with a reported result"
+  llm_eval_question_generator:
+    value: generator_ties_question_to_passage
+    evidence: ["eval/generate_golden_set.py:46-53"]
+    basis: "each generated question is stored with the chunk id and document id it was generated from"
+  llm_eval_metric_at_ceiling:
+    value: null
+    evidence: []
+    basis: "no results file or evaluation set is committed, so no aggregate metric exists to check for ceiling behavior"
+  llm_eval_role_overlap:
+    value: same_family
+    evidence: ["eval/generate_golden_set.py:25-26", "eval/evaluate_rag.py:20-28,39-40"]
+    basis: "the question-generator and judge calls both default to the same configured model, which two of the three compared answer-generation variants also use; the third uses a larger model in the same line"
+  llm_eval_config_matches_shipped:
+    value: differs
+    evidence: ["eval/evaluate_rag.py:58", "rag/qa.py:14,17-18"]
+    basis: "the eval script retrieves on the raw question; the default answer path rewrites the question before retrieval"
+  llm_eval_reproducible:
+    value: neither
+    evidence: []
+    basis: "neither the evaluation set nor a results file is committed, so the pipeline cannot be run from committed inputs nor traced to a reported figure"
+
+  # F. Monitoring
+  monitoring_kind:
+    value: feedback_and_dashboard
+    evidence: ["app/streamlit_app.py:36-52", "monitoring/grafana/dashboards/xai_digest.json:1-132"]
+    basis: "the app logs user feedback and a dashboard definition is committed"
+  monitoring_dashboard_provenance:
+    value: committed_definitions
+    evidence: ["monitoring/grafana/dashboards/xai_digest.json:1-132"]
+    basis: "panel definitions are committed as a JSON file, not only a stock image UI"
+  monitoring_instrumentation:
+    value: logged
+    evidence: ["common/db.py:49-85"]
+    basis: "each request writes a record with mode, latency and token counts; no request-path tracing spans are emitted"
+  monitoring_chart_count:
+    value: 8
+    evidence: ["monitoring/grafana/dashboards/xai_digest.json"]
+    basis: "count of `panels` entries in the committed dashboard JSON"
+  monitoring_charts_bound_to_data:
+    value: all
+    evidence: ["monitoring/grafana/dashboards/xai_digest.json:16-127", "monitoring/db_init.sql:3-50"]
+    basis: "every panel's SQL query references only tables and columns defined in the committed schema"
+
+  # G. Containerization and reproducibility
+  containerization_kind:
+    value: compose_full
+    evidence: ["docker-compose.yml:1-85", "Dockerfile.app", "Dockerfile.ingestion"]
+    basis: "compose defines the application services themselves, not only their dependencies"
+  run_instructions:
+    value: complete
+    evidence: ["README.md:77-137"]
+    basis: "setup, dependencies, configuration, required environment variables and run commands are all stated"
+  run_instructions_gap_count:
+    value: 0
+    evidence: ["README.md:77-137"]
+    basis: "desk walkthrough of the documented setup steps in order found no step whose required input is not produced by an earlier step"
+  dependency_versions_pinned:
+    value: exact_pins
+    evidence: ["requirements.txt:1-13"]
+    basis: "every dependency is pinned with an exact version"
+  data_accessible:
+    value: automated_or_committed
+    evidence: ["README.md:102-106", "ingestion/flow.py:1-53"]
+    basis: "input data is fetched automatically by one documented command rather than requiring manual retrieval steps"
+
+  # H. Techniques
+  hybrid_search:
+    present:
+      value: true
+      evidence: ["rag/retrieval.py:48-67"]
+      basis: "dense and sparse vector search results are fused before being returned"
+    shipped_enabled:
+      value: true
+      evidence: ["rag/retrieval.py:82-91", "rag/qa.py:12", "app/streamlit_app.py:22"]
+      basis: "the default retrieval strategy always calls the hybrid search function first"
+    evaluated:
+      value: false
+      evidence: []
+      basis: "no eval results or evaluation set is committed, so no reported numbers exist to check, despite a comparison script existing"
+    measured_effect:
+      value: not_measured
+      evidence: []
+      basis: "no committed reported figures exist to read an effect from"
+    decision_basis:
+      value: none
+      evidence: []
+      basis: "no ship/do-not-ship reasoning for this technique is stated"
+    decision_axes: []
+  reranking:
+    present:
+      value: true
+      evidence: ["rag/retrieval.py:70-79"]
+      basis: "retrieved hits are re-ordered by a separate rerank score before being returned"
+    shipped_enabled:
+      value: true
+      evidence: ["rag/retrieval.py:89-91", "rag/qa.py:12", "app/streamlit_app.py:22"]
+      basis: "the default retrieval strategy applies the rerank step after hybrid search"
+    evaluated:
+      value: false
+      evidence: []
+      basis: "no eval results or evaluation set is committed, so no reported numbers exist to check, despite a comparison script existing"
+    measured_effect:
+      value: not_measured
+      evidence: []
+      basis: "no committed reported figures exist to read an effect from"
+    decision_basis:
+      value: none
+      evidence: []
+      basis: "no ship/do-not-ship reasoning for this technique is stated"
+    decision_axes: []
+  query_rewriting:
+    present:
+      value: true
+      evidence: ["rag/query_rewrite.py:15-29"]
+      basis: "an LLM call rewrites the question before it is used for retrieval"
+    shipped_enabled:
+      value: true
+      evidence: ["rag/qa.py:14,17", "app/streamlit_app.py:23"]
+      basis: "the rewrite step defaults to enabled in both the answer function and the app control"
+    evaluated:
+      value: false
+      evidence: []
+      basis: "neither eval script varies whether the question is rewritten before retrieval, so no comparison isolating this step is committed"
+    measured_effect:
+      value: not_measured
+      evidence: []
+      basis: "no comparison isolating this step's effect is committed"
+    decision_basis:
+      value: argued
+      evidence: ["README.md:50"]
+      basis: "a reason is stated for this step but rests on a-priori reasoning, not a reported measurement"
+    decision_axes: ["recall"]
+
+  # I. Deployment and bonus
+  cloud_deployment:
+    value: none
+    evidence: []
+    basis: "no cloud-provider deployment documentation or configuration is committed"
+
+  # J. Documentation accuracy
+  headline_numbers_traceable:
+    value: no_numbers
+    evidence: []
+    basis: "no reported metric figures appear in the documentation text itself"
+  untraceable_number_count:
+    value: 0
+    evidence: []
+    basis: "no headline figures are stated to check"
+  document_number_conflicts:
+    value: 0
+    evidence: []
+    basis: "no figures appear in more than one document to compare"
+  document_code_conflicts:
+    value: 0
+    evidence: []
+    basis: "no checked documentation claim was found to contradict the committed code"
+  broken_reference_count:
+    value: 0
+    evidence: ["README.md:73-75", "README.md:148", "README.md:156"]
+    basis: "README's repository-layout section explicitly labels the linked results/eval-set paths as generated output rather than committed artifacts"
+  limitations_section:
+    value: includes_structural
+    evidence: ["README.md:171-173"]
+    basis: "at least one named limitation concerns the system's own filtering method rather than only hardware, scope or budget"
+  artifact_reference_strength:
+    value: all_referenced
+    evidence: ["README.md:64-75", "README.md:175-191"]
+    basis: "every artifact on the fixed checklist is named by path or directory somewhere in the documentation"
+  artifacts_unreferenced_count:
+    value: 0
+    evidence: ["README.md:64-75", "README.md:175-191"]
+    basis: "no checklist artifact is absent from the documentation's references"
+
+  # K. Descriptive
+  corpus_language:
+    value: en
+    evidence: ["README.md:1-21"]
+    basis: "documentation and interface text are in English"
+  corpus_domain:
+    value: "explainable / interpretable AI (XAI) research literature"
+    evidence: ["README.md:3"]
+    basis: "stated subject of the ingested corpus"
+  interface_framework:
+    value: streamlit
+    evidence: ["app/streamlit_app.py:6", "requirements.txt:9"]
+    basis: "UI is built with this library"
+  vector_store:
+    value: qdrant
+    evidence: ["ingestion/store.py:5,28-35", "requirements.txt:3"]
+    basis: "vector storage and search library in use"
+  llm_provider:
+    value: openai
+    evidence: ["ingestion/store.py:4,14-18", "requirements.txt:1"]
+    basis: "LLM/embedding API client in use"
+  repo_file_count:
+    value: 38
+    evidence: ["<repo>"]
+    basis: "`git ls-files | wc -l` at the pinned commit"
+
+extraction_notes:
+  - "broken_reference_count ambiguity: README links `eval/results/retrieval_eval.md` and `eval/results/rag_eval.md` (README.md:148,156) and mentions `data/golden_set.json` (README.md:73), none of which are tracked in the repository. The repository-layout table explicitly marks `data/` and `eval/results/` as '(generated)' (README.md:73-75), which reads as a documented prerequisite rather than a stale or mistaken claim, so these were not counted as broken references. A reader following the link before running anything would still hit a 404, which is the opposite reading; recorded here since the schema's definition does not distinguish 'explicitly documented as not-yet-generated' from 'broken'."
+  - "problem_statement scored brief rather than specific: the README's 'Problem' section clearly names the topic and gap being addressed, but nowhere names an intended audience (only the generic second-person 'you'); the schema's own 'specific' bar requires both a stated question and a stated audience."
+  - "Group H evaluated/measured_effect: eval/evaluate_retrieval.py explicitly compares vector vs. hybrid vs. hybrid_rerank (which would measure hybrid_search's and reranking's effect if run), but since no evaluation set or results file is committed, no reported numbers exist anywhere in the repository to read an effect from. Scored evaluated:false and measured_effect:not_measured for all three techniques on the reading that 'evaluated' requires numbers actually reported (not merely a script capable of reporting them); an extractor reading 'evaluated' as 'a comparison mechanism exists' would score hybrid_search/reranking evaluated:true instead. This is a schema-fit ambiguity worth resolving centrally."
+  - "llm_eval_role_overlap is a single categorical field but the answer-generation step in eval/evaluate_rag.py actually varies per compared variant (two of three variants use the same default model as the question-generator/judge, one uses a larger same-family model); the schema has no field to express per-variant role overlap, so same_family was chosen as the value that covers the full comparison without overclaiming exact identity for every variant."
+  - "retrieval_eval_set_size (60) is read from README's approximate '~60' comment and the generator's default sample-size parameter, not counted from a committed evaluation-set file, since none is committed. It should be read as the documented/default count, not a verified size."

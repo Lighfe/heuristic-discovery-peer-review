@@ -1,0 +1,363 @@
+schema_version: 1
+case_id: p07
+commit: "6c8f68158efa20d6f7c42e1cb2cb521c96e38441"
+extracted_by: agents/extractor/v2
+extracted_on: "2026-08-14"
+
+fields:
+
+  # A. System shape
+  knowledge_base_present:
+    value: present
+    evidence: ["src/musical_genres_rag/models.py:94-101", "src/musical_genres_rag/migrations/0002_bm25_index.py", "src/musical_genres_rag/migrations/0016_genre_index_embed.py"]
+    basis: "GenreIndex model holds a text column indexed by bm25 and a vector column indexed by hnsw, both built by hand-written migrations."
+
+  llm_in_flow:
+    value: present
+    evidence: ["src/musical_genres_rag/Rag.py:150-201"]
+    basis: "Rag.query() calls OpenAI's responses.parse with a configured chat model after retrieval."
+
+  retrieval_flow:
+    value: kb_and_llm
+    evidence: ["src/musical_genres_rag/Rag.py:158-167"]
+    basis: "Rag.query() calls self._queryIndex(query) then, given results, self._queryLlm(prompt); an empty retrieval raises rather than skipping the LLM, so the request handler always tries both in order."
+
+  problem_statement:
+    value: brief
+    evidence: ["README.md:1-6"]
+    basis: "The opening paragraph names the topic (finding genres from vibes/instruments/dates rather than genre names) but states the audience only as \"people\" wanting to explore musical genres, not a defined audience segment."
+
+  # B. Interface
+  interface_kind:
+    value: [web_ui, api, cli]
+    evidence: ["ui.py:689-870", "src/musical_genres_rag/Api.py:145-243", "src/musical_genres_rag/management/commands/rag.py:1-26"]
+    basis: "ui.py is a Streamlit app with Chat/Conversations/Feedback/Evaluations/Report pages (web_ui); Api.py exposes a NinjaAPI JSON API on the app service (api); management/commands/rag.py is a manage.py subcommand answering a question from the command line (cli)."
+
+  interface_evidence_kind:
+    value: code_and_screenshot
+    evidence: ["README.md:8", "USAGE.md:31,46,87,93,97,103,111", "images/musical-genres-rag.png", "images/musical-genres-rag-dashboard.png", "images/airflow.png", "images/evaluations.png", "images/evaluation_retrieval.png", "images/evaluation_rag.png", "images/feedback.png", "images/grafana.png"]
+    basis: "Eight PNG screenshots are committed under images/ and embedded throughout README.md and USAGE.md; no recording (gif/video) is present."
+
+  # C. Ingestion
+  ingestion_kind:
+    value: orchestrated_tool
+    evidence: ["dags/mgr.py:179-209", "compose.yml:89-115"]
+    basis: "Ingestion is driven as an Airflow DAG (HttpOperator + HttpSensor pair calling the app's /ingest endpoint), with an Airflow service defined in compose.yml."
+
+  ingestion_single_command:
+    value: true
+    evidence: ["Makefile:74-75"]
+    basis: "\"make ingest\" runs \"uv run python manage.py ingest\" end to end."
+
+  ingestion_output_stated:
+    value: true
+    evidence: ["src/musical_genres_rag/management/commands/ingest.py:8-13", "src/musical_genres_rag/Api.py:329-337"]
+    basis: "The ingest command and the /ingest API endpoint both report the count of genres indexed."
+
+  # D. Retrieval evaluation
+  retrieval_eval_present:
+    value: true
+    evidence: ["src/musical_genres_rag/Evaluation.py:484-501"]
+    basis: "GenresRetrievalEvaluationRunner scores the index live with HitRate and MRR evaluators."
+
+  retrieval_eval_approaches_compared:
+    value: 1
+    evidence: ["data/demo/snapshot.json.gz"]
+    basis: "The committed snapshot holds exactly one retrieval evaluation run, retriever=postgres_hybrid; no other engine's numbers are committed anywhere in the repository."
+
+  retrieval_eval_set_committed:
+    value: committed
+    evidence: ["data/demo/ground_truth_20260801-143303.csv"]
+    basis: "The ground truth CSV used by the committed demo evaluation runs is committed under data/demo."
+
+  retrieval_eval_set_size:
+    value: 50
+    evidence: ["data/demo/ground_truth_20260801-143303.csv"]
+    basis: "51 lines including one header row = 50 questions (10 genres in data/genre.csv times 5 questions each, per config.yml.dist's ground_truth.fields.questions description)."
+
+  retrieval_eval_relevance_rule:
+    value: document_level
+    evidence: ["src/musical_genres_rag/Evaluation.py:504-517"]
+    basis: "HitRate/MRR check whether the expected genre's own id appears in the list of ids the index returned; each indexed unit is one whole genre record, so a hit is at the level of that document."
+
+  retrieval_eval_config_matches_shipped:
+    value: matches
+    evidence: ["data/demo/snapshot.json.gz", "config.yml.dist:8,15", "src/musical_genres_rag/Index.py:8"]
+    basis: "The committed retrieval run recorded retriever=postgres_hybrid, k=4, embedding_model=Xenova/bge-small-en-v1.5, matching config.yml.dist's index_engine and embedding defaults and Index.py's DEFAULT_LIMIT=4, which the shipped chat and CLI both use unless overridden."
+
+  retrieval_eval_uncertainty_stated:
+    value: false
+    evidence: ["src/musical_genres_rag/Evaluation.py:288-312"]
+    basis: "The aggregate computation (_averages/_assertionRates/_averageScore) reports means and rates only; no interval, variance or uncertainty statement is computed or stored anywhere in the evaluation or reporting code."
+
+  retrieval_best_approach_shipped:
+    value: undeterminable
+    evidence: ["data/demo/snapshot.json.gz"]
+    basis: "Only postgres_hybrid has a committed reported run; with no comparison across postgres_text/postgres_embed/postgres_hybrid, there is nothing to check the shipped engine against."
+
+  retrieval_eval_reproducible:
+    value: reproducible_as_committed
+    evidence: ["src/musical_genres_rag/management/commands/evaluate.py:1-31", "src/musical_genres_rag/Evaluation.py:484-501"]
+    basis: "\"manage.py evaluate --type retrieval\" runs a committed, deterministic pipeline (SQL bm25/vector search, no LLM call) over the committed ground truth CSV; nothing in the path is randomized or left undefined."
+
+  # E. Answer evaluation
+  llm_eval_present:
+    value: true
+    evidence: ["src/musical_genres_rag/Evaluation.py:376-404"]
+    basis: "GenresRagEvaluationRunner scores recorded RAG answers with HitRate, MRR, several genre-hit evaluators and an LLMJudge."
+
+  llm_eval_approaches_compared:
+    value: 1
+    evidence: ["data/demo/snapshot.json.gz"]
+    basis: "The committed snapshot holds exactly one RAG evaluation run, one model and one prompt (config.yml.dist's rag.instructions); no alternative prompt or model has reported numbers committed."
+
+  llm_eval_judge_kind:
+    value: model_judge
+    evidence: ["src/musical_genres_rag/Evaluation.py:402", "config.yml.dist:106-138"]
+    basis: "LLMJudge(rubric=JUDGE_RUBRIC, model=JUDGE_MODEL) is pydantic-evals' model-based judge, reading the rubric under evaluation.judge.rubric."
+
+  llm_eval_judge_spotchecked:
+    value: false
+    evidence: ["src/musical_genres_rag/Evaluation.py:391-404"]
+    basis: "The evaluator list run over every case names no step that samples judge verdicts for a human check, and no such check is reported elsewhere in the repository."
+
+  llm_eval_question_generator:
+    value: generator_ties_question_to_passage
+    evidence: ["src/musical_genres_rag/Evaluation.py:160-177", "config.yml.dist:76-104"]
+    basis: "_queryEntityGroundTruth builds each question set from one rendered genre entity, and the committed prompt instructs the model to describe that one genre without naming it, tying every generated question to the passage it was generated from."
+
+  llm_eval_metric_at_ceiling:
+    value: true
+    evidence: ["data/demo/snapshot.json.gz"]
+    basis: "Committed RAG run assertion_rates over 50 cases: HitRate 1.0 (50/50, direction=max, best=1 -> at ceiling), LLMJudge 0.96 (48/50, direction=max, best=correct -> >=95%, at ceiling), GenreRagFamilyHit 1.0 (50/50, at ceiling), GenreRagResponseHit 1.0 (50/50, at ceiling); GenreRagGenreHit 0.9 (45/50) is below the 95% threshold. The MRR-family scores (0.82, 0.89, 0.99) are continuous per-case values, not per-item best/worst booleans, and are not evaluated against the ceiling rule. At least one qualifying metric makes the value true."
+
+  llm_eval_role_overlap:
+    value: same_model
+    evidence: ["src/musical_genres_rag/Evaluation.py:59,105-172,661", "src/musical_genres_rag/Rag.py:13"]
+    basis: "Question generation (Evaluation.py MODEL), answer generation (Rag.py MODEL) and the judge (JUDGE_MODEL='openai:'+MODEL) all resolve to the single models.chat value in config.yml, so the same model occupies all three roles."
+
+  llm_eval_config_matches_shipped:
+    value: matches
+    evidence: ["src/musical_genres_rag/Evaluation.py:376-404", "src/musical_genres_rag/Rag.py:203-206"]
+    basis: "GenresRagEvaluationRunner replays answers produced by the same GenresRag/Rag class the shipped chat and CLI use, and the judge model equals the shipped chat model."
+
+  llm_eval_reproducible:
+    value: traceable_not_reproducible
+    evidence: ["src/musical_genres_rag/Evaluation.py:461-477", "src/musical_genres_rag/Evaluation.py:402"]
+    basis: "The ground truth, recorded answers and judge rubric are all committed and inspectable, but LLMJudge issues a live, non-deterministic LLM call on every run, so re-running the pipeline is not guaranteed to regenerate the same reported figures."
+
+  # F. Monitoring
+  monitoring_kind:
+    value: feedback_and_dashboard
+    evidence: ["src/musical_genres_rag/Feedback.py:43-119", "grafana/dashboards/conversations.json"]
+    basis: "A feedback/judge pipeline (thumbs plus LLM relevance judging) and a committed Grafana dashboard are both present."
+
+  monitoring_dashboard_provenance:
+    value: committed_definitions
+    evidence: ["grafana/dashboards/conversations.json", "grafana/provisioning/datasources/postgres.yml", "grafana/provisioning/dashboards/dashboards.yml"]
+    basis: "The dashboard's panels, queries and layout, and its datasource, are all provisioned from committed files rather than a stock image's own UI."
+
+  monitoring_instrumentation:
+    value: logged
+    evidence: ["src/musical_genres_rag/Repository.py:147-156", "src/musical_genres_rag/models.py:200-219"]
+    basis: "ConversationsRepository.create writes duration/input_tokens/output_tokens/cost/model onto each Conversation row as part of request handling; this is structured logging into Postgres, not span-based tracing."
+
+  monitoring_chart_count:
+    value: 11
+    evidence: ["grafana/dashboards/conversations.json"]
+    basis: "The panels array in the committed dashboard JSON has 11 entries."
+
+  monitoring_charts_bound_to_data:
+    value: all
+    evidence: ["grafana/dashboards/conversations.json", "src/musical_genres_rag/models.py:200-326"]
+    basis: "Every panel's rawSql references conversation/feedback columns (created, question, answer, duration, cost, model, input_tokens, output_tokens, score, relevance) that exist on the Conversation and Feedback models."
+
+  # G. Containerization and reproducibility
+  containerization_kind:
+    value: compose_full
+    evidence: ["compose.yml"]
+    basis: "compose.yml defines db, redis, ui, app, airflow and grafana as a full multi-service stack, not just dependencies."
+
+  run_instructions:
+    value: complete
+    evidence: ["USAGE.md:1-120"]
+    basis: "Setup, dependencies (uv/docker), configuration (config.yml), an environment variable (OPENAI_API_KEY in .env) and the run command (make start) are all named."
+
+  run_instructions_gap_count:
+    value: 1
+    evidence: ["src/config/settings.py:12-18,63-83", "compose.yml:37,61,123", "Makefile:25-33"]
+    basis: "The documented setup (make setup: uv sync, make config, make directories, make downloadModel, docker compose up, migrate, seed) never creates .env from the committed .env.example. settings.py's required() raises on missing POSTGRES_HOST/POSTGRES_DATABASE/POSTGRES_USER/POSTGRES_PASSWORD/REDIS_HOST, and manage.py downloadModel (the very first management command make setup runs, before docker compose is even started) loads those settings at import; the following docker compose up also needs .env for its env_file: .env services. No documented step ever creates that file."
+
+  dependency_versions_pinned:
+    value: lockfile_committed
+    evidence: ["uv.lock", "pyproject.toml"]
+    basis: "uv.lock is committed alongside pyproject.toml's loose lower-bound constraints."
+
+  data_accessible:
+    value: automated_or_committed
+    evidence: ["data/genre.csv", "data/instrument.csv", "data/genre_hierarchy.csv", "data/instrument_genres.csv", "data/load.sql"]
+    basis: "The seed data is committed directly as CSV files, loaded by a committed SQL script."
+
+  # H. Techniques
+  hybrid_search:
+    present:
+      value: true
+      evidence: ["src/musical_genres_rag/Index.py:98-182"]
+      basis: "PostgresSearchEngine's 'hybrid' mode writes both text and vector columns and fuses their searches with ReciprocalRankFusion."
+    shipped_enabled:
+      value: true
+      evidence: ["config.yml.dist:8"]
+      basis: "index_engine: postgres_hybrid is the shipped default, used by chat, CLI and API unless a caller names another engine."
+    evaluated:
+      value: false
+      evidence: ["data/demo/snapshot.json.gz"]
+      basis: "No committed evaluation run reports numbers for postgres_text or postgres_embed to compare hybrid against; only hybrid's own numbers are recorded."
+    measured_effect:
+      value: not_measured
+      evidence: []
+      basis: "No comparison exists, so hybrid's effect relative to the other engines is not measured."
+    decision_basis:
+      value: none
+      evidence: ["USAGE.md:53"]
+      basis: "USAGE.md recommends leaving the engine as postgres_hybrid without stating a reason, a-priori or measured."
+    decision_axes:
+      value: []
+      evidence: []
+      basis: "No axis is named for the recommendation."
+
+  reranking:
+    present:
+      value: false
+      evidence: []
+      basis: "No reranking code, dependency or prompt exists anywhere in the repository."
+    shipped_enabled:
+      value: false
+      evidence: []
+      basis: "Not present, so not shipped."
+    evaluated:
+      value: false
+      evidence: []
+      basis: "Not present, so not evaluated."
+    measured_effect:
+      value: not_measured
+      evidence: []
+      basis: "Not present."
+    decision_basis:
+      value: none
+      evidence: []
+      basis: "No reasoning is stated because the technique does not appear at all."
+    decision_axes:
+      value: []
+      evidence: []
+      basis: "Not applicable."
+
+  query_rewriting:
+    present:
+      value: false
+      evidence: []
+      basis: "No query rewriting code, dependency or prompt exists anywhere in the repository."
+    shipped_enabled:
+      value: false
+      evidence: []
+      basis: "Not present, so not shipped."
+    evaluated:
+      value: false
+      evidence: []
+      basis: "Not present, so not evaluated."
+    measured_effect:
+      value: not_measured
+      evidence: []
+      basis: "Not present."
+    decision_basis:
+      value: none
+      evidence: []
+      basis: "No reasoning is stated because the technique does not appear at all."
+    decision_axes:
+      value: []
+      evidence: []
+      basis: "Not applicable."
+
+  # I. Deployment and bonus
+  cloud_deployment:
+    value: none
+    evidence: ["compose.yml", "Dockerfile"]
+    basis: "Only a local docker-compose stack and one Dockerfile (building the Postgres image) are committed; no cloud-provider configuration (Terraform, Kubernetes manifests, cloud CLI scripts) is present."
+
+  # J. Documentation accuracy
+  headline_numbers_traceable:
+    value: no_numbers
+    evidence: ["README.md", "USAGE.md", "docs/architecture.md", "docs/api.md", "docs/monitoring.md"]
+    basis: "No headline performance figure (hit rate, MRR, judge score, cost) is stated in prose anywhere in the committed documentation; reported figures live only in the Grafana dashboard and the Streamlit report pages, neither of which is a static document."
+
+  untraceable_number_count:
+    value: 0
+    evidence: []
+    basis: "No documentation states a headline number to check."
+
+  document_number_conflicts:
+    value: 0
+    evidence: []
+    basis: "No two committed documents state disagreeing figures; the sampling and feedback defaults (30s/20 conversations/60%, 100-item judge limit) are consistent across USAGE.md, Sample.py, Feedback.py, Api.py and dags/mgr.py."
+
+  document_code_conflicts:
+    value: 2
+    evidence: ["docs/architecture.md:191", "config.yml.dist:15", "src/musical_genres_rag/Vectorizer.py:40-44", "docs/api.md:35-36", "config.yml.dist:8", "src/musical_genres_rag/Api.py:156-157", "src/musical_genres_rag/Command.py:14-18"]
+    basis: "(1) architecture.md's searching table names the embedding model as Xenova/all-MiniLM-L6-v2, but config.yml.dist configures Xenova/bge-small-en-v1.5 and Vectorizer.py's MODEL_PROFILES has no MiniLM entry at all. (2) api.md states the engine parameter defaults to postgres_text, but both Api.py's EngineRequest and Command.py's EngineCommand default to INDEX_ENGINE, which config.yml.dist sets to postgres_hybrid."
+
+  broken_reference_count:
+    value: 0
+    evidence: ["README.md", "USAGE.md", "docs/architecture.md", "docs/api.md", "docs/monitoring.md"]
+    basis: "Every image, script and file path named in the documentation (images/*.png, scripts/generate-dataset.py, grafana/*, config.yml.dist, Dockerfile, compose.yml, pyproject.toml, uv.lock) exists in the repository at the path given."
+
+  limitations_section:
+    value: cosmetic_only
+    evidence: ["README.md:46-56"]
+    basis: "The \"Next steps\" list names production-readiness gaps (multithreaded loading, full dataset, authentication, chat isolation, scale testing, documentation polish); none concerns the retrieval or generation method's own correctness or the evaluation's validity as a measurement, only hardware/scope/budget/feature-completeness items the schema excludes from structural."
+
+  artifact_reference_strength:
+    value: all_referenced
+    evidence: ["docs/monitoring.md:70-72", "docs/monitoring.md:43", "docs/architecture.md:173-178", "README.md:24-28", "docs/api.md:125-126"]
+    basis: "The monitoring dashboard definition is named by path in a table (docs/monitoring.md:70-72); the ingestion entry point is named as a code span in the entry-points table (docs/architecture.md:173-178); the deployment configuration is pointed to by name (README.md:24-28, \"Dockerfile and docker compose\"); the evaluation question set is named via its directory (docs/monitoring.md:43, data/demo) and its generated filename pattern (docs/api.md:125-126); the evaluation entry point is reachable via the Makefile, which README.md:24-28 names directly. None of these are markdown links, so the strength stops short of all_linked."
+
+  artifacts_unreferenced_count:
+    value: 0
+    evidence: ["docs/monitoring.md:70-72", "docs/architecture.md:173-178", "README.md:24-28"]
+    basis: "All five checklist artifacts (evaluation script, evaluation question set, monitoring dashboard definition, ingestion entry point, deployment configuration) are named somewhere in the documentation."
+
+  # K. Descriptive
+  corpus_language:
+    value: en
+    evidence: ["README.md", "config.yml.dist"]
+    basis: "All prompts, documentation and data descriptions are in English."
+
+  corpus_domain:
+    value: "musical genres and instruments"
+    evidence: ["README.md:1-6", "data/genre.csv"]
+    basis: "The corpus is a sample of MusicBrainz genres, their hierarchy and associated instruments."
+
+  interface_framework:
+    value: "streamlit, django-ninja"
+    evidence: ["ui.py:1-10", "src/musical_genres_rag/Api.py:1-9"]
+    basis: "The web UI is built with Streamlit; the JSON API is built with django-ninja. This field is a single string but the repository ships two interface frameworks; see extraction_notes."
+
+  vector_store:
+    value: "postgres (pgvector)"
+    evidence: ["src/musical_genres_rag/models.py:94-98", "src/musical_genres_rag/migrations/0016_genre_index_embed.py"]
+    basis: "Vectors are stored in a pgvector column on the genre_index table, searched via an hnsw index."
+
+  llm_provider:
+    value: openai
+    evidence: ["pyproject.toml:16", "src/musical_genres_rag/Rag.py:5,153"]
+    basis: "The chat, judge and ground-truth generator all use the openai package's OpenAI client."
+
+  repo_file_count:
+    value: 96
+    evidence: ["<repo>"]
+    basis: "git ls-files | wc -l at the pinned commit."
+
+extraction_notes:
+  - "interface_kind is now list[enum] (M2), but interface_framework (group K) remains a single string. This repository ships two interface frameworks at once (Streamlit for web_ui, django-ninja for api), and the single-string field cannot hold both without concatenation. Recording \"streamlit, django-ninja\" is a workaround, not a value the field's stated shape anticipates; the same asymmetry would recur for any repository offering more than one interface kind built on different frameworks."
+  - "llm_eval_metric_at_ceiling's ceiling rule reads cleanly on the per-item boolean assertion_rates (HitRate, LLMJudge, GenreRagGenreHit, GenreRagFamilyHit, GenreRagResponseHit) but not on the continuous MRR-family scores (MRR, GenreRagGenreMrr, GenreRagFamilyMrr), which have no natural \"95% of items at the metric's best value\" reading without per-case data this record does not have access to beyond the single committed run. Only the boolean assertion rates were evaluated against the rule."
+  - "monitoring_instrumentation's two values (logged vs traced_on_request_path) do not obviously separate 'writes structured rows to a database synchronously on the request path' from 'emits spans to a tracing backend'. This repository does the former (Conversation/Feedback rows carrying duration/tokens/cost, written inline in request handling) and was recorded as logged, but it is closer to request-path instrumentation than the group F prose's own p02 contrast (OpenTelemetry spans vs nothing) suggests the boundary is meant to be."
+  - "The four dashboard summary tiles plus seven lower panels in docs/monitoring.md's prose table (11 total) match the JSON panel count exactly, so no ambiguity there — noted only because the correspondence had to be checked rather than assumed."
+  - "problem_statement's judgment call: the audience is stated only as \"people\" wanting to explore musical genres, which reads as no real audience specification rather than a defined persona; recorded as brief rather than specific on that basis, but a different reader could reasonably call the vibes/instruments/dates framing specific enough about the question half alone."

@@ -5,10 +5,28 @@ step 2), then revised in place at the 2026-08-10 owner gate (C1-C8) before any
 case was built on it. Nothing course-specific belongs
 here: this schema must survive pointing the project at a second zoomcamp.*
 
-**Status: FROZEN FOR M1 (2026-08-10).** Cleared the step-3 owner gate after
-two revision rounds; cases may now be built on it. Every open question found
-since — including several the owner raised and several the p02 extraction
-surfaced — is queued in `docs/deferred-to-m2.md` rather than resolved here.
+**Status: M2 SCHEMA CLOSURE IN PROGRESS (2026-08-13).** `schema_version`
+bumped 0 → 1. This revision closes the M1-deferred items recorded in
+`docs/deferred-to-m2.md`, per owner sign-off on
+`runs/2026-08-13-m2-schema-closure/proposal.md`; the corresponding
+`decisions.md` entries name each change. Not yet sealed — sealing is a
+separate, later owner gate (`tasks/03-milestone-2.md` step 8). One item
+(3e, `retrieval_best_approach_shipped`) is intentionally not resolved in
+this revision; see that field's entry below.
+
+**Post-sign-off edit, flagged (2026-08-14, pending owner ratification):**
+group H below gained a worked YAML example during step 3 (re-extraction),
+after this schema was supposed to have stopped moving per step 2's
+sign-off. Made without asking first — a process violation of the same
+kind item 3e's handling was written to avoid, caught by owner review after
+the fact, not before. Recorded honestly rather than folded in silently:
+see `docs/decisions.md` `group-h-worked-example-post-hoc`. **This edit is
+documentation-only and does not change `schema_version`**: it adds no
+field, no value, no rule not already implied by "Record structure" above
+(every leaf is `{value, evidence, basis}`) — it makes an existing rule
+concrete after three independent extractors misread it, rather than
+stating a new one. No record needs re-checking against it for that reason
+alone.
 
 The freeze is deliberate and its reason is arithmetic: a schema change
 before M2 sealing is free, because the corpus is being extracted then
@@ -48,6 +66,23 @@ integers, or are booleans. Free text appears only in `basis` and
 field to a different legal value and have the direction of that change be
 obvious by construction.
 
+## Domain vs. general knowledge
+
+Rule 1 bars *subject-matter* knowledge — a reviewer answering a field must
+not need to understand the corpus domain or read its language. It does
+**not** bar general programming or library knowledge: knowing that
+`pandas.read_json(dtype={'id', str})` passes a set rather than a mapping
+and fails, or that bash `echo` needs `-e` to interpret `\n`, or that a named
+image ships a UI, is ordinary software knowledge, not domain expertise, and
+is admissible.
+
+**When such knowledge is load-bearing for a value, the record states so in
+`extraction_notes`.** This is not a simplification of rule 1 — it is
+the rule the owner already applied at the M1 gate (p02's
+`run_instructions_gap_count` and monitoring fields), made explicit so two
+extractors agree on what they are allowed to know. Without the rule
+written down, that agreement is accidental.
+
 ## Read-set marking — why every field carries one
 
 Each field is marked **`scoreable`** or **`descriptive`**.
@@ -68,10 +103,19 @@ half automatically. That is the intended consequence: a criterion that moves
 when Flask becomes FastAPI, or when the corpus changes subject, is
 noise-sensitive, and the objective is built to catch that.
 
+**The disjointness holds for `value`, not automatically for `basis` (M2).**
+A *scoreable* field's `basis` sentence can still embed a *descriptive* fact
+in prose (naming the audience, the corpus domain, a vendor) even though its
+`value` never does — which silently reintroduces the leak the marking
+exists to prevent, for two of the three no-change twin kinds
+(`deferred-to-m2.md` §3c). `agents/extractor/v2` states the rule that
+closes this going forward: a scoreable field's `basis` states only the
+fact being scored, never incidental descriptive context.
+
 ## Record structure
 
 ```yaml
-schema_version: 0
+schema_version: 1
 case_id: p01
 commit: "<40-hex>"
 extracted_by: agents/extractor/v1
@@ -172,13 +216,23 @@ the presence of two stated things rather than their quality.
 
 | field | type | values |
 |---|---|---|
-| `interface_kind` | enum | `none` · `script_or_notebook` · `cli` · `api` · `web_ui` · `other` |
+| `interface_kind` | list[enum] | one or more of `none` · `script_or_notebook` · `cli` · `api` · `web_ui` · `other` (M2; was a single enum) |
 | `interface_evidence_kind` | enum | `none` · `code_only` · `code_and_screenshot` · `code_and_recording` |
 
 `interface_evidence_kind` exists because a reviewer who cannot run a project
 silently reviews its documentation instead (`project-evaluation-issues.md`,
 constraints). It records whether the documentation compensates. Nothing in
 the *current* criteria reads it; it is here so a candidate can.
+
+**`interface_kind` is a list (M2).** A single enum forces a project
+offering both a web UI and an API — or, as found repeatedly across the
+corpus (p01, p02, p08, p11), two separate interfaces — into one value,
+silently dropping the other. `none` appears only as the sole element of an
+empty-interface record. A criterion reading a single interface still works
+unchanged (`{interface_kind: {in: [web_ui, api]}}` now matches if *any*
+element of the list is in the set — see `candidates/v0/score.py`'s
+membership-test update, `sampling-in-cache-key`-adjacent but a scorer
+change, not a protocol one).
 
 ## C. Ingestion — `scoreable`
 
@@ -200,6 +254,7 @@ the *current* criteria reads it; it is here so a candidate can.
 | `retrieval_eval_config_matches_shipped` | enum | `matches` · `differs` · `undeterminable` |
 | `retrieval_eval_uncertainty_stated` | bool | any interval, variance or uncertainty statement |
 | `retrieval_best_approach_shipped` | enum | `yes` · `no` · `mixed_result` · `undeterminable` |
+| `retrieval_eval_reproducible` | enum | `reproducible_as_committed` · `traceable_not_reproducible` · `neither` |
 
 `retrieval_eval_relevance_rule` is read off the scoring function, not the
 prose: what does the code count as a hit? Coarser rules make more
@@ -217,6 +272,39 @@ numbers disagree across metrics about which approach wins. That is a
 distinct fact from "the best was not shipped", and collapsing the two would
 lose the distinction a candidate most needs.
 
+`retrieval_eval_reproducible` (M2) states whether the retrieval-evaluation
+*pipeline itself* can be trusted, independent of what it reports:
+
+- `reproducible_as_committed` — a committed script or notebook, run as
+  committed, would regenerate the reported figures from committed inputs:
+  no missing imports, no unexecuted cells, no undefined names, no
+  silently-dropped denominator.
+- `traceable_not_reproducible` — the number cannot be regenerated by
+  running committed code, but every step from evaluation set to reported
+  figure is still inspectable by reading committed artifacts.
+- `neither` — neither holds.
+
+This replaces a four-sub-field sketch the owner rejected as overfit to two
+specific repositories. It does not subsume `document_code_conflicts`
+(group J — a reported figure the code cannot reach) or
+`headline_numbers_traceable` (also group J — whether an artifact exists
+that could produce a number at all); it is specifically about whether the
+*evaluation pipeline*, if run, would work.
+
+**`retrieval_best_approach_shipped` is not normalised, and this revision
+does not fix it (M2, `deferred-to-m2.md` §3e, open).** The field is a
+hand-maintained summary of the per-technique `measured_effect` values in
+group H; a twin changing one technique's measured effect can make this
+field stale without a corresponding edit, which is why
+`twin-entailed-change-scoped` had to be invented at all. The permanent fix
+— deriving this value from the H blocks at scoring time instead of storing
+it — is deferred pending a precise, owner-reviewed derivation rule: this
+field anchors the single most contested interpretation in v0
+(`retrieval-best-approach-reading-flagged`, findings F2/F3), and a
+derivation formula written without that review would just relocate the
+judgment call, not remove it. The field stays as written, hand-maintained,
+until that rule exists.
+
 ## E. Answer evaluation — `scoreable`
 
 | field | type | values |
@@ -226,9 +314,10 @@ lose the distinction a candidate most needs.
 | `llm_eval_judge_kind` | enum | `none` · `model_judge` · `human` · `offline_metric` · `other` |
 | `llm_eval_judge_spotchecked` | bool | a sample of judge verdicts checked by hand, with the result reported |
 | `llm_eval_question_generator` | enum | `none_committed` · `generator_committed` · `generator_ties_question_to_passage` · `other` · `undeterminable` |
-| `llm_eval_metric_at_ceiling` | bool | a reported metric sits at its maximum for effectively every item |
+| `llm_eval_metric_at_ceiling` | bool \| null | a reported metric is at ceiling per the defined rule below; `null` when no aggregate metric exists to check |
 | `llm_eval_role_overlap` | enum | `distinct` · `same_family` · `same_model` · `undeterminable` |
 | `llm_eval_config_matches_shipped` | enum | `matches` · `differs` · `undeterminable` |
+| `llm_eval_reproducible` | enum | `reproducible_as_committed` · `traceable_not_reproducible` · `neither` |
 
 `llm_eval_judge_spotchecked` and `llm_eval_question_generator` together
 express the circularity failure mode. Neither technique is a defect alone —
@@ -257,6 +346,23 @@ about the reported numbers and needs no view about the subject matter.
 Contrast p02, whose judge scores are 0.805 and 0.969 — below ceiling, so the
 metric could in principle have come out worse.
 
+**Ceiling threshold, defined (M2):** a reported metric is *at ceiling* when
+at least 95% of scored items achieve that metric's best possible value,
+where "best" is the metric's own stated direction — maximum for a
+quality/relevance score, **minimum for an error, refusal, or failure
+rate**. 95% matches the G4 ceiling-check threshold already frozen in
+`objective.md` (`agreement-protocol-ceiling`) rather than inventing a
+second number. `value` is `true` iff at least one reported metric qualifies
+— evaluated per metric, **never averaged across metrics**: a mean would
+hide exactly the one-maxed-metric-among-several case this field exists to
+catch. `basis` states each reported metric's direction and per-metric
+ceiling status. Where no aggregate metric exists at all (an evaluation
+attempted but never completed, or no static aggregate committed), the
+value is `null`, not `false` — there is nothing to check for ceiling
+behavior, which is a different fact from "checked, and not at ceiling."
+(p06's judge emits a categorical label with no committed numeric
+aggregate; its `null` value predates this rule and is consistent with it.)
+
 `llm_eval_role_overlap` records how many roles one model occupies:
 generating the question set, being a system under comparison, and judging.
 p02 has one model in all three, including judging a comparison it loses.
@@ -268,6 +374,19 @@ remains is shared inductive bias — a judge that makes the same mistakes as
 the generator scores them as correct — which is real but is a tendency, not
 a defect the schema should assert. `same_family` covers different sizes of
 one model line.
+
+`llm_eval_reproducible` (M2) is the answer-evaluation counterpart to
+`retrieval_eval_reproducible` (group D) — same three values, same
+definitions, applied to the answer-evaluation pipeline: judge run,
+question set, generation calls. It states whether the pipeline itself
+would work if run, not whether its reported numbers are good.
+
+**When `llm_eval_question_generator` is `none_committed` (M2):** the
+generator role has no model in it — there is nothing to overlap with. This
+field then compares only the answer-generator and judge roles, and
+`basis` must say so explicitly. p01 is exactly this case: its recorded
+`same_family` reflects the answer-generator/judge pair only, not a
+three-way comparison.
 
 ## F. Monitoring — `scoreable`
 
@@ -357,10 +476,55 @@ A count rather than an enum: `complete`/`partial` cannot distinguish one
 missing `export` from a procedure that never populates its index, and a
 count lets a twin move the field by exactly one gap.
 
+**`run_instructions` and `run_instructions_gap_count` measure different
+things and are not redundant (M2).** The enum measures *coverage* — does
+the written procedure name every required step category. The count
+measures *correctness* — does each named step actually work. A record can
+correctly hold `run_instructions: complete` alongside a nonzero gap count:
+p01's procedure names every category and is still unrunnable in three
+places. **A criterion checking whether the instructions actually work
+should read the count, never the enum alone** — reading only the enum
+answers a different question than it looks like it answers. v0 currently
+reads only the enum, faithfully transcribing the current guidance's own
+conflation of the two; this is unchanged (`v0-literal-no-inferences`).
+
 ## H. Techniques — `scoreable`
 
 One block per technique, keys `hybrid_search`, `reranking`,
-`query_rewriting`:
+`query_rewriting`. **Each sub-field below is its own leaf — a
+`{value, evidence, basis}` mapping, exactly like every other field in this
+schema — nested one level deeper under the technique name, never a bare
+value.** This has been the single most common structural mistake extractors
+make (found and fixed in three separate M2 extractions): writing
+`hybrid_search: {present: true, ...}` with bare values instead of
+`hybrid_search: {present: {value: true, evidence: [...], basis: "..."}, ...}`.
+Worked example, one technique, fully nested:
+
+```yaml
+fields:
+  hybrid_search:
+    present:
+      value: true
+      evidence: ["src/rag.py:40-58"]
+      basis: "combines BM25 and vector search results before reranking"
+    shipped_enabled:
+      value: true
+      evidence: ["src/rag.py:12"]
+      basis: "HYBRID_SEARCH=true is the shipped default"
+    evaluated:
+      value: true
+      evidence: ["notebooks/eval.ipynb:cell9"]
+      basis: "hit rate/MRR computed for hybrid vs. vector-only"
+    measured_effect:
+      value: improves
+      evidence: ["notebooks/eval.ipynb:cell9"]
+      basis: "hybrid MRR 0.81 vs. vector-only MRR 0.74"
+    decision_basis:
+      value: measured
+      evidence: ["README.md:120-124"]
+      basis: "shipped because it wins on the project's own MRR comparison"
+    decision_axes: ["mrr", "hit_rate"]
+```
 
 | sub-field | type | values |
 |---|---|---|
@@ -368,7 +532,7 @@ One block per technique, keys `hybrid_search`, `reranking`,
 | `shipped_enabled` | bool | active on the request path, not merely present |
 | `evaluated` | bool | its effect is measured and the numbers reported |
 | `measured_effect` | enum | `improves` · `mixed` · `hurts` · `not_measured` |
-| `decision_documented` | bool | the ship/do-not-ship choice is stated **and** justified by the project's own measurements |
+| `decision_basis` | enum | `none` · `argued` · `measured` — see below (M2; was `decision_documented: bool`) |
 | `decision_axes` | list[str] | which measured quantities the stated justification rests on |
 
 This is the harmful-component-kept lever, and the reason it needs four
@@ -382,7 +546,7 @@ requires nobody to read anything.
 from a view about whether the component ought to help. `mixed` when the
 reported metrics disagree with each other.
 
-`decision_documented` is the field that makes a **documented removal**
+`decision_basis` is the field that makes a **documented removal**
 visible, and without it the schema could only ever record the negative half
 of one. p02 implements a reranker, measures it, and rejects it: MRR improves
 but latency rises more than tenfold, and the README says so and says why.
@@ -395,6 +559,26 @@ This is the incentive gradient of `project-evaluation-issues.md` §2 reduced
 to a checkable fact. Shipping a component is visible in the file tree;
 measuring one and removing it is visible only if someone reads the write-up.
 A criterion cannot reward the second path unless a field carries it.
+
+**Three-way, not boolean (M2, was `decision_documented: bool`).** A bool
+named "documented" reads as "a reason was stated," but the field actually
+required more: a choice stated **and** justified by the project's own
+measurements. p02's original hybrid-search argument (dense embeddings suit
+the domain, on a-priori grounds, no measurement cited) is a real,
+documented reason that nonetheless answered `false` under the old
+definition — correct under the schema as written, but surprising to
+anyone checking the field by its name alone. `decision_basis` states which
+case holds:
+
+- `none` — no ship/do-not-ship reasoning is stated at all.
+- `argued` — a reason is stated, but rests on a-priori reasoning rather
+  than the project's own measurements (p02's original hybrid-search case).
+- `measured` — the choice is tied to the project's own reported numbers
+  (p02's reranker rejection; the old `true`).
+
+A criterion may still collapse `argued` and `measured` together if it
+wants the old boolean behavior; the field now lets one that cares about
+the distinction read it.
 
 `decision_axes` names the quantities the justification rests on — e.g.
 `["mrr", "hit_rate", "latency", "token costs"]` — because a project may decide on an axis
@@ -517,12 +701,27 @@ not, and only the former is admissible (decision
 
 | field | type | values |
 |---|---|---|
-| `corpus_language` | string | primary language of the indexed corpus |
+| `corpus_language` | string | lowercase [ISO 639-1](https://en.wikipedia.org/wiki/List_of_ISO_639_language_codes) code, e.g. `en`, `pt`, `ru`, `de` (M2; was unconstrained free text) |
 | `corpus_domain` | string | free-text subject label |
 | `interface_framework` | string | e.g. `flask`, `streamlit`, `fastapi` |
 | `vector_store` | string | e.g. `qdrant`, `elasticsearch`, `in_memory` |
 | `llm_provider` | string | e.g. `openai`, `ollama` |
 | `repo_file_count` | int | tracked files at the pinned commit |
+
+**`corpus_language` is constrained (M2).** M1 returned `pt` from one
+extraction and `portuguese` from another for the same fact — both correct,
+not comparable. The extended M2 corpus repeated the problem across
+capitalization and code-vs-name choice (`english`, `English`, `Russian`,
+`de` all appeared before this constraint). ISO 639-1 removes the ambiguity;
+every value observed so far maps cleanly to one code.
+
+**Group-K string equality is excluded from any extraction-agreement or
+spot-check statistic (M2).** These fields are `descriptive` and no
+criterion may read them; a double-extraction agreement measurement that
+penalizes `pt` vs. `portuguese` disagreement would be measuring wording,
+not extraction validity. `corpus_language`'s new constraint reduces the
+practical risk but the exclusion applies to all of group K, including the
+still-free-text `corpus_domain`.
 
 These exist **so that no-change twins have somewhere to mutate**. A
 criterion reading any of them would score a project for choosing Flask over

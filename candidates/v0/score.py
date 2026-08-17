@@ -57,6 +57,12 @@ def satisfies(actual: Any, expected: Any) -> bool:
     """One condition. Every key in a `when` block must satisfy (AND)."""
     if isinstance(expected, dict):
         if "in" in expected:
+            # A list-valued field (e.g. `interface_kind` since M2, schema
+            # item 7) matches "in" if ANY element is a member — a project
+            # with two interfaces should satisfy a criterion either one
+            # alone would satisfy. A scalar field keeps exact membership.
+            if isinstance(actual, list):
+                return any(a in expected["in"] for a in actual)
             return actual in expected["in"]
         for op in (">=", ">", "<=", "<"):
             if op in expected:
@@ -72,6 +78,10 @@ def satisfies(actual: Any, expected: Any) -> bool:
                     "<=": actual <= bound, "<": actual < bound,
                 }[op]
         raise MappingError(f"unknown condition {expected!r}")
+    # Same list-aware rule as "in" above, for bare equality against a
+    # list-valued field (e.g. `{interface_kind: none}` against `["none"]`).
+    if isinstance(actual, list):
+        return expected in actual
     return actual == expected
 
 

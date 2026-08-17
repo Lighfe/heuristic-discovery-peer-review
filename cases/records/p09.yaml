@@ -1,0 +1,362 @@
+schema_version: 1
+case_id: p09
+commit: "8cc8fea6f3fc189599d49cbaded3ce3051ce600f"
+extracted_by: agents/extractor/v2
+extracted_on: "2026-08-14"
+
+fields:
+  # A. System shape
+  knowledge_base_present:
+    value: present
+    evidence: ["schema.sql:12-19", "retrieval/retrieve.py:39-55"]
+    basis: "chunks table holds text + a pgvector embedding column, queried by keyword_search and vector_search."
+
+  llm_in_flow:
+    value: present
+    evidence: ["generation/generate.py:19-33"]
+    basis: "generate_answer calls the OpenAI chat completions API on every request."
+
+  retrieval_flow:
+    value: kb_and_llm
+    evidence: ["app/app.py:91-101"]
+    basis: "answer_question calls retrieve() against Postgres then generate_answer() against the LLM, in the request handler."
+
+  problem_statement:
+    value: brief
+    evidence: ["README.md:11-24", "README.md:34-42"]
+    basis: "topic (grounded handbook Q&A, refuses out-of-scope questions) is stated; no section names a specific audience, only an incidental mention that onboarding benefits (README.md:24)."
+
+  # B. Interface
+  interface_kind:
+    value: [web_ui]
+    evidence: ["app/app.py:114-158"]
+    basis: "single Streamlit interface (st.set_page_config/st.form/st.button); no CLI or API entry point in the repository."
+
+  interface_evidence_kind:
+    value: code_and_screenshot
+    evidence: ["README.md:44-54", "docs/images/qa-screen.png", "docs/images/monitoring-dashboard.jpeg"]
+    basis: "README embeds two committed screenshots (Q&A screen, Grafana dashboard) alongside the app code."
+
+  # C. Ingestion
+  ingestion_kind:
+    value: orchestrated_tool
+    evidence: ["ingest/__main__.py:1-19", "ingest/corpus.py:39-42", "ingest/embed.py:30-46"]
+    basis: "ingestion is a dlt pipeline (dlt.resource/dlt.transformer, dlt.pipeline.run)."
+
+  ingestion_single_command:
+    value: true
+    evidence: ["Makefile:3-4"]
+    basis: "`make ingest` runs `uv run python -m ingest` end to end; also triggered automatically by `docker compose up` via the ingest service."
+
+  ingestion_output_stated:
+    value: false
+    evidence: ["README.md:101-110", "README.md:125"]
+    basis: "README describes the chunking scheme but states no document, chunk or vector count anywhere."
+
+  # D. Retrieval evaluation
+  retrieval_eval_present:
+    value: true
+    evidence: ["notebooks/retrieval-evaluation.ipynb:cell0"]
+    basis: ""
+
+  retrieval_eval_approaches_compared:
+    value: 3
+    evidence: ["notebooks/retrieval-evaluation.ipynb:cell10,cell11"]
+    basis: "keyword, vector and hybrid retrievers each have reported hit-rate@5 and mrr@5 in the comparison table."
+
+  retrieval_eval_set_committed:
+    value: committed
+    evidence: ["data/ground-truth-retrieval.csv"]
+    basis: "427 (question, chunk_id) rows committed to the repository."
+
+  retrieval_eval_set_size:
+    value: 427
+    evidence: ["data/ground-truth-retrieval.csv"]
+    basis: "427 data rows (428 lines including header)."
+
+  retrieval_eval_relevance_rule:
+    value: passage_level
+    evidence: ["notebooks/retrieval-evaluation.ipynb:cell9", "ingest/corpus.py:19-36"]
+    basis: "a hit requires the exact section-level chunk_id in the top-k results; a chunk is one heading section, not a whole document."
+
+  retrieval_eval_config_matches_shipped:
+    value: matches
+    evidence: ["notebooks/retrieval-evaluation.ipynb:cell1,cell9", "retrieval/retrieve.py:14-16,58-85"]
+    basis: "the notebook imports RETRIEVERS/connection directly from retrieval/retrieve.py and evaluates at k=5, same module and default k the app uses."
+
+  retrieval_eval_uncertainty_stated:
+    value: true
+    evidence: ["notebooks/retrieval-evaluation.ipynb:cell12"]
+    basis: "the write-up states the hybrid/vector hit-rate margin (0.2 points, ~1 question of 427) and interprets it as within noise rather than a real difference."
+
+  retrieval_best_approach_shipped:
+    value: mixed_result
+    evidence: ["notebooks/retrieval-evaluation.ipynb:cell11", "retrieval/retrieve.py:12"]
+    basis: "hybrid wins hit-rate@5 (0.867 vs vector's 0.864) but vector wins mrr@5 (0.692 vs hybrid's 0.681); hybrid is the shipped DEFAULT_RETRIEVER."
+
+  retrieval_eval_reproducible:
+    value: reproducible_as_committed
+    evidence: ["notebooks/retrieval-evaluation.ipynb:cell1,cell3,cell5,cell9,cell10,cell11"]
+    basis: "cells execute in order (execution_count 1-8, no gaps) with stored outputs matching the numbers quoted in the notebook's own prose; requires a running, ingested Postgres instance to re-execute, but no undefined name or dropped denominator in the committed code."
+
+  # E. Answer evaluation
+  llm_eval_present:
+    value: true
+    evidence: ["notebooks/llm-evaluation.ipynb:cell0"]
+    basis: ""
+
+  llm_eval_approaches_compared:
+    value: 3
+    evidence: ["generation/prompts.py:46-50", "notebooks/llm-evaluation.ipynb:cell10"]
+    basis: "PROMPT_VARIANTS has three named entries (baseline, hardened, few_shot), each with reported per-criterion scores."
+
+  llm_eval_judge_kind:
+    value: model_judge
+    evidence: ["generation/judge.py:5,38-61"]
+    basis: "judge_answer makes a gpt-4o-mini chat completion call and parses its JSON verdict."
+
+  llm_eval_judge_spotchecked:
+    value: false
+    evidence: ["notebooks/llm-evaluation.ipynb:cell3"]
+    basis: "ground-truth-llm.csv carries a reference_answer column 'for a human reader to sanity-check ... the judge's calls against', but no spot-check result over judge verdicts is reported anywhere in the notebook or README."
+
+  llm_eval_question_generator:
+    value: none_committed
+    evidence: ["notebooks/llm-evaluation.ipynb:cell3"]
+    basis: "the gold set is described as seed questions taken from the problem statement plus hand-added refusal probes; no generator function is committed for this set."
+
+  llm_eval_metric_at_ceiling:
+    value: true
+    evidence: ["data/llm-eval-results.csv", "notebooks/llm-evaluation.ipynb:cell10,cell11"]
+    basis: "groundedness (max=2, higher is better) is 2.00 for the shipped 'hardened' variant, i.e. 12/12 scored items (100%) at the metric's maximum, >=95% ceiling threshold; citation/relevance/refusal for hardened, and all criteria for the other two variants, are below the threshold."
+
+  llm_eval_role_overlap:
+    value: same_model
+    evidence: ["generation/generate.py:5", "generation/judge.py:5"]
+    basis: "answer generation and judging both use gpt-4o-mini; the question-generator role has no committed model (see llm_eval_question_generator), so only these two roles are compared."
+
+  llm_eval_config_matches_shipped:
+    value: matches
+    evidence: ["notebooks/llm-evaluation.ipynb:cell2,cell8", "generation/prompts.py:52", "retrieval/retrieve.py:12"]
+    basis: "the notebook retrieves with DEFAULT_RETRIEVER at k=5 and generates with each prompt variant via the shared generate_answer function; the winning variant (hardened) is exactly PRODUCTION_SYSTEM_PROMPT, the constant the app imports."
+
+  llm_eval_reproducible:
+    value: reproducible_as_committed
+    evidence: ["notebooks/llm-evaluation.ipynb:cell4,cell8,cell10,cell11", "data/llm-eval-results.csv"]
+    basis: "cells execute in order (execution_count 1-6, no gaps) and, with the committed results CSV present, the reported means/totals are a deterministic pandas groupby over it."
+
+  # F. Monitoring
+  monitoring_kind:
+    value: feedback_and_dashboard
+    evidence: ["app/app.py:141-153", "grafana/provisioning/dashboards/handbook-assistant.json:1-172"]
+    basis: "thumbs up/down buttons write feedback, and an 8-panel Grafana dashboard is provisioned."
+
+  monitoring_dashboard_provenance:
+    value: committed_definitions
+    evidence: ["grafana/provisioning/dashboards/handbook-assistant.json:1-172"]
+    basis: "all 8 panel definitions, including their SQL, are committed JSON, not a stock tool's default UI."
+
+  monitoring_instrumentation:
+    value: logged
+    evidence: ["app/app.py:43-79,103-105"]
+    basis: "log_interaction writes one row per request (question, answer, latency, tokens, retriever, refusal) via a synchronous INSERT within the request handler."
+
+  monitoring_chart_count:
+    value: 8
+    evidence: ["grafana/provisioning/dashboards/handbook-assistant.json:10-171"]
+    basis: "8 entries in the dashboard JSON's panels array (ids 1-8)."
+
+  monitoring_charts_bound_to_data:
+    value: all
+    evidence: ["grafana/provisioning/dashboards/handbook-assistant.json:10-171", "schema.sql:28-47"]
+    basis: "every panel's rawSql references only columns that exist on the interactions table (ts, latency_ms, refused, feedback, judge_*, prompt_tokens, completion_tokens, top_doc_type)."
+
+  # G. Containerization and reproducibility
+  containerization_kind:
+    value: compose_full
+    evidence: ["docker-compose.yml:1-61"]
+    basis: "db, ingest, app and grafana are all defined as services in one docker-compose.yml."
+
+  run_instructions:
+    value: complete
+    evidence: ["README.md:56-91"]
+    basis: "setup (.env), dependencies (docker compose), configuration and the run command are all stated."
+
+  run_instructions_gap_count:
+    value: 0
+    evidence: ["README.md:56-91", "docker-compose.yml:1-61", "Dockerfile:1-16"]
+    basis: "desk walk-through of the documented steps traced into service depends_on/healthcheck ordering (db healthy -> ingest completed -> app/grafana) and the Dockerfile's pre-baked embedding model; no step found that needs an input an earlier step doesn't create."
+
+  dependency_versions_pinned:
+    value: lockfile_committed
+    evidence: ["uv.lock"]
+    basis: "uv.lock is committed alongside pyproject.toml."
+
+  data_accessible:
+    value: automated_or_committed
+    evidence: ["data/corpus", "data/ground-truth-retrieval.csv", "data/ground-truth-llm.csv"]
+    basis: "the corpus and both evaluation sets are committed synthetic data, no external download needed."
+
+  # H. Techniques
+  hybrid_search:
+    present:
+      value: true
+      evidence: ["retrieval/retrieve.py:58-73"]
+      basis: "hybrid_search implements reciprocal rank fusion over keyword and vector result lists."
+    shipped_enabled:
+      value: true
+      evidence: ["retrieval/retrieve.py:12", ".env.example:6"]
+      basis: "DEFAULT_RETRIEVER = 'hybrid', and .env.example ships RETRIEVER=hybrid."
+    evaluated:
+      value: true
+      evidence: ["notebooks/retrieval-evaluation.ipynb:cell10"]
+      basis: "hybrid is one of the three retrievers scored on hit-rate@5/mrr@5."
+    measured_effect:
+      value: mixed
+      evidence: ["notebooks/retrieval-evaluation.ipynb:cell11"]
+      basis: "hybrid wins hit-rate@5 (0.867 vs vector 0.864), vector wins mrr@5 (0.692 vs hybrid 0.681); the two reported metrics disagree."
+    decision_basis:
+      value: measured
+      evidence: ["notebooks/retrieval-evaluation.ipynb:cell12"]
+      basis: "the choice of hit-rate@5 as the deciding metric is argued from how retrieved chunks are used downstream (all 5 handed to the LLM, rank unused), and hybrid's win on that metric is the project's own reported number."
+    decision_axes:
+      value: ["hit_rate@5", "mrr@5"]
+      evidence: ["notebooks/retrieval-evaluation.ipynb:cell12"]
+      basis: "both reported metrics are discussed in the shipping decision, with hit-rate@5 the deciding one."
+
+  reranking:
+    present:
+      value: false
+      evidence: ["retrieval/retrieve.py:76-80"]
+      basis: "RETRIEVERS maps only 'keyword', 'vector', 'hybrid'; no reranking step exists anywhere in the request path."
+    shipped_enabled:
+      value: false
+      evidence: ["retrieval/retrieve.py:76-80"]
+      basis: "not present, so not enabled."
+    evaluated:
+      value: false
+      evidence: []
+      basis: "not present, so not evaluated."
+    measured_effect:
+      value: not_measured
+      evidence: []
+      basis: ""
+    decision_basis:
+      value: none
+      evidence: []
+      basis: "no ship/do-not-ship reasoning about reranking appears anywhere in the repository."
+    decision_axes:
+      value: []
+      evidence: []
+      basis: ""
+
+  query_rewriting:
+    present:
+      value: false
+      evidence: ["retrieval/retrieve.py:1-85", "generation/generate.py:1-34"]
+      basis: "no query transformation step exists between the user's question and retrieve()."
+    shipped_enabled:
+      value: false
+      evidence: ["retrieval/retrieve.py:1-85"]
+      basis: "not present, so not enabled."
+    evaluated:
+      value: false
+      evidence: []
+      basis: "not present, so not evaluated."
+    measured_effect:
+      value: not_measured
+      evidence: []
+      basis: ""
+    decision_basis:
+      value: none
+      evidence: []
+      basis: "no ship/do-not-ship reasoning about query rewriting appears anywhere in the repository."
+    decision_axes:
+      value: []
+      evidence: []
+      basis: ""
+
+  # I. Deployment and bonus
+  cloud_deployment:
+    value: none
+    evidence: ["docker-compose.yml:1-61", "README.md:143-146"]
+    basis: "only a local docker-compose stack exists; the README's closing section discusses cloud/production ideas as unimplemented future work."
+
+  # J. Documentation accuracy
+  headline_numbers_traceable:
+    value: all_traceable
+    evidence: ["notebooks/retrieval-evaluation.ipynb:cell11", "notebooks/llm-evaluation.ipynb:cell10,cell11", "README.md:122-123"]
+    basis: "the hit-rate@5/mrr@5 figures and the judge per-criterion/total scores README summarises are reproduced in the notebooks' own stored cell outputs."
+
+  untraceable_number_count:
+    value: 0
+    evidence: ["notebooks/retrieval-evaluation.ipynb:cell11", "notebooks/llm-evaluation.ipynb:cell10,cell11"]
+    basis: "every headline figure checked traces to a stored notebook output computed from committed data."
+
+  document_number_conflicts:
+    value: 0
+    evidence: ["README.md:108-130"]
+    basis: "README does not restate specific numeric results itself, so there is nothing for it to disagree with the notebooks on."
+
+  document_code_conflicts:
+    value: 0
+    evidence: ["README.md:93-110", "retrieval/retrieve.py:14-16,58-85", "generation/generate.py:5,19-33"]
+    basis: "checked README's retrieval/generation description (k=5, hybrid RRF default, gpt-4o-mini at temperature 0) against retrieval/retrieve.py and generation/generate.py; no contradiction found."
+
+  broken_reference_count:
+    value: 0
+    evidence: ["README.md:1-146"]
+    basis: "every path README names (retrieval/retrieve.py, generation/generate.py, app/app.py, ingest/, grafana/provisioning/, both notebooks, docs/images/*) exists in the repository."
+
+  limitations_section:
+    value: includes_structural
+    evidence: ["README.md:143-146", "notebooks/llm-evaluation.ipynb:cell0"]
+    basis: "README names a method limitation of the ingestion approach (full replace, no incremental load, no per-file health logging); the LLM-eval notebook separately names the judge's self-bias (same model family as the generator) and the small gold-set size as measurement limitations."
+
+  artifact_reference_strength:
+    value: all_referenced
+    evidence: ["README.md:112-131", "notebooks/retrieval-evaluation.ipynb:cell2", "notebooks/llm-evaluation.ipynb:cell3"]
+    basis: "the evaluation notebooks, question sets, monitoring dashboard, ingestion entry point and deployment command are all named by path or command somewhere in the documentation, but as code spans/plain text rather than markdown links."
+
+  artifacts_unreferenced_count:
+    value: 0
+    evidence: ["README.md:112-131"]
+    basis: "checked against the fixed checklist (eval script/notebook, eval question set, monitoring dashboard definition, ingestion entry point, deployment configuration): all five are named in README.md's Map table or prose."
+
+  # K. Descriptive
+  corpus_language:
+    value: en
+    evidence: ["data/corpus/procedures/purchase-order-approval.md"]
+    basis: ""
+
+  corpus_domain:
+    value: "internal policy and procedure handbook for a fictional manufacturing company"
+    evidence: ["data/corpus"]
+    basis: ""
+
+  interface_framework:
+    value: streamlit
+    evidence: ["app/app.py:6"]
+    basis: ""
+
+  vector_store:
+    value: pgvector
+    evidence: ["schema.sql:10,18,22-23"]
+    basis: ""
+
+  llm_provider:
+    value: openai
+    evidence: ["generation/generate.py:3,25-26"]
+    basis: ""
+
+  repo_file_count:
+    value: 84
+    evidence: ["<repo>"]
+    basis: "git ls-files | wc -l at the pinned commit."
+
+extraction_notes:
+  - "monitoring_instrumentation is a poor fit here: the app writes a full structured interaction record (question, answer, latency, tokens, retriever, refusal) synchronously within the request handler on every call, and that record IS wired to the Grafana dashboard (unlike the schema's stated 'logged' case, where nothing is wired to a viewer). It is also not tracing/spans instrumentation like the schema's 'traced_on_request_path' example. Recorded as 'logged' as the closer of the two, but the enum does not cleanly express 'structured per-request logging that a committed dashboard reads'."
+  - "problem_statement's audience check is again marginal, as flagged as a known schema weakness: README states the topic (grounded handbook Q&A with refusal) clearly but never names an audience directly; 'onboarding a new person' is a side benefit mentioned in passing, not a stated 'this is for X' sentence. Scored brief; a different reader could defensibly call it specific."
+  - "retrieval_eval_relevance_rule's document_level vs passage_level distinction is hard to apply cleanly on this corpus: each committed document is already a single short topic file split into a handful of H2 sections, so 'the matching document' and 'the matching passage' are close to the same granularity here. Scored passage_level because the ground truth and the scoring function both key on the section-level chunk_id, not the document id."
+  - "Load-bearing general software knowledge, per the extractor rule: (1) uv includes the 'dev' dependency-group by default on `uv run`/`uv sync` unless --no-dev is passed, so README's bare `uv run jupyter lab` instruction does install jupyter/pandas from pyproject.toml's [dependency-groups].dev without an extra documented step — used to conclude run_instructions_gap_count is not incremented here. (2) Grafana's provisioning YAML supports `$ENV_VAR` substitution from the container's environment, so grafana/provisioning/datasources/postgres.yml referencing $POSTGRES_DB/$POSTGRES_USER/$POSTGRES_PASSWORD (which docker-compose.yml sets on the grafana service) is not a broken reference."
+  - "corpus_domain records the fictional company's business type only (manufacturing), never any real identifying detail; the corpus is stated in README.md as AI-generated for this project."

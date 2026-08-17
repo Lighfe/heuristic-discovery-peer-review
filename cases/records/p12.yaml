@@ -1,0 +1,309 @@
+schema_version: 1
+case_id: p12
+commit: "3e5058dc0177e00ed19c89b97000fd954d1403b0"
+extracted_by: agents/extractor/v2
+extracted_on: "2026-08-14"
+
+fields:
+  # --- A. System shape --------------------------------------------------
+  knowledge_base_present:
+    value: present
+    evidence: ["src/ingest.py:193-230", "src/index.py:114-144"]
+    basis: "Qdrant collection (dense) and a persisted BM25 pickle (sparse) are built from data/raw/."
+  llm_in_flow:
+    value: present
+    evidence: ["src/rag.py:72-83"]
+    basis: "rag_pipeline calls OpenAI chat completion for the final answer."
+  retrieval_flow:
+    value: kb_and_llm
+    evidence: ["src/rag.py:93-172", "src/app.py:187-215"]
+    basis: "app.py's request handler calls rag_pipeline, which retrieves from the hybrid index and calls the LLM."
+  problem_statement:
+    value: specific
+    evidence: ["README.md:7-13"]
+    basis: "Names the audience (DevOps/Platform Engineers) and the question answered (recall exact syntax/error meanings/fixes) in one named section."
+
+  # --- B. Interface --------------------------------------------------
+  interface_kind:
+    value: ["web_ui", "cli"]
+    evidence: ["src/app.py:231-309", "src/tools/log_explainer.py:196-208", "src/tools/config_reviewer.py:154-166"]
+    basis: "Streamlit chat UI (app.py) plus two argparse CLI entry points (log_explainer.py, config_reviewer.py)."
+  interface_evidence_kind:
+    value: code_and_screenshot
+    evidence: ["images/chat_ui.png", "images/log_explainer.png", "images/monitoring_dashboard.png", "README.md:24-25,148"]
+    basis: "Three screenshots are committed under images/ and the README points to that directory, though not via per-file markdown links."
+
+  # --- C. Ingestion --------------------------------------------------
+  ingestion_kind:
+    value: script_or_notebook
+    evidence: ["src/ingest.py:255-321"]
+    basis: "An argparse CLI script (collect/clean/upload/run subcommands), not an orchestrated pipeline tool."
+  ingestion_single_command:
+    value: false
+    evidence: ["setup.md:57-78", "src/ingest.py:233-252", "src/index.py:205-221"]
+    basis: "ingest.py's 'run' subcommand performs collect+clean+upload but never builds the BM25 index; src/index.py must be run as a separate command. setup.md documents this as three distinct commands (ingest.py run --dry-run; index.py; ingest.py upload) for the native path."
+  ingestion_output_stated:
+    value: false
+    evidence: ["notebooks/01_data_prep.ipynb:cell1"]
+    basis: "The only place document/chunk counts would be shown is notebook cell 1, which reads the manifest/chunks files and prints counts, but the notebook is committed with its outputs stripped (outputs: [])."
+
+  # --- D. Retrieval evaluation --------------------------------------------------
+  retrieval_eval_present:
+    value: true
+    evidence: ["src/evaluate.py:209-265"]
+    basis: "evaluate_retrieval() computes Hit Rate@5/MRR/NDCG@5 over four strategies."
+  retrieval_eval_approaches_compared:
+    value: 4
+    evidence: ["src/evaluate.py:51-56"]
+    basis: "STRATEGIES lists four distinct retrieval strategies, each with reported numbers in data/eval/retrieval_report.json."
+  retrieval_eval_set_committed:
+    value: committed
+    evidence: ["data/eval/eval.jsonl"]
+    basis: "data/eval/eval.jsonl is tracked in the repository."
+  retrieval_eval_set_size:
+    value: 44
+    evidence: ["data/eval/eval.jsonl"]
+    basis: "44 non-empty lines (44 question records)."
+  retrieval_eval_relevance_rule:
+    value: passage_level
+    evidence: ["src/evaluate.py:112-135", "data/eval/eval.jsonl:1"]
+    basis: "hit_rate_at_k/mrr/ndcg_at_k score a hit as an exact match between a retrieved chunk id and one of the query's relevant_ids, which are specific chunk-level UUIDs (sub-document passages), not whole-document or source-level ids."
+  retrieval_eval_config_matches_shipped:
+    value: matches
+    evidence: ["src/evaluate.py:157-203", "src/rag.py:93-121"]
+    basis: "Strategy hybrid_k20_rerank_rewrite uses top_k=5/retrieve_k=20 with rewrite and rerank enabled, matching rag_pipeline's own default parameters (top_k=5, retrieve_k=20, rewrite=True, rerank=True)."
+  retrieval_eval_uncertainty_stated:
+    value: false
+    evidence: ["data/eval/retrieval_report.json"]
+    basis: "Only point averages (hit_rate_at_5, mrr, ndcg_at_5) are reported per strategy; no interval or variance is given."
+  retrieval_best_approach_shipped:
+    value: mixed_result
+    evidence: ["data/eval/retrieval_report.json", "src/rag.py:98-99"]
+    basis: "The shipped default (rewrite=True, rerank=True, i.e. hybrid_k20_rerank_rewrite) ties hybrid_k20_rerank on hit_rate@5 (0.6136 each) but scores lower on mrr (0.4318 vs 0.4333) and ndcg@5 (0.3087 vs 0.3224); the report's own 'winner' field names hybrid_k20_rerank, not the shipped rewrite variant."
+  retrieval_eval_reproducible:
+    value: reproducible_as_committed
+    evidence: ["src/evaluate.py:141-265", "src/retriever.py:1-195", "src/index.py:147-221"]
+    basis: "Given the committed eval set and a built index, run_strategy/evaluate_retrieval call only committed, importable functions with no undefined names or unexecuted steps."
+
+  # --- E. Answer evaluation --------------------------------------------------
+  llm_eval_present:
+    value: true
+    evidence: ["src/evaluate.py:337-397"]
+    basis: "evaluate_llm() runs the RAG pipeline and grades every answer with an LLM judge."
+  llm_eval_approaches_compared:
+    value: 4
+    evidence: ["src/evaluate.py:59-64", "data/eval/llm_prompt_report.json"]
+    basis: "PROMPT_STRATEGIES lists four named prompt styles, each with reported per-prompt averages in llm_prompt_report.json."
+  llm_eval_judge_kind:
+    value: model_judge
+    evidence: ["src/evaluate.py:271-334"]
+    basis: "judge_answer() calls an OpenAI chat model (JUDGE_MODEL, default gpt-4o-mini) and parses its JSON verdict."
+  llm_eval_judge_spotchecked:
+    value: false
+    evidence: []
+    basis: "No committed script, notebook cell, or document describes a manual sample check of judge verdicts against a human reading."
+  llm_eval_question_generator:
+    value: none_committed
+    evidence: ["data/eval/eval.jsonl"]
+    basis: "No generator script is committed; eval.jsonl's questions and relevant_ids exist only as a static file."
+  llm_eval_metric_at_ceiling:
+    value: false
+    evidence: ["data/eval/llm_judge_report.json:1-9"]
+    basis: "avg_relevance 4.159, avg_faithfulness 3.568, avg_completeness 3.795 (all maximum-direction, 5 best); several individual items score 1/1/1, so well under 95% of items reach the maximum on any of the three metrics."
+  llm_eval_role_overlap:
+    value: same_model
+    evidence: ["src/evaluate.py:271", "src/rag.py:29"]
+    basis: "Question generation has no model role (none_committed above), so only answer-generator and judge are compared: both default to gpt-4o-mini (ANSWER_MODEL and JUDGE_MODEL)."
+  llm_eval_config_matches_shipped:
+    value: differs
+    evidence: ["src/evaluate.py:352-354", "src/evaluate.py:432-437", "src/rag.py:98-99"]
+    basis: "evaluate_llm() and evaluate_llm_prompts() both call rag_pipeline(..., rewrite=False, rerank=False), while rag_pipeline's own defaults (used by the app) are rewrite=True, rerank=True."
+  llm_eval_reproducible:
+    value: reproducible_as_committed
+    evidence: ["src/evaluate.py:337-494"]
+    basis: "evaluate_llm/evaluate_llm_prompts call only committed, importable functions against the committed eval set; no undefined names or unexecuted steps."
+
+  # --- F. Monitoring --------------------------------------------------
+  monitoring_kind:
+    value: feedback_and_dashboard
+    evidence: ["src/app.py:157-182", "src/monitoring.py:191-214"]
+    basis: "Thumbs-up/down feedback is appended to feedback.csv from the chat UI, and a separate Streamlit dashboard renders six charts from that file."
+  monitoring_dashboard_provenance:
+    value: committed_definitions
+    evidence: ["src/monitoring.py:78-176"]
+    basis: "All six chart panels are defined in committed code (_rating_pie, _questions_per_day, _latency_per_day, _top_queries, _tool_usage, _tokens_per_day), not a stock tool's built-in UI."
+  monitoring_instrumentation:
+    value: logged
+    evidence: ["src/app.py:69-73,157-182"]
+    basis: "Feedback rows (including latency_ms and a token estimate) are written to feedback.csv only when a user clicks a thumbs button, not on every request; there is no tracing/span instrumentation on the request path."
+  monitoring_chart_count:
+    value: 6
+    evidence: ["src/monitoring.py:78-176"]
+    basis: "Six distinct chart-rendering functions, each producing one committed panel."
+  monitoring_charts_bound_to_data:
+    value: all
+    evidence: ["src/monitoring.py:37-45,78-176"]
+    basis: "Every panel reads a column from REQUIRED_COLUMNS (timestamp, question, rating, mode, latency_ms, tokens), all of which are written by _append_feedback in app.py."
+
+  # --- G. Containerization and reproducibility --------------------------------------------------
+  containerization_kind:
+    value: compose_full
+    evidence: ["docker-compose.yml:16-124"]
+    basis: "Compose defines the app plus all three dependencies (Qdrant, Elasticsearch, Postgres)."
+  run_instructions:
+    value: complete
+    evidence: ["setup.md:1-167"]
+    basis: "Setup, dependencies, configuration, required environment variables, and run commands are all stated somewhere in setup.md."
+  run_instructions_gap_count:
+    value: 1
+    evidence: ["setup.md:27-78", "src/retriever.py:42-56", "src/index.py:175-202", "README.md:106-113"]
+    basis: "The documented Docker path (README's 'one-command setup: docker compose up --build', then setup.md section 3, then the single docker-exec ingestion line in section 4) never runs `python src/index.py`. HybridRetriever.from_disk() calls load_index() unconditionally with no fallback, so every query raises FileNotFoundError until a reader independently discovers the native-path instructions three lines above and adapts them to Docker."
+  dependency_versions_pinned:
+    value: exact_pins
+    evidence: ["requriement.txt:9-24"]
+    basis: "Every dependency is pinned to an exact version (e.g. openai==1.51.0, torch==2.7.0)."
+  data_accessible:
+    value: automated_or_committed
+    evidence: ["data/raw/docker", "data/raw/nginx", "data/data_sources.md:1-15"]
+    basis: "The raw documentation corpus (210 markdown files) is committed directly under data/raw/, not fetched at build/run time."
+
+  # --- H. Techniques --------------------------------------------------
+  hybrid_search:
+    present:
+      value: true
+      evidence: ["src/retriever.py:1-153"]
+      basis: "HybridRetriever runs dense (Qdrant) and sparse (BM25) search and fuses them with Reciprocal Rank Fusion."
+    shipped_enabled:
+      value: true
+      evidence: ["src/rag.py:111", "src/retriever.py:107-123"]
+      basis: "rag_pipeline always constructs a HybridRetriever and calls its unconditional hybrid retrieve(); there is no flag to fall back to dense-only."
+    evaluated:
+      value: true
+      evidence: ["data/eval/retrieval_report.json"]
+      basis: "vector_only strategies are compared against hybrid strategies with reported hit_rate/mrr/ndcg."
+    measured_effect:
+      value: improves
+      evidence: ["data/eval/retrieval_report.json"]
+      basis: "hybrid_k20_rerank (hit_rate 0.6136, mrr 0.4333, ndcg 0.3224) beats vector_only_k20_rerank (0.5, 0.3447, 0.2237) on all three reported metrics."
+    decision_basis:
+      value: measured
+      evidence: ["README.md:118-134"]
+      basis: "The README's evaluation section presents the retrieval comparison table as the stated basis for shipping hybrid search."
+    decision_axes: ["hit_rate", "mrr", "ndcg"]
+  reranking:
+    present:
+      value: true
+      evidence: ["src/reranker.py:1-91"]
+      basis: "CrossEncoderReranker wraps a sentence-transformers cross-encoder to re-score retrieved chunks."
+    shipped_enabled:
+      value: true
+      evidence: ["src/rag.py:99,112,126-134"]
+      basis: "rag_pipeline defaults rerank=True and applies the cross-encoder when reranker.available and hits exist."
+    evaluated:
+      value: true
+      evidence: ["data/eval/retrieval_report.json"]
+      basis: "vector_only_k5 (no rerank) is compared against vector_only_k20_rerank (with rerank) with reported hit_rate/mrr/ndcg."
+    measured_effect:
+      value: mixed
+      evidence: ["data/eval/retrieval_report.json"]
+      basis: "vector_only_k5 and vector_only_k20_rerank report identical hit_rate_at_5 (0.5), mrr (0.3447) and ndcg_at_5 (0.2237) to four decimal places, showing no measurable difference from adding the reranker in this comparison."
+    decision_basis:
+      value: measured
+      evidence: ["README.md:118-134,150-159"]
+      basis: "Reranking is listed among the best-practice bonuses backed by the same evaluation table cited for hybrid search."
+    decision_axes: ["hit_rate", "mrr", "ndcg"]
+  query_rewriting:
+    present:
+      value: true
+      evidence: ["src/query_rewriter.py:1-99"]
+      basis: "rewrite_query() uses an LLM to rewrite the latest turn into a self-contained search query."
+    shipped_enabled:
+      value: true
+      evidence: ["src/rag.py:98,114-117"]
+      basis: "rag_pipeline defaults rewrite=True and calls rewrite_query before retrieval."
+    evaluated:
+      value: true
+      evidence: ["data/eval/retrieval_report.json"]
+      basis: "hybrid_k20_rerank (no rewrite) is compared against hybrid_k20_rerank_rewrite with reported hit_rate/mrr/ndcg."
+    measured_effect:
+      value: mixed
+      evidence: ["data/eval/retrieval_report.json"]
+      basis: "hybrid_k20_rerank_rewrite ties hybrid_k20_rerank on hit_rate_at_5 (0.6136) but scores lower on mrr (0.4318 vs 0.4333) and ndcg_at_5 (0.3087 vs 0.3224)."
+    decision_basis:
+      value: measured
+      evidence: ["README.md:118-134"]
+      basis: "The README's evaluation table names the rewrite variant as the winner and cites it as the reason it is shipped as the default."
+    decision_axes: ["hit_rate", "mrr", "ndcg"]
+
+  # --- I. Deployment and bonus --------------------------------------------------
+  cloud_deployment:
+    value: deployment_code_committed
+    evidence: ["fly.toml", "render.yaml", "Dockerfile.cloud", "docker-compose.prod.yml", "deploy/README.md"]
+    basis: "Three deployment configurations (Fly, Render, self-hosted Compose) are committed with a walkthrough document."
+
+  # --- J. Documentation accuracy --------------------------------------------------
+  headline_numbers_traceable:
+    value: none_traceable
+    evidence: ["README.md:120-134", "data/eval/retrieval_report.json"]
+    basis: "The only headline evaluation numbers in the documentation are README's four-strategy table; the committed artifact that would produce such numbers (data/eval/retrieval_report.json) reports different values for all four strategies and names a different strategy as winner."
+  untraceable_number_count:
+    value: 12
+    evidence: ["README.md:123-129", "data/eval/retrieval_report.json"]
+    basis: "4 strategies x 3 metrics (hit_rate, mrr, ndcg) in README's table, none matching the corresponding figure in the committed retrieval_report.json."
+  document_number_conflicts:
+    value: 12
+    evidence: ["README.md:123-129", "data/eval/retrieval_report.json:1-27"]
+    basis: "Same 12 figures disagree between README.md's evaluation table and the committed data/eval/retrieval_report.json (e.g. README's hybrid_k20_rerank_rewrite hit_rate 0.89 vs. the report's 0.6136); README itself flags the table as 'representative' rather than current."
+  document_code_conflicts:
+    value: 1
+    evidence: ["README.md:108-113", "docker-compose.yml:46-51", "src/retriever.py:42-56"]
+    basis: "README states 'The one-command setup: docker compose up --build' with no further step, but the app container only starts Streamlit (no ingestion), and HybridRetriever unconditionally requires a BM25 index that command never builds."
+  broken_reference_count:
+    value: 2
+    evidence: ["README.md:99-102", "tests/"]
+    basis: "README's project-layout tree lists tests/test_retriever.py and tests/test_reranker.py; neither file exists in the committed tests/ directory."
+  limitations_section:
+    value: includes_structural
+    evidence: ["README.md:182-189"]
+    basis: "Alongside scope/config caveats, the section states the retriever uses an in-process BM25 index instead of the committed Elasticsearch service, a fact about the system's own retrieval method."
+  artifact_reference_strength:
+    value: all_referenced
+    evidence: ["README.md:64-104,116-121,136-138,161-180"]
+    basis: "The evaluation harness, eval set, monitoring dashboard, ingestion entry point, and deployment configs are each named by path (mostly as code spans, two as markdown links) somewhere in the documentation."
+  artifacts_unreferenced_count:
+    value: 0
+    evidence: ["README.md:64-104,116-121,136-138,161-180"]
+    basis: "All five checklist artifacts present in this repository (eval script/notebook, eval question set, monitoring dashboard definition, ingestion entry point, deployment configuration) are named in the documentation."
+
+  # --- K. Descriptive --------------------------------------------------
+  corpus_language:
+    value: en
+    evidence: ["data/raw/docker", "data/raw/nginx"]
+    basis: "Raw documentation and the eval set are in English."
+  corpus_domain:
+    value: "devops / infrastructure documentation (docker and nginx)"
+    evidence: ["data/data_sources.md:1-15"]
+    basis: "Curated Docker and Nginx documentation."
+  interface_framework:
+    value: streamlit
+    evidence: ["src/app.py:26", "src/monitoring.py:31"]
+    basis: "Both the chat UI and the dashboard are built with Streamlit."
+  vector_store:
+    value: qdrant
+    evidence: ["src/ingest_core.py:93-97"]
+    basis: "get_qdrant_client() connects to a persistent Qdrant server."
+  llm_provider:
+    value: openai
+    evidence: ["src/rag.py:72-76", "src/ingest_core.py:298-302"]
+    basis: "Both generation and embedding calls use the OpenAI SDK."
+  repo_file_count:
+    value: 329
+    evidence: ["<repo>"]
+    basis: "`git ls-files | wc -l` at the pinned commit."
+
+extraction_notes:
+  - "src/tools/config_reviewer.py is a fully implemented third tool (Dockerfile/compose/nginx/Terraform config review, same retrieval backbone) that is never mentioned in README's feature list, never wired into app.py's UI, and not part of group J's fixed artifact checklist — so it neither helps nor hurts any J field, but a reader relying on the README's stated feature set ('Docs Q&A' and 'Explain Log' only) would not know it exists. No field captures an implemented-but-undocumented capability."
+  - "`headline_numbers_traceable`/`untraceable_number_count` and `document_number_conflicts` were both filled from the same underlying evidence (README's evaluation table vs. the committed retrieval_report.json), read from two different angles the schema separates (can a committed artifact produce this figure vs. do two committed documents disagree). For this repository the two counts happen to coincide exactly (12 and 12); it is not obvious the schema intends these to always move together, and I could not find guidance on whether a reviewer should treat this as one defect or two independently-creditable ones."
+  - "`reranking.measured_effect` had no good enum fit: vector_only_k5 and vector_only_k20_rerank report byte-for-byte identical hit_rate/mrr/ndcg across all 44 questions, i.e. a measured zero effect. `mixed` (defined as metrics disagreeing with each other) does not literally describe this — the metrics agree with each other, just show no change from the intervention. I chose `mixed` as the closest available value and flagged the exact numbers in `basis`, but a `no_effect` or `null` value may be missing from the enum."
+  - "`llm_eval_role_overlap`'s three named roles (generator, system-under-test, judge) collapse to two labelled roles here because `llm_eval_question_generator` is `none_committed`; recorded per the schema's explicit guidance for that case."
+  - "Group D's `retrieval_eval_relevance_rule` enum offers `passage_level` and `document_level` but the corpus's own chunking (500-token overlapping windows, not aligned to any document substructure like sections or paragraphs) sits awkwardly between the two; I used `passage_level` because match granularity is a chunk, not a whole document, but a corpus with genuinely structured passages (e.g. numbered clauses) would read differently under the same label."

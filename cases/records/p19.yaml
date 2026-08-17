@@ -1,0 +1,305 @@
+schema_version: 1
+case_id: p19
+commit: "ead0810142aed4aae9f7462abb6b888b75d99a90"
+extracted_by: agents/extractor/v2
+extracted_on: "2026-08-17"
+
+fields:
+  # A. System shape
+  knowledge_base_present:
+    value: present
+    evidence: ["src/bg_rag/db.py:46-57", "src/bg_rag/ingest.py:48-120"]
+    basis: "a documents table with embedding and text_search columns is created and populated by an ingestion pipeline"
+  llm_in_flow:
+    value: present
+    evidence: ["src/bg_rag/rag.py:128-146"]
+    basis: "the request path calls the OpenAI Responses API to generate an answer"
+  retrieval_flow:
+    value: kb_and_llm
+    evidence: ["src/bg_rag/api/routes/rag.py:37-56", "src/bg_rag/rag.py:148-170"]
+    basis: "the /ask handler runs RAGPipeline.ask(), which searches the documents table then calls the LLM"
+  problem_statement:
+    value: brief
+    evidence: ["README.md:1-12"]
+    basis: "the topic (answering BG2 character-creation questions) is named; no section states an intended audience"
+
+  # B. Interface
+  interface_kind:
+    value: [web_ui, api]
+    evidence: ["src/bg_rag/frontend/app.py:73-171", "src/bg_rag/api/main.py:33-58", "src/bg_rag/api/routes/rag.py:37"]
+    basis: "a Streamlit chat UI and a FastAPI REST API (/ask, /search, /documents, /feedback) both exist on the request path"
+  interface_evidence_kind:
+    value: code_only
+    evidence: []
+    basis: "no screenshot or recording file found in the repository (searched for common image/video extensions); documentation is prose and code blocks only"
+
+  # C. Ingestion
+  ingestion_kind:
+    value: script_or_notebook
+    evidence: ["src/bg_rag/ingest.py:147-170", "Makefile:53-55"]
+    basis: "make ingest runs bg_rag.ingest.main(), a plain Python script"
+  ingestion_single_command:
+    value: true
+    evidence: ["Makefile:53-55", "docs/setup.md:69-75"]
+    basis: "'make ingest' loads, embeds and inserts all documents in one command, once the database is up"
+  ingestion_output_stated:
+    value: true
+    evidence: ["docs/setup.md:74-75"]
+    basis: "setup.md states the record count ingested (11 character records)"
+
+  # D. Retrieval evaluation
+  retrieval_eval_present:
+    value: true
+    evidence: ["scripts/evaluate.py:1-88", "src/bg_rag/evaluation.py:1-78"]
+    basis: "a committed script computes Hit Rate@K and MRR@K over a ground-truth set"
+  retrieval_eval_approaches_compared:
+    value: 3
+    evidence: ["scripts/evaluate.py:49"]
+    basis: "methods = ['vector', 'keyword', 'hybrid'], each evaluated and reported separately"
+  retrieval_eval_set_committed:
+    value: referenced_not_committed
+    evidence: ["scripts/evaluate.py:26-31", ".gitignore:159"]
+    basis: "evaluate.py reads data/ground_truth.csv, which .gitignore excludes (data/ground_truth.csv line); the generator script is committed, the CSV is not"
+  retrieval_eval_set_size:
+    value: 55
+    evidence: ["data/evaluation_results.csv:2-4", "docs/usage.md:103"]
+    basis: "evaluation_results.csv reports total_queries=55 for every method; docs/usage.md states '~55 test questions (5 per character class)' for 11 classes"
+  retrieval_eval_relevance_rule:
+    value: document_level
+    evidence: ["src/bg_rag/evaluation.py:8-41"]
+    basis: "hit_rate_at_k/mrr_at_k count a hit when a result's doc_id exactly equals the target doc_id; each doc_id addresses one whole ingested character record (documents are not chunked into passages)"
+  retrieval_eval_config_matches_shipped:
+    value: matches
+    evidence: ["scripts/evaluate.py:56-60", "src/bg_rag/rag.py:78-90", "src/bg_rag/api/routes/rag.py:15-18"]
+    basis: "evaluate.py calls search_engine.search(method=m, limit=5) for each method via the same SearchEngine class the API uses; the default AskRequest.search_method is 'hybrid' and RAGPipeline.search() also defaults to limit=5"
+  retrieval_eval_uncertainty_stated:
+    value: false
+    evidence: []
+    basis: "no interval, variance, or uncertainty statement found alongside the reported Hit Rate/MRR figures"
+  retrieval_best_approach_shipped:
+    value: "yes"
+    evidence: ["data/evaluation_results.csv:2-4", "src/bg_rag/api/routes/rag.py:18", "src/bg_rag/rag.py:68"]
+    basis: "hybrid ties vector for the best reported hit_rate/mrr in evaluation_results.csv, and hybrid is the shipped default search method"
+  retrieval_eval_reproducible:
+    value: traceable_not_reproducible
+    evidence: ["scripts/evaluate.py:1-88", "scripts/generate_ground_truth.py:1-116", ".gitignore:159"]
+    basis: "the evaluation and ground-truth-generation code is committed and inspectable end to end, but the ground-truth CSV it reads is gitignored and generation calls OpenAI, so running the committed script as-is cannot deterministically regenerate the committed evaluation_results.csv figures"
+
+  # E. Answer evaluation
+  llm_eval_present:
+    value: true
+    evidence: ["src/bg_rag/judge.py:40-82", "src/bg_rag/api/routes/rag.py:98-121"]
+    basis: "an LLM-as-judge relevance classifier runs on every /ask request"
+  llm_eval_approaches_compared:
+    value: 0
+    evidence: []
+    basis: "no committed artifact reports a comparison across multiple prompts or judge models; the judge runs a single fixed configuration on live traffic"
+  llm_eval_judge_kind:
+    value: model_judge
+    evidence: ["src/bg_rag/judge.py:18-22", "src/bg_rag/judge.py:66-73"]
+    basis: "evaluate_relevance() calls an OpenAI model with structured output to classify relevance"
+  llm_eval_judge_spotchecked:
+    value: false
+    evidence: []
+    basis: "no documented sample of judge verdicts checked by hand, with a result reported"
+  llm_eval_question_generator:
+    value: none_committed
+    evidence: ["src/bg_rag/api/routes/rag.py:37-56", "src/bg_rag/judge.py:40-82"]
+    basis: "the judge evaluates whatever question a user submits to /ask; no committed generator produces the question set the judge is applied to"
+  llm_eval_metric_at_ceiling:
+    value: null
+    evidence: []
+    basis: "judge verdicts are stored per-conversation in the (uncommitted) database; no committed artifact aggregates them into a reported metric"
+  llm_eval_role_overlap:
+    value: same_model
+    evidence: ["src/bg_rag/config.py:22", "src/bg_rag/rag.py:74-75", "src/bg_rag/judge.py:67"]
+    basis: "no question-generator role exists for this pipeline (see llm_eval_question_generator); comparing only answer-generator and judge, both use gpt-4.1-mini (settings.llm_model default and judge.py's hardcoded model)"
+  llm_eval_config_matches_shipped:
+    value: matches
+    evidence: ["src/bg_rag/api/routes/rag.py:8", "src/bg_rag/api/routes/rag.py:102"]
+    basis: "the judge is called with judge.evaluate_relevance() directly inside the production /ask handler; no separate offline evaluation configuration exists to diverge from it"
+  llm_eval_reproducible:
+    value: reproducible_as_committed
+    evidence: ["src/bg_rag/judge.py:40-82"]
+    basis: "evaluate_relevance() is committed, self-contained code that would run as written given a question and answer; no missing imports or undefined names"
+
+  # F. Monitoring
+  monitoring_kind:
+    value: feedback_and_dashboard
+    evidence: ["src/bg_rag/api/routes/feedback.py", "grafana/dashboards/bg_rag.json"]
+    basis: "a /feedback endpoint records thumbs up/down, and a committed Grafana dashboard is provisioned"
+  monitoring_dashboard_provenance:
+    value: committed_definitions
+    evidence: ["grafana/dashboards/bg_rag.json", "grafana/provisioning/dashboards/dashboard.yml"]
+    basis: "the dashboard's 10 panels and their queries are committed JSON, auto-provisioned into a stock Grafana image"
+  monitoring_instrumentation:
+    value: none
+    evidence: []
+    basis: "no logging or tracing library usage found in src/bg_rag (searched for logging/logger/opentelemetry/otel/tracing); metrics reach the database only via the application's own INSERT statements for its normal conversation/feedback records"
+  monitoring_chart_count:
+    value: 10
+    evidence: ["grafana/dashboards/bg_rag.json"]
+    basis: "counted the 'panels' array entries in the committed dashboard JSON"
+  monitoring_charts_bound_to_data:
+    value: all
+    evidence: ["grafana/dashboards/bg_rag.json", "src/bg_rag/db.py:89-118"]
+    basis: "all 10 panel queries reference only the conversations and feedback tables/columns created in db.py's init_db()"
+
+  # G. Containerization and reproducibility
+  containerization_kind:
+    value: compose_full
+    evidence: ["docker-compose.yml:1-66"]
+    basis: "docker-compose.yml defines postgres, api, streamlit, and grafana services together, not just dependencies"
+  run_instructions:
+    value: complete
+    evidence: ["docs/setup.md:1-155", "README.md:39-73"]
+    basis: "setup, dependency install, configuration, required environment variables and run commands are all stated for both local and Docker paths"
+  run_instructions_gap_count:
+    value: 0
+    evidence: ["docs/setup.md:1-155"]
+    basis: "walked the 10 documented local-dev steps plus the Docker alternative in order; each step's inputs are produced by an earlier step or are already committed, and no later step undoes an earlier one"
+  dependency_versions_pinned:
+    value: lockfile_committed
+    evidence: ["uv.lock", "pyproject.toml:7-23"]
+    basis: "pyproject.toml declares only lower bounds, but a uv.lock file is committed"
+  data_accessible:
+    value: automated_or_committed
+    evidence: ["data/bg_characters.json", "data/bg_faq.txt"]
+    basis: "the source FAQ text and the derived character-record dataset are both committed to the repository"
+
+  # H. Techniques
+  hybrid_search:
+    present:
+      value: true
+      evidence: ["src/bg_rag/search.py:95-140"]
+      basis: "SearchEngine.hybrid_search() fuses vector and keyword search results via Reciprocal Rank Fusion"
+    shipped_enabled:
+      value: true
+      evidence: ["src/bg_rag/api/routes/rag.py:18", "src/bg_rag/rag.py:68"]
+      basis: "hybrid is the default search_method in both AskRequest and RAGPipeline"
+    evaluated:
+      value: true
+      evidence: ["scripts/evaluate.py:49-67", "data/evaluation_results.csv:2-4"]
+      basis: "hit rate/MRR are computed and reported for hybrid alongside vector-only and keyword-only"
+    measured_effect:
+      value: mixed
+      evidence: ["data/evaluation_results.csv:2-4"]
+      basis: "committed evaluation_results.csv reports hybrid hit_rate/mrr identical to vector-only (1.0/0.9106 both) and both far above keyword-only (0.036/0.036); hybrid shows no measured uplift over the simpler vector-only baseline"
+    decision_basis:
+      value: measured
+      evidence: ["docs/usage.md:111-119"]
+      basis: "docs/usage.md states hybrid is the default directly below the Hit Rate/MRR comparison table and calls it 'best method by MRR'"
+    decision_axes: ["hit_rate", "mrr"]
+  reranking:
+    present:
+      value: false
+      evidence: []
+      basis: "no reranking code or reference found (searched for 'rerank' across the repository)"
+    shipped_enabled:
+      value: false
+      evidence: []
+      basis: "not present, so not enabled"
+    evaluated:
+      value: false
+      evidence: []
+      basis: "not present, so nothing to evaluate"
+    measured_effect:
+      value: not_measured
+      evidence: []
+      basis: "not present"
+    decision_basis:
+      value: none
+      evidence: []
+      basis: "no ship/do-not-ship reasoning stated; the technique is absent, not rejected"
+    decision_axes: []
+  query_rewriting:
+    present:
+      value: false
+      evidence: []
+      basis: "no query-rewriting/HyDE/multi-query code or reference found (searched for 'query_rewrit', 'hyde', 'multi.query' across the repository)"
+    shipped_enabled:
+      value: false
+      evidence: []
+      basis: "not present, so not enabled"
+    evaluated:
+      value: false
+      evidence: []
+      basis: "not present, so nothing to evaluate"
+    measured_effect:
+      value: not_measured
+      evidence: []
+      basis: "not present"
+    decision_basis:
+      value: none
+      evidence: []
+      basis: "no ship/do-not-ship reasoning stated; the technique is absent, not rejected"
+    decision_axes: []
+
+  # I. Deployment and bonus
+  cloud_deployment:
+    value: none
+    evidence: []
+    basis: "no cloud deployment code, IaC, or hosting documentation found; docker-compose targets local Docker only"
+
+  # J. Documentation accuracy
+  headline_numbers_traceable:
+    value: some_traceable
+    evidence: ["data/bg_characters.json", "data/evaluation_results.csv", "docs/usage.md:103-119"]
+    basis: "the 11-record and 55-query counts are traceable to committed data/counts; the 6 Hit Rate/MRR figures in docs/usage.md's table do not match the committed evaluation_results.csv figures a run would actually produce"
+  untraceable_number_count:
+    value: 6
+    evidence: ["docs/usage.md:113-117", "data/evaluation_results.csv:2-4"]
+    basis: "docs/usage.md reports vector 0.8545/0.7636, keyword 0.6909/0.5818, hybrid 0.9091/0.8182 (6 figures); the committed evaluation_results.csv reports vector 1.0/0.9106, keyword 0.036/0.036, hybrid 1.0/0.9106 for the same metrics, so none of the 6 documented figures is what the committed artifact yields"
+  document_number_conflicts:
+    value: 6
+    evidence: ["docs/usage.md:113-117", "data/evaluation_results.csv:2-4"]
+    basis: "each of 6 Hit Rate@5/MRR@5 figures in docs/usage.md's table disagrees with the corresponding figure in the committed data/evaluation_results.csv"
+  document_code_conflicts:
+    value: 0
+    evidence: []
+    basis: "no additional case found, beyond the docs/usage.md-vs-evaluation_results.csv figures already counted above, of a claim the code itself (rather than another document) contradicts"
+  broken_reference_count:
+    value: 0
+    evidence: ["README.md:119-123", "docs/setup.md", "docs/usage.md"]
+    basis: "every documented path (docs/setup.md, docs/usage.md, plan/000...) resolves to a committed file"
+  limitations_section:
+    value: absent
+    evidence: []
+    basis: "no 'Limitations', 'Known issues', or similar section found in README.md, docs/*.md, or plan/000...md"
+  artifact_reference_strength:
+    value: partially_referenced
+    evidence: ["docs/usage.md:103", "README.md:92-105"]
+    basis: "the evaluation question set's path is named (data/ground_truth.csv); the evaluation script, monitoring dashboard definition, and deployment configuration are named nowhere by path"
+  artifacts_unreferenced_count:
+    value: 4
+    evidence: ["README.md:92-105", "docs/setup.md", "docs/usage.md"]
+    basis: "of the fixed checklist, scripts/evaluate.py, grafana/dashboards/bg_rag.json, src/bg_rag/ingest.py, and docker-compose.yml/Dockerfile.* are never named by path in README.md or docs/*.md; only data/ground_truth.csv (the evaluation question set) is"
+
+  # K. Descriptive
+  corpus_language:
+    value: en
+    evidence: ["README.md:1-127"]
+  corpus_domain:
+    value: "video game character-creation guide"
+    evidence: ["README.md:84-90"]
+  interface_framework:
+    value: "fastapi (backend), streamlit (frontend)"
+    evidence: ["pyproject.toml:8", "pyproject.toml:10"]
+  vector_store:
+    value: pgvector
+    evidence: ["docker-compose.yml:2-3", "src/bg_rag/db.py:38"]
+  llm_provider:
+    value: openai
+    evidence: ["src/bg_rag/rag.py:19", "src/bg_rag/judge.py:11"]
+  repo_file_count:
+    value: 60
+    evidence: ["."]
+    basis: "git ls-files | wc -l at the pinned commit"
+
+extraction_notes:
+  - "document_number_conflicts and headline_numbers_traceable/untraceable_number_count were both filled from the same underlying fact (docs/usage.md's Hit Rate/MRR table vs. the committed data/evaluation_results.csv). The schema's own group-J text (p01's ceiling case, p02's dropped-null case) treats these as answering different questions about the same repository, so both were recorded rather than choosing one; document_code_conflicts was left at 0 to avoid a third counting of the identical fact, since the disagreement is between two documents (a markdown table and a CSV artifact), not between a document and application code behavior."
+  - "hybrid_search's measured_effect does not fit the four-value enum cleanly: hybrid ties vector-only exactly on both reported metrics (no cross-metric disagreement, so not 'mixed' by the letter of its definition) but also shows no improvement over the simpler baseline (so 'improves' overstates it). Recorded as 'mixed' as the closest available value; a value distinct from cross-metric disagreement for 'ties the next-simplest baseline' would be worth proposing."
+  - "llm_eval_question_generator and llm_eval_role_overlap assume the answer-evaluation pipeline runs over a fixed, generated question set the way the retrieval evaluation does. This project's judge instead evaluates whatever question a live user submits to /ask; a generator (generate_ground_truth.py) exists in the repo but feeds only the retrieval evaluation, not the judge. Recorded llm_eval_question_generator as none_committed for the judge specifically, and noted the mismatch here rather than crediting an unrelated generator."
+  - "retrieval_eval_relevance_rule was recorded as document_level rather than source_level: each ingested unit is one whole FAQ character-class record with no further chunking, and the match is exact-doc_id equality, so 'document' and 'source' are the same granularity here. The schema's prose does not define the boundary between the two values precisely enough to rule out source_level as an equally defensible reading."
+  - "src/bg_rag/frontend/app.py's sidebar links to './dashboard' (app.py:103) as if the metrics dashboard were a page within the same Streamlit app (port 8501), but the dashboard is actually a separate Streamlit process on a different port (Makefile 'dev-dashboard' target, port 8502). Following that in-app link would not reach the dashboard. This is a structural, checkable fact, but no schema field covers a broken reference inside application UI code as opposed to inside documentation (broken_reference_count and artifact_reference_strength are documentation-scoped); recorded here rather than forced into either field."
+  - "llm_eval_reproducible was scored 'reproducible_as_committed' on the narrow question of whether the judge pipeline's code would run as committed. No committed artifact aggregates judge verdicts into a reported number at all (hence llm_eval_metric_at_ceiling: null), so 'reproducible' here says only that the mechanism works, not that any figure can be regenerated — the schema's three-value enum for this field has no option for 'no aggregate exists to reproduce', unlike llm_eval_metric_at_ceiling which does."

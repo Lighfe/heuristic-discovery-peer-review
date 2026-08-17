@@ -1,0 +1,322 @@
+schema_version: 1
+case_id: p10
+commit: "0e316ae61a13b91fd5a80927ab3bcce4dba09c53"
+extracted_by: agents/extractor/v2
+extracted_on: "2026-08-14"
+
+fields:
+
+  # A. System shape
+  knowledge_base_present:
+    value: present
+    evidence: ["college_rag/ingest.py:155-161", "college_rag/data/us_top_30_universities.json"]
+    basis: "load_data() reads a committed JSON file of 30 university records used as retrieval documents"
+  llm_in_flow:
+    value: present
+    evidence: ["college_rag/rag_help.py:74-88"]
+    basis: "RAG.llm() calls an OpenAI client (responses.create) to generate the final answer"
+  retrieval_flow:
+    value: kb_and_llm
+    evidence: ["app.py:55", "app_assist.py:203-206", "college_rag/rag_help.py:90-101"]
+    basis: "the request handler (app.py's chat tab) calls run_rag(), which searches the index then calls the LLM before returning"
+  problem_statement:
+    value: brief
+    evidence: ["README.md:1-14"]
+    basis: "the Overview/Tech Stack sections name the topic (a RAG app producing college recommendations) but no named section states an audience"
+
+  # B. Interface
+  interface_kind:
+    value: [web_ui]
+    evidence: ["app.py:229-250", "image/College_Advisor1.png", "image/evaluation1.png"]
+    basis: "the only user-facing entry point is the Streamlit app (two tabs: chat, evaluation history); no CLI, API or notebook entry point is offered to an end user"
+  interface_evidence_kind:
+    value: code_and_screenshot
+    evidence: ["app.py:229-250", "image/College_Advisor1.png", "image/College_Advisor2.png", "image/College_Advisor3.png", "image/evaluation1.png", "image/evaluation2.png"]
+    basis: "committed screenshots show the running chat and evaluation-history views alongside the interface code"
+
+  # C. Ingestion
+  ingestion_kind:
+    value: script_or_notebook
+    evidence: ["college_rag/ingest.py:155-168", "app_assist.py:14-20"]
+    basis: "the knowledge base is loaded and indexed by plain Python functions (load_data, load_documents, build_index), invoked automatically at app import time"
+  ingestion_single_command:
+    value: false
+    evidence: []
+    basis: "no command for building the index or preparing data is documented anywhere in README.md"
+  ingestion_output_stated:
+    value: true
+    evidence: ["README.md:19-25"]
+    basis: "README states the knowledge base contains 30 records"
+
+  # D. Retrieval evaluation
+  retrieval_eval_present:
+    value: true
+    evidence: ["college_rag/evaluating.ipynb:cell16,cell17,cell18,cell21"]
+    basis: "a notebook defines hit_rate/mrr functions and reports both metrics for two retrieval approaches"
+  retrieval_eval_approaches_compared:
+    value: 2
+    evidence: ["college_rag/evaluating.ipynb:cell17,cell18,cell21"]
+    basis: "vector search and text (minsearch) search each have a reported hit_rate and mrr"
+  retrieval_eval_set_committed:
+    value: committed
+    evidence: ["college_rag/data/ground-truth-retrieval.csv"]
+    basis: "the evaluation question set is a tracked file in the repository"
+  retrieval_eval_set_size:
+    value: 60
+    evidence: ["college_rag/data/ground-truth-retrieval.csv"]
+    basis: "counted rows in the committed CSV: 60 data rows (30 universities x 2 question types)"
+  retrieval_eval_relevance_rule:
+    value: document_level
+    evidence: ["college_rag/evaluating.ipynb:cell16"]
+    basis: "evaluate() marks a result relevant when the retrieved document's university_id equals the ground-truth university_id, i.e. an exact whole-document match"
+  retrieval_eval_config_matches_shipped:
+    value: matches
+    evidence: ["college_rag/evaluating.ipynb:cell19,cell20", "college_rag/rag_help.py:42-48", "app_assist.py:14-20"]
+    basis: "the evaluated text_search (num_results=3, boost via choose_boost_profile, index built by build_index over the same JSON file) matches the parameters used by the shipped RAG.search()"
+  retrieval_eval_uncertainty_stated:
+    value: false
+    evidence: []
+    basis: "no interval, variance, or uncertainty statement appears alongside the reported hit_rate/mrr figures"
+  retrieval_best_approach_shipped:
+    value: "yes"
+    evidence: ["college_rag/evaluating.ipynb:cell18,cell21", "app_assist.py:14-20", "README.md:38-43"]
+    basis: "text search scores higher than vector search on both reported metrics (hit_rate 0.867 vs 0.617, mrr 0.789 vs 0.433), and the shipped index (app_assist.py's create_index) builds only the text/minsearch index"
+  retrieval_eval_reproducible:
+    value: traceable_not_reproducible
+    evidence: ["college_rag/evaluating.ipynb:cell11", "college_rag/ingest.py:163-168"]
+    basis: "cell11 calls load_documents() with no argument, but ingest.py's load_documents(data) has no default for its one parameter, so running the notebook fresh top-to-bottom would raise an error before the vector index is built; every step from question set to reported hit_rate/mrr is still readable in the committed cells"
+
+  # E. Answer evaluation
+  llm_eval_present:
+    value: true
+    evidence: ["college_rag/evaluat_with_llm.ipynb:cell0,cell5,cell8", "app_assist.py:33-79"]
+    basis: "a judge prompt and loop exist in a dedicated notebook, and a judge function runs on every live chat interaction"
+  llm_eval_approaches_compared:
+    value: 0
+    evidence: ["college_rag/evaluat_with_llm.ipynb:cell7,cell8"]
+    basis: "the notebook's evaluation loop uses a single prompt/model and raises an error on the first sampled item, so no comparison figures are reported for any approach"
+  llm_eval_judge_kind:
+    value: model_judge
+    evidence: ["app_assist.py:33-79", "college_rag/evaluat_with_llm.ipynb:cell0,cell5"]
+    basis: "an LLM call (OpenAI responses API) returns a relevance label and explanation"
+  llm_eval_judge_spotchecked:
+    value: false
+    evidence: []
+    basis: "no code or document compares a sample of llm_evaluation verdicts against user_evaluation or any other check, though both are stored in the same table"
+  llm_eval_question_generator:
+    value: generator_ties_question_to_passage
+    evidence: ["college_rag/evaluating.ipynb:cell2,cell3,cell5,cell6,cell9"]
+    basis: "generate_ground_truth() produces each question from one university's own profile and records its university_id, and this same file is read as the question set for the LLM-judge evaluation"
+  llm_eval_metric_at_ceiling:
+    value: null
+    evidence: ["college_rag/evaluat_with_llm.ipynb:cell7,cell8"]
+    basis: "the evaluation loop errors on the first sampled item (KeyError from an unescaped prompt template) before any item completes, so no aggregate metric was ever produced"
+  llm_eval_role_overlap:
+    value: same_model
+    evidence: ["college_rag/evaluating.ipynb:cell5", "college_rag/rag_help.py:32", "app_assist.py:33", "college_rag/evaluat_with_llm.ipynb:cell5"]
+    basis: "the question generator, the answer generator (RAG), and both judge implementations all default to the same model string"
+  llm_eval_config_matches_shipped:
+    value: differs
+    evidence: ["college_rag/evaluat_with_llm.ipynb:cell0", "app_assist.py:62-67"]
+    basis: "the evaluation notebook's prompt_template leaves the JSON-example braces unescaped for str.format(), while the shipped app_assist.py llm_judge escapes the same braces as {{ }}; the literal template text used in the eval script differs from the one used in production"
+  llm_eval_reproducible:
+    value: neither
+    evidence: ["college_rag/evaluat_with_llm.ipynb:cell7,cell8"]
+    basis: "the committed evaluation loop raises an error on the first item every time it is run, and no aggregate figure is reported anywhere to trace to"
+
+  # F. Monitoring
+  monitoring_kind:
+    value: feedback_and_dashboard
+    evidence: ["app.py:93-110", "image/grafana_dashboard.png"]
+    basis: "the app collects per-answer user feedback (Relevant/Partly relevant/Not relevant buttons) and a Grafana dashboard is deployed showing usage and evaluation panels"
+  monitoring_dashboard_provenance:
+    value: other
+    evidence: ["image/grafana_dashboard.png", "database/Makefile:15-21"]
+    basis: "the dashboard's panels (token usage, evaluation table) are project-specific, querying the app's own tables, but no dashboard JSON or provisioning file is committed; the Makefile only runs a stock grafana/grafana image with no dashboard configuration"
+  monitoring_instrumentation:
+    value: traced_on_request_path
+    evidence: ["app.py:67-78", "app_assist.py:83-152"]
+    basis: "save_rag_result and save_feedback_result run synchronously inside the chat request handler, writing per-request records as the request is served"
+  monitoring_chart_count:
+    value: 0
+    evidence: ["image/grafana_dashboard.png"]
+    basis: "no dashboard definition file is committed; the screenshot shows panels but none exist as a committed panel-definition artifact"
+  monitoring_charts_bound_to_data:
+    value: all
+    evidence: ["image/grafana_dashboard.png", "database/db_init.py:24-58"]
+    basis: "every column shown in the dashboard screenshot (prompt_tokens, completion_tokens, total_tokens, question_id, user_evaluation, llm_evaluation) exists in the committed rag_results/rag_feedback schema"
+
+  # G. Containerization and reproducibility
+  containerization_kind:
+    value: other
+    evidence: ["database/Makefile:1-21"]
+    basis: "postgres and grafana are containerized via raw `docker run` commands wrapped in Makefile targets, not docker-compose; no Dockerfile exists for the application itself"
+  run_instructions:
+    value: none
+    evidence: ["README.md"]
+    basis: "README states no setup, dependency-install, environment-variable, or run command anywhere; database/Makefile exists but is not referenced from any documentation"
+  run_instructions_gap_count:
+    value: 0
+    evidence: []
+    basis: "no documented procedure exists to walk through, so there are no steps to count as a gap"
+  dependency_versions_pinned:
+    value: lower_bounds_only
+    evidence: ["pyproject.toml:7-18", ".gitignore:8"]
+    basis: "every dependency in pyproject.toml uses a >= lower bound and no upper pin; uv.lock is gitignored and not committed"
+  data_accessible:
+    value: automated_or_committed
+    evidence: ["college_rag/data/us_top_30_universities.json"]
+    basis: "the knowledge base JSON file is committed directly in the repository"
+
+  # H. Techniques
+  hybrid_search:
+    present:
+      value: false
+      evidence: ["college_rag/ingest.py:225-245,376-417"]
+      basis: "the repository builds a text (minsearch Index) and a separate vector (minsearch VectorSearch) index, but no code combines or fuses their results"
+    shipped_enabled:
+      value: false
+      evidence: ["app_assist.py:14-20"]
+      basis: "create_index() builds only the text index for the shipped app"
+    evaluated:
+      value: false
+      evidence: []
+      basis: "no hybrid (combined) retrieval configuration is evaluated; the notebook compares text and vector search separately, not fused"
+    measured_effect:
+      value: not_measured
+      evidence: []
+      basis: "not applicable, no hybrid configuration exists to measure"
+    decision_basis:
+      value: none
+      evidence: []
+      basis: "no ship/do-not-ship reasoning about hybrid search is stated, because the technique is not present"
+    decision_axes:
+      value: []
+      evidence: []
+      basis: "no decision is stated"
+  reranking:
+    present:
+      value: false
+      evidence: ["college_rag/ingest.py:135"]
+      basis: "the only textual trace is a code comment listing fields kept for possible future 'filtering/reranking'; no reranking step is implemented"
+    shipped_enabled:
+      value: false
+      evidence: []
+      basis: "not present, so not enabled"
+    evaluated:
+      value: false
+      evidence: []
+      basis: "not present, so not evaluated"
+    measured_effect:
+      value: not_measured
+      evidence: []
+      basis: "not applicable, no reranking configuration exists to measure"
+    decision_basis:
+      value: none
+      evidence: []
+      basis: "no ship/do-not-ship reasoning about reranking is stated, because the technique is not present"
+    decision_axes:
+      value: []
+      evidence: []
+      basis: "no decision is stated"
+  query_rewriting:
+    present:
+      value: false
+      evidence: ["college_rag/ingest.py:171-221"]
+      basis: "choose_boost_profile() selects field-weighting profiles by keyword matching but never rewrites or expands the user's query text"
+    shipped_enabled:
+      value: false
+      evidence: []
+      basis: "not present, so not enabled"
+    evaluated:
+      value: false
+      evidence: []
+      basis: "not present, so not evaluated"
+    measured_effect:
+      value: not_measured
+      evidence: []
+      basis: "not applicable, no query-rewriting configuration exists to measure"
+    decision_basis:
+      value: none
+      evidence: []
+      basis: "no ship/do-not-ship reasoning about query rewriting is stated, because the technique is not present"
+    decision_axes:
+      value: []
+      evidence: []
+      basis: "no decision is stated"
+
+  # I. Deployment and bonus
+  cloud_deployment:
+    value: none
+    evidence: []
+    basis: "no cloud deployment documentation or deployment code is present in the repository"
+
+  # J. Documentation accuracy
+  headline_numbers_traceable:
+    value: all_traceable
+    evidence: ["README.md:19-25", "college_rag/data/us_top_30_universities.json"]
+    basis: "the one headline figure in the documentation (30 knowledge-base records) is producible from a committed artifact, even though README names the wrong file for it"
+  untraceable_number_count:
+    value: 0
+    evidence: []
+    basis: "the sole headline figure (30) is traceable to a committed artifact"
+  document_number_conflicts:
+    value: 0
+    evidence: []
+    basis: "only one document (README.md) states figures, so no cross-document conflict is checkable"
+  document_code_conflicts:
+    value: 1
+    evidence: ["README.md:19-25", "college_rag/ingest.py:155-161", "college_rag/data/ground-truth-retrieval.csv"]
+    basis: "README states the 30-record knowledge base is stored in ground-truth-retrieval.csv; the code instead loads the knowledge base from us_top_30_universities.json, and ground-truth-retrieval.csv is read only as the evaluation question set"
+  broken_reference_count:
+    value: 0
+    evidence: ["README.md"]
+    basis: "the one filename README names (ground-truth-retrieval.csv) does exist in the repository, even though its documented role is wrong"
+  limitations_section:
+    value: absent
+    evidence: ["README.md"]
+    basis: "no section of README names a limitation of the system's method or measurement"
+  artifact_reference_strength:
+    value: partially_referenced
+    evidence: ["README.md", "college_rag/evaluating.ipynb", "college_rag/evaluat_with_llm.ipynb", "college_rag/ingest.py"]
+    basis: "the evaluation notebooks and the ingestion module exist but are never named by path anywhere in README, while the evaluation question set is named"
+  artifacts_unreferenced_count:
+    value: 2
+    evidence: ["README.md", "college_rag/evaluating.ipynb", "college_rag/evaluat_with_llm.ipynb", "college_rag/ingest.py"]
+    basis: "of the fixed checklist, two present artifacts are named nowhere in the documentation: the evaluation script/notebook, and the ingestion entry point; a monitoring dashboard definition and a deployment configuration are absent from the repository and excluded from the count"
+
+  # K. Descriptive
+  corpus_language:
+    value: en
+    evidence: ["README.md"]
+    basis: "all documentation and data are in English"
+  corpus_domain:
+    value: "college and university recommendations"
+    evidence: ["README.md:1-14"]
+    basis: "the system recommends universities to a user based on stated preferences"
+  interface_framework:
+    value: streamlit
+    evidence: ["app.py:10,230-243"]
+    basis: "the interface is built with the streamlit library"
+  vector_store:
+    value: in_memory
+    evidence: ["college_rag/ingest.py:376-417"]
+    basis: "minsearch's VectorSearch holds embeddings in memory; no external vector database is used"
+  llm_provider:
+    value: openai
+    evidence: ["app_assist.py:2-12", "college_rag/rag_help.py:1-40"]
+    basis: "all LLM calls go through the openai client"
+  repo_file_count:
+    value: 22
+    evidence: ["<repo>"]
+    basis: "git ls-files | wc -l at the pinned commit"
+
+extraction_notes:
+  - "monitoring_dashboard_provenance's enum (none/committed_definitions/stock_tool_ui/other) has no clean slot for this repository's case: a Grafana dashboard whose panels are visibly custom-built against the app's own schema (not an out-of-the-box vendor UI) but whose definition is not committed at all, so the only available evidence is a screenshot rather than a text or code locator. Recorded as `other`; the schema may want a fourth value for 'custom, uncommitted' distinct from `stock_tool_ui`."
+  - "Load-bearing general-programming fact for retrieval_eval_reproducible: college_rag/ingest.py:163 defines load_documents(data) with no default for its one parameter; college_rag/evaluating.ipynb:cell11 calls load_documents() with zero arguments, which raises TypeError on a fresh top-to-bottom run. This is ordinary Python calling-convention knowledge, not domain knowledge about the subject matter."
+  - "Load-bearing general-programming fact for llm_eval_config_matches_shipped and llm_eval_reproducible: Python's str.format() raises KeyError when its template contains a literal brace pair that looks like a field reference but is not escaped as {{ }}. college_rag/evaluat_with_llm.ipynb:cell0's prompt_template has unescaped braces around its JSON example, which is why cell7/cell8 error on the very first sample; app_assist.py:64-67 escapes the same JSON example correctly and runs live in production. This is a fact about Python string formatting, not about the RAG system's subject matter."
+  - "document_code_conflicts (README.md:19-25 vs college_rag/ingest.py:155-161): README states the 30-record knowledge base is stored in ground-truth-retrieval.csv; that file is actually the 60-row evaluation question set, and the true knowledge base is us_top_30_universities.json, never named in README."
+  - "run_instructions is recorded as `none` because the check is anchored to what a reader following the documentation would find: database/Makefile documents real setup commands for postgres and grafana, but README never names or points at it, and no documentation anywhere states how to install dependencies, set required environment variables (OPENAI_API_KEY, POSTGRES_*), or start the application. The schema does not have a way to record 'runnable instructions exist in the repository but are not linked from the documentation', which is a different fact from both `none` (nothing exists) and `partial` (some documented steps are incomplete)."
+  - "run_instructions_gap_count is recorded as 0 alongside run_instructions: none. This is a vacuous zero (no documented steps to fail), which the schema's int type cannot distinguish from a genuinely complete, gap-free documented procedure. The two cases are opposite in what they say about the repository but currently produce the same count."
+  - "This repository's most notable retrieval-technique decision — measuring two whole retrieval backends (a text/minsearch index and a dense-embedding index) against each other and shipping the empirically better one — has no home in group H, because hybrid_search/reranking/query_rewriting all describe augmentations to a single retrieval path, not a choice between two competing backends. retrieval_best_approach_shipped captures the outcome, but the schema has no field for 'two whole approaches compared, one shipped', which is exactly the discipline the current criteria's checkbox-for-presence incentive fails to reward."
+  - "problem_statement's judgment call: README names the topic (a RAG app for college recommendations) but no named section states an audience; the audience is only visible in code (app.py's chat caption, rag_help.py's system instructions), which this schema's rule 1 treats as available to a reader but not as 'a named section' of documentation. Recorded as `brief`."

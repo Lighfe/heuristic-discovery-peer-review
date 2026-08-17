@@ -1,0 +1,310 @@
+schema_version: 1
+case_id: p15
+commit: "b01580eac3b5820d32ed15431297097badc614c7"
+extracted_by: agents/extractor/v2
+extracted_on: "2026-08-17"
+
+fields:
+  # A. System shape
+  knowledge_base_present:
+    value: present
+    evidence: ["data/firstaidqa_v1-first-half.json", "src/ingest.py:12-18"]
+    basis: "a committed JSON file of Q&A entries is loaded and indexed at startup"
+  llm_in_flow:
+    value: present
+    evidence: ["src/rag/rag_helper.py:82-89"]
+    basis: "the request path calls an LLM completion to produce the answer"
+  retrieval_flow:
+    value: kb_and_llm
+    evidence: ["src/app.py:14-16", "src/rag/rag_usage.py:39-67", "src/rag/rag_helper.py:82-89"]
+    basis: "the request handler (app.py) calls assistant.rag(), which both searches the indices and calls the LLM"
+  problem_statement:
+    value: specific
+    evidence: ["README.md:9-11"]
+    basis: "a named '## Problem' section states the audience (person at an accident scene) and the question the system answers (first-aid guidance)"
+
+  # B. Interface
+  interface_kind:
+    value: [web_ui, cli]
+    evidence: ["src/app.py:1-51", "src/assistant.py:31-39"]
+    basis: "src/app.py is a Streamlit UI; src/assistant.py has a __main__ block taking a question from sys.argv and printing the answer"
+  interface_evidence_kind:
+    value: code_only
+    evidence: ["src/app.py:1-51"]
+    basis: "USAGE.md shows text/ASCII mockups of UI screens, not image screenshots or recordings; no image or video files are tracked in the repository"
+
+  # C. Ingestion
+  ingestion_kind:
+    value: script_or_notebook
+    evidence: ["src/ingest.py:1-66"]
+    basis: "loading and indexing is implemented as plain Python functions (load_faq_data, build_index, build_vector_index), not a CLI orchestration tool"
+  ingestion_single_command:
+    value: true
+    evidence: ["README.md:181-187", "src/assistant.py:14-28"]
+    basis: "the single documented app-start command (uv run streamlit run src/app.py) triggers create_assistant(), which runs ingestion end to end"
+  ingestion_output_stated:
+    value: true
+    evidence: ["README.md:237-238"]
+    basis: "README states the dataset is 2,775 Q&A pairs"
+
+  # D. Retrieval evaluation
+  retrieval_eval_present:
+    value: true
+    evidence: ["notebooks/02-sqlite-text-search-evals.ipynb", "notebooks/06-sqlite-vector-num-of-results-evals.ipynb", "notebooks/08-sqlite-hybrid-search-evals.ipynb"]
+    basis: "hit_rate/mrr are computed and reported for text, vector, and hybrid search"
+  retrieval_eval_approaches_compared:
+    value: 3
+    evidence: ["notebooks/02-sqlite-text-search-evals.ipynb:cell8", "notebooks/06-sqlite-vector-num-of-results-evals.ipynb:cell8", "notebooks/08-sqlite-hybrid-search-evals.ipynb:cell7"]
+    basis: "three distinct retrieval strategies (text-only, vector-only, hybrid RRF) each have separately reported hit_rate/mrr"
+  retrieval_eval_set_committed:
+    value: committed
+    evidence: ["data/ground_truth.csv"]
+    basis: "the evaluation question set is a committed CSV file"
+  retrieval_eval_set_size:
+    value: 13874
+    evidence: ["data/ground_truth.csv", "notebooks/02-sqlite-text-search-evals.ipynb:cell6"]
+    basis: "data/ground_truth.csv has 13875 lines including a header row; the notebook's own progress-bar total over the same data reads 13874"
+  retrieval_eval_relevance_rule:
+    value: document_level
+    evidence: ["src/evaluation/evaluation.py:36-44"]
+    basis: "compute_relevance marks a retrieved item relevant only if its id equals the id of the single source document the question was generated from"
+  retrieval_eval_config_matches_shipped:
+    value: matches
+    evidence: ["notebooks/08-sqlite-hybrid-search-evals.ipynb:cell6-cell7", "src/rag/rag_usage.py:39-56", "src/search.py:9-19"]
+    basis: "evaluation hybrid search uses text_search and vector_search each at num_results=10 fused with rrf k=60, identical to RAGWithUsage.search on the shipped path"
+  retrieval_eval_uncertainty_stated:
+    value: false
+    evidence: []
+    basis: "reported hit_rate/mrr are point estimates with no interval or variance statement"
+  retrieval_best_approach_shipped:
+    value: "no"
+    evidence: ["notebooks/06-sqlite-vector-num-of-results-evals.ipynb:cell8", "notebooks/08-sqlite-hybrid-search-evals.ipynb:cell7", "src/assistant.py:14-28"]
+    basis: "vector-only search (hit_rate 0.732, mrr 0.467) reports higher numbers on both metrics than the shipped hybrid combination (hit_rate 0.602, mrr 0.408), and the shipped path always builds and uses both indices via hybrid search"
+  retrieval_eval_reproducible:
+    value: reproducible_as_committed
+    evidence: ["notebooks/02-sqlite-text-search-evals.ipynb", "notebooks/06-sqlite-vector-num-of-results-evals.ipynb", "notebooks/08-sqlite-hybrid-search-evals.ipynb", "data/ground_truth.csv"]
+    basis: "each notebook, run top to bottom, loads committed data and a committed evaluation set, calls only defined functions, and produces the reported figures"
+
+  # E. Answer evaluation
+  llm_eval_present:
+    value: true
+    evidence: ["notebooks/09-llm-as-judge.ipynb"]
+    basis: "generated answers are scored good/bad against ground-truth answers and aggregated"
+  llm_eval_approaches_compared:
+    value: 1
+    evidence: ["notebooks/09-llm-as-judge.ipynb"]
+    basis: "one generation/judge configuration has reported aggregate numbers; notebooks/010-agent-evals.ipynb runs a single example through a separate tool-calling harness with no aggregate figure reported"
+  llm_eval_judge_kind:
+    value: model_judge
+    evidence: ["src/evaluation/evaluation.py:114-138", "notebooks/09-llm-as-judge.ipynb:cell17-cell19"]
+    basis: "an LLM call returns a structured good/bad verdict with reasoning"
+  llm_eval_judge_spotchecked:
+    value: false
+    evidence: ["notebooks/09-llm-as-judge.ipynb:cell27"]
+    basis: "the notebook lists a sample of judge-scored 'bad' items but records no manual check of whether the judge's verdicts themselves were correct"
+  llm_eval_question_generator:
+    value: generator_ties_question_to_passage
+    evidence: ["src/evaluation/evaluation.py:10-34", "notebooks/01-data-gen.ipynb:cell22-cell23"]
+    basis: "generate_ground_truth is committed code and each generated question is stored with the id of the source document it was generated from"
+  llm_eval_metric_at_ceiling:
+    value: true
+    evidence: ["notebooks/09-llm-as-judge.ipynb:cell26"]
+    basis: "the reported good-rate metric (maximum-is-best direction) is 95.39% (13234/13874), at or above the 95% ceiling threshold"
+  llm_eval_role_overlap:
+    value: same_model
+    evidence: ["src/config.py:6-15", "src/evaluation/evaluation.py:122", "notebooks/01-data-gen.ipynb:cell8"]
+    basis: "question generation, answer generation, and judging all default to the same configured model"
+  llm_eval_config_matches_shipped:
+    value: differs
+    evidence: ["notebooks/09-llm-as-judge.ipynb:cell8", "src/rag/starter.py:53-61", "src/evaluation/evaluation.py:114-138", "src/judge.py:11-23", "src/app.py:31"]
+    basis: "the evaluation harness builds answers with RAGWithUsage directly, skipping the query-rewriting step that the shipped RAGProduction.rag() performs before search; it also scores answers with a different good/bad correctness judge than the RELEVANT/PARTLY_RELEVANT/NON_RELEVANT judge invoked in the shipped app"
+  llm_eval_reproducible:
+    value: reproducible_as_committed
+    evidence: ["notebooks/09-llm-as-judge.ipynb:cell16", "data/rag-answers.csv"]
+    basis: "the judging step reads a committed answers file and calls only defined functions; the answer-generation step above it is redundant with the committed file but does not block reproduction of the judging step"
+
+  # F. Monitoring
+  monitoring_kind:
+    value: feedback_only
+    evidence: ["src/db/feedback.py:1-28", "src/app.py:31-35,42-50"]
+    basis: "user +1/-1 feedback and an auto-judge verdict are recorded; no committed dashboard or panel definitions exist"
+  monitoring_dashboard_provenance:
+    value: none
+    evidence: ["notebooks/010-monitoring.ipynb:cell2-cell3"]
+    basis: "the only monitoring notebook prints raw trace rows and re-runs one query; it defines no panels and no stock observability UI is deployed"
+  monitoring_instrumentation:
+    value: traced_on_request_path
+    evidence: ["src/rag/starter.py:17-50", "src/telemetry/tracer.py:1-23"]
+    basis: "RAGTraced wraps the rag/search/llm calls on the live request path with OpenTelemetry spans"
+  monitoring_chart_count:
+    value: null
+    evidence: []
+    basis: "no dashboard is defined, so there are no panels to count"
+  monitoring_charts_bound_to_data:
+    value: not_applicable
+    evidence: []
+    basis: "no dashboard is defined"
+
+  # G. Containerization and reproducibility
+  containerization_kind:
+    value: compose_full
+    evidence: ["docker-compose.yml:1-30", "Dockerfile:1-14"]
+    basis: "docker-compose.yml builds and runs the application service itself alongside its postgres dependency"
+  run_instructions:
+    value: complete
+    evidence: ["README.md:80-291"]
+    basis: "setup, dependencies, configuration, required environment variables and the run command are all stated"
+  run_instructions_gap_count:
+    value: 1
+    evidence: ["README.md:139-147", "scripts/download.py:50-51", "src/embedder.py:7"]
+    basis: "the documented model-download step (uv run python scripts/download.py), run as written, downloads Xenova/nomic-embed-text-v1.5 to models/Xenova/nomic-embed-text-v1.5/, not the Xenova/all-MiniLM-L6-v2 path the README states it downloads and the one the application's Embedder reads by default"
+  dependency_versions_pinned:
+    value: lockfile_committed
+    evidence: ["uv.lock", "pyproject.toml:16-32"]
+    basis: "pyproject.toml states only lower bounds, but a resolved uv.lock is committed alongside it"
+  data_accessible:
+    value: automated_or_committed
+    evidence: ["data/firstaidqa_v1-first-half.json"]
+    basis: "the ingestion input is committed directly in the repository, no manual download step is required"
+
+  # H. Techniques
+  hybrid_search:
+    present:
+      value: true
+      evidence: ["src/search.py:9-19", "src/rag/rag_usage.py:39-56"]
+      basis: "text_search (BM25) and vector_search results are combined with reciprocal rank fusion"
+    shipped_enabled:
+      value: true
+      evidence: ["src/assistant.py:14-28", "src/rag/rag_usage.py:39-56"]
+      basis: "create_assistant() supplies both a text_index and a vector_index, so RAGWithUsage.search takes the hybrid branch on every request"
+    evaluated:
+      value: true
+      evidence: ["notebooks/08-sqlite-hybrid-search-evals.ipynb:cell6-cell9"]
+      basis: "hit_rate/mrr are computed for the hybrid combination, both at the shipped k and across tuned k values"
+    measured_effect:
+      value: mixed
+      evidence: ["notebooks/02-sqlite-text-search-evals.ipynb:cell8", "notebooks/06-sqlite-vector-num-of-results-evals.ipynb:cell8", "notebooks/08-sqlite-hybrid-search-evals.ipynb:cell7"]
+      basis: "hybrid (hit_rate 0.602, mrr 0.408) beats text-only (hit_rate 0.521, mrr 0.301) on both metrics but is beaten by vector-only (hit_rate 0.732, mrr 0.467) on both metrics"
+    decision_basis:
+      value: none
+      evidence: ["README.md:5"]
+      basis: "README describes hybrid search as a feature of the pipeline; no ship/do-not-ship reasoning comparing it against an alternative is stated"
+    decision_axes: []
+  reranking:
+    present:
+      value: false
+      evidence: []
+      basis: "no reranking code or reference appears anywhere in the repository"
+    shipped_enabled:
+      value: false
+      evidence: []
+      basis: "not present, so not enabled"
+    evaluated:
+      value: false
+      evidence: []
+      basis: "not present, so not evaluated"
+    measured_effect:
+      value: not_measured
+      evidence: []
+      basis: "not present"
+    decision_basis:
+      value: none
+      evidence: []
+      basis: "not present, no reasoning stated"
+    decision_axes: []
+  query_rewriting:
+    present:
+      value: true
+      evidence: ["src/rag/rag_helper.py:25-43"]
+      basis: "rewrite_query reformulates the raw user query via an LLM call before search"
+    shipped_enabled:
+      value: true
+      evidence: ["src/rag/starter.py:53-61"]
+      basis: "RAGProduction.rag() calls rewrite_query before delegating to search on every request"
+    evaluated:
+      value: false
+      evidence: []
+      basis: "no notebook or script reports retrieval or answer-quality numbers with and without query rewriting"
+    measured_effect:
+      value: not_measured
+      evidence: []
+      basis: "not evaluated"
+    decision_basis:
+      value: none
+      evidence: ["README.md:5"]
+      basis: "README describes query rewriting as a feature; no ship/do-not-ship reasoning comparing it against not rewriting is stated"
+    decision_axes: []
+
+  # I. Deployment and bonus
+  cloud_deployment:
+    value: none
+    evidence: []
+    basis: "no cloud provider configuration, IaC, or deployment target is referenced anywhere in the repository"
+
+  # J. Documentation accuracy
+  headline_numbers_traceable:
+    value: no_numbers
+    evidence: []
+    basis: "README and USAGE state no aggregate performance figures; reported hit_rate/mrr/good-rate numbers exist only inside notebook outputs"
+  untraceable_number_count:
+    value: 0
+    evidence: []
+    basis: "no headline numbers are stated in the documentation"
+  document_number_conflicts:
+    value: 0
+    evidence: []
+    basis: "no numeric figure is repeated across two documents in a way that could conflict"
+  document_code_conflicts:
+    value: 2
+    evidence: ["README.md:144-147", "scripts/download.py:50-51", "src/embedder.py:7", "USAGE.md:228", "notebooks/010-monitoring.ipynb:cell2-cell3"]
+    basis: "(1) README claims the download command fetches all-MiniLM-L6-v2, but the script's own entry point fetches a different named model to a different path; (2) USAGE.md calls notebooks/010-monitoring.ipynb 'a full monitoring dashboard', but that notebook defines no panels, only printing raw trace rows"
+  broken_reference_count:
+    value: 0
+    evidence: ["README.md", "USAGE.md"]
+    basis: "every file path named in README.md and USAGE.md exists in the repository"
+  limitations_section:
+    value: absent
+    evidence: []
+    basis: "no section or heading in README.md or USAGE.md names a limitation"
+  artifact_reference_strength:
+    value: all_referenced
+    evidence: ["README.md:39-76", "README.md:242", "USAGE.md:260-270"]
+    basis: "every present artifact in the fixed checklist (evaluation notebooks, an evaluation question set, the ingestion entry point, deployment configuration) is named by plain-text path or code span somewhere in the documentation; the project has no monitoring dashboard definition to check"
+  artifacts_unreferenced_count:
+    value: 0
+    evidence: ["README.md:39-76", "README.md:242", "USAGE.md:260-270"]
+    basis: "each checklist category with a present artifact has at least one member named in the documentation"
+
+  # K. Descriptive
+  corpus_language:
+    value: en
+    evidence: ["data/firstaidqa_v1-first-half.json"]
+    basis: "questions and answers are in English"
+  corpus_domain:
+    value: "first aid guidance"
+    evidence: ["README.md:1-11"]
+    basis: "the FAQ content and stated problem concern first-aid questions"
+  interface_framework:
+    value: streamlit
+    evidence: ["src/app.py:1"]
+    basis: "the UI is built with the streamlit package"
+  vector_store:
+    value: sqlite
+    evidence: ["src/ingest.py:37-44"]
+    basis: "vectors are indexed via the sqlitesearch package's VectorSearchIndex, backed by a SQLite file, HNSW mode"
+  llm_provider:
+    value: mistral
+    evidence: ["src/config.py:3-15"]
+    basis: "the configured model is routed to the mistral provider via litellm"
+  repo_file_count:
+    value: 52
+    evidence: ["<repo>"]
+    basis: "git ls-files | wc -l at the pinned commit"
+
+extraction_notes:
+  - "The README/USAGE prose describes hybrid search and query rewriting only as pipeline steps ('combines hybrid search... with an LLM', 'automatically rewrites queries to improve retrieval'), with no stated ship/do-not-ship argument. I read this as decision_basis: none rather than argued, since nothing compares the choice against an alternative; a stated purpose alone reads differently from a stated justification, and the schema does not draw this line explicitly."
+  - "hybrid_search.measured_effect is ambiguous under the current definition when three approaches are compared pairwise and disagree by baseline rather than by metric: hybrid beats text-only on both hit_rate and mrr, but loses to vector-only on both hit_rate and mrr. The schema's 'mixed' is defined as metrics disagreeing with each other for one comparison, not as comparisons disagreeing with each other against different baselines. I recorded mixed as the closest fit and flag this as a possible schema gap when more than two approaches exist."
+  - "src/ingest.py's build_index and build_vector_index both use the pattern `if index: return index else: index.fit(...)`, where `index` is a freshly constructed object — under ordinary Python truthiness this branch always returns before .fit() runs, unless the sqlitesearch library's index classes define custom `__bool__`/`__len__` that evaluate falsy when empty. That library is an installed dependency, not vendored in this repository, so I could not verify which is true from committed code alone, and I did not run or install anything to check. Left undetermined rather than asserted as a run_instructions_gap; flagged here as a candidate for owner or library-source review."
+  - "notebooks/010-agent-evals.ipynb runs a tool-calling agent harness (via the toyaikit package) distinct from the shipped RAGProduction chain and from the evaluation.py judge pipeline; it produces one example run with no aggregate metric, so it does not count toward llm_eval_approaches_compared or any other scoreable field, but it is a third, uncounted evaluation-adjacent artifact worth noting for schema completeness."
+  - "data/clinical_eval_set.csv is a second, differently-prompted question set (notebooks/03-clinical-data-gen.ipynb) used only in the embedding-model and vector-mode tournament notebooks (04, 05), not in the core hit_rate/mrr/judge evaluations that produce the numbers cited above. The schema's artifact_reference_strength/artifacts_unreferenced_count checklist treats 'evaluation question set' as one category; README.md:242 names clinical_eval_set.csv but never names data/ground_truth.csv, the file the reported hit_rate/mrr/good-rate figures actually come from. Category-level, this reads as referenced; file-level, the specific evidentiary artifact is unreferenced. Recorded as a note since the schema checklist operates at category granularity."
+  - "The git history's single commit is authored under a name that appears in the clone's local git log metadata, not in any tracked file path; nothing in the tracked file tree names a person, so no evidence field or note here cites it."

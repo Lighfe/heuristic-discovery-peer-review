@@ -1,0 +1,301 @@
+schema_version: 1
+case_id: p23
+commit: "6eb6d1fa5f7e6471162b363be78cab1bbb7bcda8"
+extracted_by: agents/extractor/v2
+extracted_on: "2026-08-17"
+
+fields:
+  knowledge_base_present:
+    value: present
+    evidence: ["data/qdrant_ingest/documents.jsonl", "data/qdrant_ingest/ingest.py:44-65"]
+    basis: "66-chunk document set embedded and upserted into a Qdrant collection"
+  llm_in_flow:
+    value: present
+    evidence: ["agent.py:56-61", "agent.py:96-99", "app.py:89-91"]
+    basis: "request path runs a pydantic_ai Agent (model from LLM_MODEL) to produce the reply"
+  retrieval_flow:
+    value: kb_and_llm
+    evidence: ["agent.py:83", "tools/lore_search.py:15-24", "app.py:89-91"]
+    basis: "request handler runs an LLM agent that calls a Qdrant-backed search_lore tool before answering"
+  problem_statement:
+    value: specific
+    evidence: ["README.md:13-27"]
+    basis: "named 'Problem description' section states the question answered (lore of a tabletop RPG setting) and the audience (players asking in natural language)"
+
+  interface_kind:
+    value: [web_ui, cli]
+    evidence: ["app.py:44-95", "docker-compose.yml:27-46", "agent.py:86-99", "README.md:94-104"]
+    basis: "Streamlit chat UI is the primary shipped interface (compose service on :8501); agent.py also runs as a documented terminal CLI (uv run agent.py <persona> \"<question>\")"
+  interface_evidence_kind:
+    value: code_only
+    evidence: ["README.md:29-37"]
+    basis: "README shows one example Q&A as plain text; no screenshot or recording of the interface is included (persona portraits are character art, not UI evidence)"
+
+  ingestion_kind:
+    value: script_or_notebook
+    evidence: ["data/qdrant_ingest/ingest.py:1-73"]
+    basis: "a single Python script embeds documents.jsonl and upserts to Qdrant"
+  ingestion_single_command:
+    value: true
+    evidence: ["README.md:65", "docker-compose.yml:15-25"]
+    basis: "docker compose up --build runs the one-shot ingest service end to end; uv run data/qdrant_ingest/ingest.py is the equivalent local command"
+  ingestion_output_stated:
+    value: true
+    evidence: ["README.md:161", "data/qdrant_ingest/ingest.py:67-68"]
+    basis: "README states 66 committed chunks; ingest.py prints the resulting Qdrant point count on completion"
+
+  retrieval_eval_present:
+    value: false
+    evidence: ["README.md:232-233"]
+    basis: "README's evaluation-criteria table marks retrieval evaluation 'Not implemented'; no evaluation script or notebook exists in the repository"
+  retrieval_eval_approaches_compared:
+    value: 0
+    evidence: []
+    basis: "no retrieval evaluation exists"
+  retrieval_eval_set_committed:
+    value: absent
+    evidence: []
+    basis: "no evaluation question set is committed"
+  retrieval_eval_set_size:
+    value: null
+    evidence: []
+    basis: "no evaluation set exists"
+  retrieval_eval_relevance_rule:
+    value: none
+    evidence: []
+    basis: "no retrieval scoring function exists"
+  retrieval_eval_config_matches_shipped:
+    value: undeterminable
+    evidence: []
+    basis: "no evaluation configuration exists to compare against the shipped retrieval path"
+  retrieval_eval_uncertainty_stated:
+    value: false
+    evidence: []
+    basis: "no evaluation exists, so no uncertainty statement can exist either"
+  retrieval_best_approach_shipped:
+    value: undeterminable
+    evidence: []
+    basis: "no retrieval approaches are compared, so nothing settles which one 'wins'"
+  retrieval_eval_reproducible:
+    value: neither
+    evidence: []
+    basis: "no retrieval-evaluation pipeline is committed"
+
+  llm_eval_present:
+    value: false
+    evidence: ["README.md:233"]
+    basis: "README's evaluation-criteria table marks LLM evaluation 'Not implemented'; no judge, prompt-comparison or metric code exists in the repository"
+  llm_eval_approaches_compared:
+    value: 0
+    evidence: []
+    basis: "no answer evaluation exists"
+  llm_eval_judge_kind:
+    value: none
+    evidence: []
+    basis: "no judge code exists"
+  llm_eval_judge_spotchecked:
+    value: false
+    evidence: []
+    basis: "no judge exists to spot-check"
+  llm_eval_question_generator:
+    value: none_committed
+    evidence: []
+    basis: "no question-generation code is committed"
+  llm_eval_metric_at_ceiling:
+    value: null
+    evidence: []
+    basis: "no aggregate metric exists to check for ceiling behavior"
+  llm_eval_role_overlap:
+    value: undeterminable
+    evidence: []
+    basis: "no generator, comparison, or judge roles exist to compare"
+  llm_eval_config_matches_shipped:
+    value: undeterminable
+    evidence: []
+    basis: "no evaluation configuration exists to compare against the shipped generation path"
+  llm_eval_reproducible:
+    value: neither
+    evidence: []
+    basis: "no answer-evaluation pipeline is committed"
+
+  monitoring_kind:
+    value: none
+    evidence: ["README.md:236"]
+    basis: "README's evaluation-criteria table marks monitoring 'Not implemented'; no feedback capture or dashboard code exists"
+  monitoring_dashboard_provenance:
+    value: none
+    evidence: []
+    basis: "no dashboard exists, committed or stock"
+  monitoring_instrumentation:
+    value: none
+    evidence: []
+    basis: "no logging or tracing code runs on the request path"
+  monitoring_chart_count:
+    value: null
+    evidence: []
+    basis: "not applicable, no dashboard exists"
+  monitoring_charts_bound_to_data:
+    value: not_applicable
+    evidence: []
+    basis: "no dashboard exists"
+
+  containerization_kind:
+    value: compose_full
+    evidence: ["docker-compose.yml:1-51"]
+    basis: "compose defines the vector database, the ingestion job, and the application, and runs all three"
+  run_instructions:
+    value: complete
+    evidence: ["README.md:56-104"]
+    basis: "setup, dependency install, required env var, and run commands are all stated for both the docker and local-dev paths"
+  run_instructions_gap_count:
+    value: 0
+    evidence: ["README.md:56-104", "docker-compose.yml:1-51", "data/qdrant_ingest/ingest.py:27-38"]
+    basis: "desk walk-through of both documented paths in order: compose's service dependency graph (ingest waits on qdrant via its own poll loop, app waits on ingest's successful completion) and the local-dev command order both resolve without an undeclared input or an out-of-order step"
+  dependency_versions_pinned:
+    value: lockfile_committed
+    evidence: ["uv.lock", "pyproject.toml:6-14"]
+    basis: "pyproject.toml states only lower bounds; uv.lock, a full resolved lockfile, is committed alongside it"
+  data_accessible:
+    value: automated_or_committed
+    evidence: ["data/qdrant_ingest/documents.jsonl", "data/qdrant_ingest/ingest.py:41-65"]
+    basis: "the 66-chunk dataset is committed to the repository and loaded automatically by the ingestion script/service"
+
+  hybrid_search:
+    present:
+      value: false
+      evidence: ["data/qdrant_ingest/search.py:33-100"]
+      basis: "search() issues a single dense-vector query_points call; no keyword/BM25 stage exists"
+    shipped_enabled:
+      value: false
+      evidence: ["data/qdrant_ingest/search.py:33-100"]
+      basis: "not implemented, so nothing is enabled"
+    evaluated:
+      value: false
+      evidence: []
+      basis: "not implemented, so nothing is evaluated"
+    measured_effect:
+      value: not_measured
+      evidence: []
+      basis: "not implemented"
+    decision_basis:
+      value: none
+      evidence: []
+      basis: "no ship/do-not-ship reasoning about hybrid search is stated"
+    decision_axes: []
+
+  reranking:
+    present:
+      value: false
+      evidence: ["data/qdrant_ingest/search.py:33-100", "tools/lore_search.py:15-24"]
+      basis: "search results returned by query_points are passed straight through with no re-scoring step"
+    shipped_enabled:
+      value: false
+      evidence: ["data/qdrant_ingest/search.py:33-100"]
+      basis: "not implemented, so nothing is enabled"
+    evaluated:
+      value: false
+      evidence: []
+      basis: "not implemented, so nothing is evaluated"
+    measured_effect:
+      value: not_measured
+      evidence: []
+      basis: "not implemented"
+    decision_basis:
+      value: none
+      evidence: []
+      basis: "no ship/do-not-ship reasoning about reranking is stated"
+    decision_axes: []
+
+  query_rewriting:
+    present:
+      value: false
+      evidence: ["agent.py:1-99", "tools/lore_search.py:15-24"]
+      basis: "no dedicated query-reformulation code exists; the search_lore tool passes through whatever query string the calling LLM supplies"
+    shipped_enabled:
+      value: false
+      evidence: ["agent.py:1-99"]
+      basis: "not implemented, so nothing is enabled"
+    evaluated:
+      value: false
+      evidence: []
+      basis: "not implemented, so nothing is evaluated"
+    measured_effect:
+      value: not_measured
+      evidence: []
+      basis: "not implemented"
+    decision_basis:
+      value: none
+      evidence: []
+      basis: "no ship/do-not-ship reasoning about query rewriting is stated"
+    decision_axes: []
+
+  cloud_deployment:
+    value: none
+    evidence: ["README.md:1-256"]
+    basis: "no cloud deployment documentation or infrastructure-as-code is present; the only deployment path documented is local docker compose"
+
+  headline_numbers_traceable:
+    value: all_traceable
+    evidence: ["README.md:81", "README.md:161-178", "README.md:250", "README.md:252", "data/qdrant_ingest/documents.jsonl"]
+    basis: "committed documents.jsonl reproduces every reported figure on inspection: 66 total chunks, 50/16 source split, all seven type_label counts (14/12/9/7/4/2/2), 1800-char cap (max 1799), and 48 of 66 chunks containing [[label|uuid]] markers"
+  untraceable_number_count:
+    value: 0
+    evidence: ["data/qdrant_ingest/documents.jsonl"]
+    basis: "every headline figure checked against documents.jsonl matches exactly"
+  document_number_conflicts:
+    value: 0
+    evidence: ["README.md:1-256"]
+    basis: "README is the only document reporting figures; no other committed document states comparable numbers to conflict with"
+  document_code_conflicts:
+    value: 0
+    evidence: ["README.md:78-81", "data/qdrant_ingest/ingest.py:48-65", "data/qdrant_ingest/documents.jsonl"]
+    basis: "checked claims (idempotent re-ingestion via stable ids, client-side FastEmbed inference, 1800-char chunk cap, one-line response-language change) against the code and data they describe; none contradicted"
+  broken_reference_count:
+    value: 0
+    evidence: ["README.md:208-222"]
+    basis: "every path named in the README's project-structure listing exists in the repository at the pinned commit"
+  limitations_section:
+    value: includes_structural
+    evidence: ["README.md:246-256"]
+    basis: "named limitation states that 48 of 66 chunks retain raw scraper cross-reference markers that pollute both the embeddings and what the model sees -- a claim about the retrieval/generation method, not only about hardware, scope or budget"
+  artifact_reference_strength:
+    value: all_referenced
+    evidence: ["README.md:208-238"]
+    basis: "every artifact the project has (ingestion entry point, deployment configuration) is named by path in the plain-text project-structure tree or the evaluation-criteria table; neither is a markdown link"
+  artifacts_unreferenced_count:
+    value: 0
+    evidence: ["README.md:208-238"]
+    basis: "against the fixed checklist, only ingestion entry point and deployment configuration are present in this project, and both are named in the documentation; evaluation script, evaluation question set and monitoring dashboard are absent and excluded from the count"
+
+  corpus_language:
+    value: ru
+    evidence: ["README.md:39-45", "data/qdrant_ingest/documents.jsonl"]
+    basis: "the indexed lore text is Russian; interface, prompts and personas are English"
+  corpus_domain:
+    value: "tabletop role-playing game campaign-setting lore"
+    evidence: ["README.md:1-27"]
+    basis: null
+  interface_framework:
+    value: streamlit
+    evidence: ["app.py:6", "pyproject.toml:13"]
+    basis: null
+  vector_store:
+    value: qdrant
+    evidence: ["data/qdrant_ingest/search.py:14", "docker-compose.yml:2-10"]
+    basis: null
+  llm_provider:
+    value: openai
+    evidence: [".env.example:1", "agent.py:14"]
+    basis: null
+  repo_file_count:
+    value: 20
+    evidence: ["<repo>"]
+    basis: "git ls-files | wc -l, at the pinned commit"
+
+extraction_notes:
+  - "Four fields were forced into a value meant for a different situation because the schema's enums for group D/E don't distinguish 'no evaluation was attempted' from 'an evaluation exists but the question is unresolvable': retrieval_eval_config_matches_shipped, llm_eval_config_matches_shipped, retrieval_best_approach_shipped and llm_eval_role_overlap are all recorded as undeterminable here, but for the reason 'there is nothing to compare', not 'the evidence is absent or contradictory' as the schema's own definition of undeterminable states."
+  - "retrieval_eval_reproducible and llm_eval_reproducible have no undeterminable option at all; recorded as neither because no pipeline exists, but that collapses 'no evaluation was ever attempted' together with 'an evaluation was attempted and is broken', which are different facts a candidate might want to score differently."
+  - "query_rewriting is ambiguous for this repository's shape: the agent is tool-calling (pydantic_ai), so the LLM itself composes the search_lore query string at call time, and may call it more than once with a different query while reasoning. No dedicated rewriting/reformulation module exists in code, so present is recorded false, but an agentic system blurs the line between 'a technique was implemented' and 'the model's ordinary tool-use produces the same effect'."
+  - "The .dockerignore lists CLAUDE.md, TECH_DEBT.md and project.md as excluded from the image, but none of the three are tracked by git at the pinned commit (git ls-files returns 20 files, none of them these). Not used as evidence for anything; noted since it implies local-only files existed during development that are not part of the record."
+  - "README.md:60's 'cd rpg_bartender_project' step could not be checked against the actual repository name, since that name is deliberately not recorded by this project's anonymity rule; not counted as a run_instructions gap because it may simply be a placeholder in the Quick start block."
+  - "llm_provider is recorded as the single string 'openai' (the .env.example default and the only key without a comment marking it optional), though OPENROUTER_API_KEY/openrouter: model prefixes are a documented alternative; the schema's free-text single-value field has nowhere to record a second supported provider."

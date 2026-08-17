@@ -1,0 +1,345 @@
+schema_version: 1
+case_id: p20
+commit: "c37ed4c0e0ecbcc2c21e73d9957693061749c55f"
+extracted_by: agents/extractor/v2
+extracted_on: "2026-08-17"
+
+fields:
+  knowledge_base_present:
+    value: present
+    evidence: ["retrieval/qdrant_index.py:23-33", "retrieval/minsearch_index.py"]
+    basis: "two knowledge-base backends (Qdrant, minsearch) are built from committed records"
+
+  llm_in_flow:
+    value: present
+    evidence: ["rag/pipeline.py:78-80"]
+    basis: "answer_question() calls an OpenAI chat completion after retrieval"
+
+  retrieval_flow:
+    value: kb_and_llm
+    evidence: ["rag/pipeline.py:73-80"]
+    basis: "request handler both queries a knowledge-base index and calls an LLM"
+
+  problem_statement:
+    value: specific
+    evidence: ["README.md:5-9", "README.md:20-24"]
+    basis: "a named 'Problem statement' section states the question answered (turning a fragmentary field description into a species name) and the audience (beginner birders)"
+
+  interface_kind:
+    value: [web_ui, cli]
+    evidence: ["app.py:40-99", "rag/pipeline.py:109-142"]
+    basis: "a Streamlit UI (app.py) and an argparse CLI entry point (rag/pipeline.py main()) both exist"
+
+  interface_evidence_kind:
+    value: code_only
+    evidence: []
+    basis: "no screenshot or recording file/link found in README.md or birder-rag-project-context.md"
+
+  ingestion_kind:
+    value: orchestrated_tool
+    evidence: ["ingestion/pipeline.py:29", "ingestion/pipeline.py:103-124"]
+    basis: "ingestion is run through a dlt pipeline (dlt.pipeline/.run), not a bare script"
+
+  ingestion_single_command:
+    value: false
+    evidence: ["README.md:74-77"]
+    basis: "regenerating ingestion outputs documents two sequential commands (ingestion.pipeline then retrieval.build), not one"
+
+  ingestion_output_stated:
+    value: true
+    evidence: ["data/ingest_report.txt:1-7", "ingestion/pipeline.py:240-247"]
+    basis: "a committed report states species/chunk/join counts, and the pipeline also prints chunk and trait counts"
+
+  retrieval_eval_present:
+    value: true
+    evidence: ["eval/retrieval_eval.py", "data/retrieval_eval_report.txt"]
+    basis: ""
+
+  retrieval_eval_approaches_compared:
+    value: 3
+    evidence: ["eval/retrieval_eval.py:68-72", "data/retrieval_eval_report.txt:1-5"]
+    basis: "minsearch (keyword), qdrant (vector) and hybrid (RRF) each have reported hit-rate/MRR numbers"
+
+  retrieval_eval_set_committed:
+    value: committed
+    evidence: ["data/ground_truth.json"]
+    basis: "600-item ground-truth file is committed"
+
+  retrieval_eval_set_size:
+    value: 600
+    evidence: ["data/ground_truth.json"]
+    basis: "600 top-level entries in the committed JSON array"
+
+  retrieval_eval_relevance_rule:
+    value: passage_level
+    evidence: ["eval/retrieval_eval.py:27-42", "eval/ground_truth.py:48-59,74-96"]
+    basis: "a hit requires the retrieved doc_id to equal the exact chunk id the question was generated from, and each chunk is a section-level passage of a species article, not the whole article"
+
+  retrieval_eval_config_matches_shipped:
+    value: matches
+    evidence: ["eval/retrieval_eval.py:23,49-64", "app.py:26-30,63", "rag/pipeline.py:56-74"]
+    basis: "eval script's top-K (5) and QdrantIndex construction (default embedding model, .qdrant_local path) match the shipped app's answer_question() default limit (5) and QdrantIndex construction"
+
+  retrieval_eval_uncertainty_stated:
+    value: false
+    evidence: ["data/retrieval_eval_report.txt"]
+    basis: "report states point estimates only, no interval or variance"
+
+  retrieval_best_approach_shipped:
+    value: "yes"
+    evidence: ["data/retrieval_eval_report.txt:1-5", "app.py:19,26-30"]
+    basis: "qdrant (vector) has the highest hit_rate and mrr of the three compared, and app.py's get_index() builds a QdrantIndex"
+
+  retrieval_eval_reproducible:
+    value: reproducible_as_committed
+    evidence: ["eval/retrieval_eval.py:1-91", "data/ground_truth.json", "data/birds_chunks.json", "data/species_traits.json"]
+    basis: "the script's inputs (ground truth, chunks, traits) are all committed and its imports resolve within the repository; no OpenAI call is required for this script"
+
+  llm_eval_present:
+    value: true
+    evidence: ["eval/llm_eval.py", "data/llm_eval_report.txt"]
+    basis: ""
+
+  llm_eval_approaches_compared:
+    value: 2
+    evidence: ["eval/llm_eval.py:62-69", "data/llm_eval_report.txt:1-5"]
+    basis: "concise and detailed prompt variants each have a reported win tally"
+
+  llm_eval_judge_kind:
+    value: model_judge
+    evidence: ["eval/llm_eval.py:29,43-54"]
+    basis: "a chat-completion call with a JSON winner field acts as the judge"
+
+  llm_eval_judge_spotchecked:
+    value: false
+    evidence: []
+    basis: "no file or documented step checks a sample of judge verdicts by hand and reports the result"
+
+  llm_eval_question_generator:
+    value: generator_ties_question_to_passage
+    evidence: ["eval/ground_truth.py:48-59,74-96"]
+    basis: "generate_questions() is called per indexed chunk and each produced question is stored with that chunk's own id as doc_id"
+
+  llm_eval_metric_at_ceiling:
+    value: null
+    evidence: ["data/llm_eval_report.txt:1-5"]
+    basis: "the only reported aggregate is a pairwise win/tie tally between two prompt variants (9/17/4 of 30), not a per-item quality score with a defined best value, so there is nothing to check for ceiling behavior"
+
+  llm_eval_role_overlap:
+    value: same_model
+    evidence: ["eval/ground_truth.py:26", "rag/pipeline.py:25", "eval/llm_eval.py:29"]
+    basis: "question generation, answer generation and judging all default to gpt-4o-mini"
+
+  llm_eval_config_matches_shipped:
+    value: matches
+    evidence: ["eval/llm_eval.py:29,57-59,92-95", "app.py:16,63", "rag/pipeline.py:25,56-74"]
+    basis: "eval script retrieves via QdrantIndex and calls answer_question() with the shipped default model (gpt-4o-mini) and default limit (5), same as app.py"
+
+  llm_eval_reproducible:
+    value: reproducible_as_committed
+    evidence: ["eval/llm_eval.py:1-125", "data/ground_truth.json"]
+    basis: "the script's question source (committed ground truth) and code path resolve as committed; results are tallied without dropping any completed item"
+
+  monitoring_kind:
+    value: feedback_and_dashboard
+    evidence: ["app.py:86-99", "docker/grafana/dashboards/birder_rag.json"]
+    basis: "thumbs up/down feedback is captured and a Grafana dashboard definition is committed"
+
+  monitoring_dashboard_provenance:
+    value: committed_definitions
+    evidence: ["docker/grafana/dashboards/birder_rag.json"]
+    basis: "panel definitions are committed as JSON, not merely a stock tool's UI"
+
+  monitoring_instrumentation:
+    value: traced_on_request_path
+    evidence: ["rag/pipeline.py:69,73,79", "monitoring/tracing.py:44-45"]
+    basis: "answer_question() opens spans around retrieval and generation on the request path"
+
+  monitoring_chart_count:
+    value: 5
+    evidence: ["docker/grafana/dashboards/birder_rag.json"]
+    basis: "5 panel objects counted in the committed dashboard JSON's panels array"
+
+  monitoring_charts_bound_to_data:
+    value: all
+    evidence: ["docker/grafana/dashboards/birder_rag.json", "monitoring/db.py:22-38"]
+    basis: "each of the 5 panels' SQL queries reference only columns (feedback, created_at, response_time_ms, cost_usd, top_score) that exist in the committed query_log schema"
+
+  containerization_kind:
+    value: compose_full
+    evidence: ["docker-compose.yml:1-76"]
+    basis: "compose file defines app, qdrant, postgres, grafana and tempo services together"
+
+  run_instructions:
+    value: complete
+    evidence: ["README.md:61-96"]
+    basis: "setup, dependency install, env vars, and run commands (docker and non-docker) are all stated"
+
+  run_instructions_gap_count:
+    value: 1
+    evidence: ["README.md:90-96", "app.py:35-44", "monitoring/db.py:41-57"]
+    basis: "the 'no Docker' instructions run 'streamlit run app.py' without starting Postgres; app.py calls ensure_schema() unconditionally at import time, which connects to Postgres at localhost:5432 and raises if nothing is listening there"
+
+  dependency_versions_pinned:
+    value: lockfile_committed
+    evidence: ["uv.lock", "pyproject.toml:40-43"]
+    basis: "uv.lock is committed and README documents 'uv sync --frozen' against it"
+
+  data_accessible:
+    value: automated_or_committed
+    evidence: ["data/birds_chunks.json", "data/species_traits.json", "data/raw/birdbase.xlsx", "data/raw/avonet.xlsx"]
+    basis: "ingestion outputs and both vendored trait source files are committed; no manual download step is required for a fresh clone"
+
+  hybrid_search:
+    present:
+      value: true
+      evidence: ["retrieval/hybrid.py:19-42"]
+      basis: "HybridIndex fuses minsearch and Qdrant results by Reciprocal Rank Fusion"
+    shipped_enabled:
+      value: false
+      evidence: ["app.py:19,26-30", "rag/pipeline.py:114,128-132"]
+      basis: "app.py's get_index() and rag/pipeline.py's CLI only construct MinsearchIndex or QdrantIndex; HybridIndex is imported only in eval/retrieval_eval.py"
+    evaluated:
+      value: true
+      evidence: ["eval/retrieval_eval.py:66-72", "data/retrieval_eval_report.txt:5"]
+      basis: "hit-rate/MRR are reported for hybrid alongside minsearch and qdrant"
+    measured_effect:
+      value: hurts
+      evidence: ["data/retrieval_eval_report.txt:3-5"]
+      basis: "hybrid hit_rate=0.737/mrr=0.539 is lower than qdrant-only hit_rate=0.747/mrr=0.586 on both metrics"
+    decision_basis:
+      value: measured
+      evidence: ["README.md:127", "data/retrieval_eval_report.txt:1-5"]
+      basis: "README states Qdrant is the default retriever because it won on both reported metrics among the three compared approaches"
+    decision_axes: ["hit_rate", "mrr"]
+
+  reranking:
+    present:
+      value: false
+      evidence: []
+      basis: "no reranking module or reference found in the repository"
+    shipped_enabled:
+      value: false
+      evidence: []
+      basis: "not present, so not enabled"
+    evaluated:
+      value: false
+      evidence: []
+      basis: "not present, so not evaluated"
+    measured_effect:
+      value: not_measured
+      evidence: []
+      basis: "not present"
+    decision_basis:
+      value: none
+      evidence: []
+      basis: "no ship/do-not-ship reasoning about reranking is stated anywhere"
+    decision_axes: []
+
+  query_rewriting:
+    present:
+      value: false
+      evidence: []
+      basis: "no query-rewriting module or reference found in the repository"
+    shipped_enabled:
+      value: false
+      evidence: []
+      basis: "not present, so not enabled"
+    evaluated:
+      value: false
+      evidence: []
+      basis: "not present, so not evaluated"
+    measured_effect:
+      value: not_measured
+      evidence: []
+      basis: "not present"
+    decision_basis:
+      value: none
+      evidence: []
+      basis: "no ship/do-not-ship reasoning about query rewriting is stated anywhere"
+    decision_axes: []
+
+  cloud_deployment:
+    value: none
+    evidence: []
+    basis: "no cloud provider deployment configuration or documentation found; docker-compose.yml targets local Docker only"
+
+  headline_numbers_traceable:
+    value: all_traceable
+    evidence:
+      - "data/retrieval_eval_report.txt"
+      - "data/llm_eval_report.txt"
+      - "birder-rag-project-context.md:61-66"
+      - "tests/test_traits.py:19-32"
+    basis: "retrieval and LLM-eval headline numbers reproduce the committed report files exactly; the claimed 980-record and 42-test counts both check out against committed data/tests (860+120 records; 35 plain test functions + 7 parametrize cases)"
+
+  untraceable_number_count:
+    value: 0
+    evidence: []
+    basis: "no reported figure found without a committed artifact able to produce it"
+
+  document_number_conflicts:
+    value: 0
+    evidence: []
+    basis: "README.md and birder-rag-project-context.md figures for retrieval/LLM-eval agree with each other and with the report files"
+
+  document_code_conflicts:
+    value: 0
+    evidence: []
+    basis: "no documented claim found that the code contradicts"
+
+  broken_reference_count:
+    value: 0
+    evidence: []
+    basis: "every path named in README.md's feature table and Setup section was checked and exists in the repository"
+
+  limitations_section:
+    value: includes_structural
+    evidence: ["README.md:34-40"]
+    basis: "'What this version does not do' names limitations about the system's own scope/method (no photo/audio ID, seasonality only as good as source articles, output is a shortlist not a determination), not only hardware or budget"
+
+  artifact_reference_strength:
+    value: all_referenced
+    evidence: ["README.md:98-104", "README.md:123-135"]
+    basis: "the evaluation scripts, evaluation question set, monitoring dashboard definition, ingestion entry point and deployment configuration are all named by path in README.md, as inline code spans rather than markdown links"
+
+  artifacts_unreferenced_count:
+    value: 0
+    evidence: []
+    basis: "all five fixed-checklist artifact kinds present in the repository are named somewhere in the documentation"
+
+  corpus_language:
+    value: en
+    evidence: ["README.md:20-24"]
+    basis: ""
+
+  corpus_domain:
+    value: "bird identification from a free-text field description"
+    evidence: ["README.md:1-24"]
+    basis: ""
+
+  interface_framework:
+    value: streamlit
+    evidence: ["app.py:11"]
+    basis: ""
+
+  vector_store:
+    value: qdrant
+    evidence: ["retrieval/qdrant_index.py:15"]
+    basis: ""
+
+  llm_provider:
+    value: openai
+    evidence: ["rag/pipeline.py:18,25"]
+    basis: ""
+
+  repo_file_count:
+    value: 57
+    evidence: ["<repo>"]
+    basis: "git ls-files | wc -l"
+
+extraction_notes:
+  - "retrieval_eval_relevance_rule is finer than 'document_level': doc_id is a section-level chunk id, and ground truth is generated per chunk, so a hit requires matching the exact source passage, not merely the right species article. Recorded as passage_level."
+  - "The compose stack's app service has no readiness dependency on Postgres beyond depends_on's container-start ordering (no healthcheck/condition: service_healthy in docker-compose.yml), so a first 'docker compose up' could race app startup against Postgres accepting connections. This is timing-dependent rather than a deterministic failure like the no-Docker gap counted above, so it was not added to run_instructions_gap_count, but it is a structural fact about docker-compose.yml worth flagging."
+  - "llm_eval_metric_at_ceiling's schema example (faithfulness out of 5) assumes a per-item quality score exists. This repository's answer evaluation is a pairwise A/B win-rate between two prompt variants, which has no single best-possible per-item value to check for ceiling against. Recorded as null; a schema note in case other repos have this same eval shape and the field's applicability to A/B designs needs clarifying."
+  - "vector_store records 'qdrant' as the shipped/default backend; minsearch is also implemented and is one of the three approaches compared in retrieval_eval, but the field's example values suggest a single shipped answer is wanted."

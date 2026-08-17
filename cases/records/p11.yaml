@@ -1,0 +1,359 @@
+schema_version: 1
+case_id: p11
+commit: "d22f63607c37b978a2434be492d31085145df37d"
+extracted_by: agents/extractor/v2
+extracted_on: "2026-08-14"
+
+fields:
+
+  # A. System shape
+  knowledge_base_present:
+    value: present
+    evidence: ["src/db.py:60-92", "src/ingest.py:1-40"]
+    basis: "PostgreSQL + pgvector table 'documents' is created and populated from committed data"
+
+  llm_in_flow:
+    value: present
+    evidence: ["src/rag.py:16-28", "src/rag.py:174-217"]
+    basis: "request path calls the OpenAI API (gpt-5.4-mini) to generate the answer"
+
+  retrieval_flow:
+    value: kb_and_llm
+    evidence: ["src/app.py:8-17", "src/rag.py:136-148", "src/rag.py:174-217"]
+    basis: "the request handler (app.py:8-17) calls agentic_rag, which queries the knowledge base via the hybrid_search_text tool and calls the LLM"
+
+  problem_statement:
+    value: specific
+    evidence: ["README.md:37-46"]
+    basis: "a named section states the question answered (grounded illness/condition answers from NHS content) and the audience (patients seeking medical advice)"
+
+  # B. Interface
+  interface_kind:
+    value: [web_ui, api]
+    evidence: ["src/streamlit_app.py:1-111", "src/app.py:1-52"]
+    basis: "a Streamlit chat UI (src/streamlit_app.py) and a Flask REST API (/question, /feedback in src/app.py) are both committed and independently runnable"
+
+  interface_evidence_kind:
+    value: code_and_recording
+    evidence: ["README.md:10-13", "images/demo.gif", "images/chat_assistant.PNG"]
+    basis: "an animated demo (images/demo.gif) and a screenshot (images/chat_assistant.PNG) are both committed alongside the interface code"
+
+  # C. Ingestion
+  ingestion_kind:
+    value: script_or_notebook
+    evidence: ["Makefile:1-12", "src/nhs_download.py", "src/nhs_chunking_data.py", "src/ingest.py"]
+    basis: "a Makefile chains three plain Python scripts (download, chunk, ingest); no orchestration tool is used"
+
+  ingestion_single_command:
+    value: true
+    evidence: ["Makefile:1-3", "README.md:151-155"]
+    basis: "'make update-data' runs download, chunk and ingest end to end"
+
+  ingestion_output_stated:
+    value: true
+    evidence: ["README.md:93-111", "src/nhs_chunking_data.py:68-70"]
+    basis: "document count (425) and chunk count (6,855) are stated in README and printed by the chunking script"
+
+  # D. Retrieval evaluation
+  retrieval_eval_present:
+    value: true
+    evidence: ["README.md:188-204", "notebooks/nhs_search_pgdb.ipynb:cell27-cell37"]
+    basis: ""
+
+  retrieval_eval_approaches_compared:
+    value: 4
+    evidence: ["README.md:192-199", "notebooks/nhs_search_pgdb.ipynb:cell34,cell35,cell36,cell37"]
+    basis: "four strategies reported: keyword, keyword+query-rewrite, vector, hybrid"
+
+  retrieval_eval_set_committed:
+    value: committed
+    evidence: ["data/ground-truth-retrieval.csv"]
+    basis: ""
+
+  retrieval_eval_set_size:
+    value: 200
+    evidence: ["data/ground-truth-retrieval.csv"]
+    basis: "201 lines including header = 200 question rows"
+
+  retrieval_eval_relevance_rule:
+    value: passage_level
+    evidence: ["notebooks/nhs_search_pgdb.ipynb:cell32", "notebooks/nhs_ground_truth_generation.ipynb:cell2"]
+    basis: "the scoring function compares each retrieved result's chunk_id to the ground-truth chunk_id, which was assigned to one specific chunk when the question was generated"
+
+  retrieval_eval_config_matches_shipped:
+    value: differs
+    evidence: ["notebooks/nhs_search_pgdb.ipynb:cell24", "src/rag.py:136-148"]
+    basis: "the eval notebook's hybrid_search defaults to num_results=10; the shipped hybrid_search_text hardcodes num_results=5"
+
+  retrieval_eval_uncertainty_stated:
+    value: false
+    evidence: ["README.md:192-199", "notebooks/nhs_search_pgdb.ipynb:cell32"]
+    basis: "hit_rate/mrr are reported as single point values; no interval or variance is computed or stated"
+
+  retrieval_best_approach_shipped:
+    value: "yes"
+    evidence: ["README.md:192-199", "src/rag.py:136-148,174-185"]
+    basis: "hybrid has the highest hit rate (0.950) and MRR (0.690) of the four compared approaches and is the method called on the request path"
+
+  retrieval_eval_reproducible:
+    value: reproducible_as_committed
+    evidence: ["notebooks/nhs_search_pgdb.ipynb:cell2-cell37"]
+    basis: "hit_rate/mrr/evaluate are defined before use, no undefined names or unexecuted cells found; running the notebook against the DB populated by the committed ingestion pipeline would regenerate the reported figures"
+
+  # E. Answer evaluation
+  llm_eval_present:
+    value: true
+    evidence: ["README.md:208-227", "notebooks/nhs_llm_eval.ipynb:cell20-cell28"]
+    basis: ""
+
+  llm_eval_approaches_compared:
+    value: 2
+    evidence: ["README.md:212-217", "notebooks/nhs_llm_eval.ipynb:cell22,cell27"]
+    basis: "gpt-5.4-mini and gpt-4o are both run through the same judge and reported"
+
+  llm_eval_judge_kind:
+    value: model_judge
+    evidence: ["notebooks/nhs_llm_eval.ipynb:cell20", "src/rag.py:90-120"]
+    basis: "an LLM prompt classifies each answer as RELEVANT/PARTLY_RELEVANT/NON_RELEVANT"
+
+  llm_eval_judge_spotchecked:
+    value: false
+    evidence: ["notebooks/nhs_llm_eval.ipynb:cell0-cell29", "src/rag.py:90-217"]
+    basis: "no code or text checking a sample of judge verdicts by hand was found in the notebook or application code"
+
+  llm_eval_question_generator:
+    value: generator_ties_question_to_passage
+    evidence: ["notebooks/nhs_ground_truth_generation.ipynb:cell2"]
+    basis: "the generator loop assigns each generated question the chunk_id of the specific chunk it was generated from"
+
+  llm_eval_metric_at_ceiling:
+    value: true
+    evidence: ["data/rag-eval-gpt-5.4-mini.csv", "notebooks/nhs_llm_eval.ipynb:cell24"]
+    basis: "relevance (direction: maximize) is RELEVANT for 196/200 = 98% of scored items for gpt-5.4-mini, at/above the 95% ceiling rule; the gpt-4o comparison arm is 183/200 = 91.5%, below ceiling"
+
+  llm_eval_role_overlap:
+    value: same_model
+    evidence: ["notebooks/nhs_ground_truth_generation.ipynb:cell2", "src/rag.py:16", "src/rag.py:111-113", "notebooks/nhs_llm_eval.ipynb:cell17,cell20"]
+    basis: "gpt-5.4-mini generates the ground-truth questions, generates the shipped model's answers, and is also the judge model"
+
+  llm_eval_config_matches_shipped:
+    value: differs
+    evidence: ["notebooks/nhs_llm_eval.ipynb:cell18,cell19", "src/rag.py:174-217"]
+    basis: "the eval notebook's rag() does one fixed retrieval+prompt+llm call with num_results=10; the shipped agentic_rag() instead runs a tool-calling agent that may invoke retrieval multiple times, with num_results hardcoded to 5 in the tool"
+
+  llm_eval_reproducible:
+    value: reproducible_as_committed
+    evidence: ["notebooks/nhs_llm_eval.ipynb:cell1-cell28"]
+    basis: "functions are defined before use with no undefined names; running the notebook against the committed ground-truth set and a live model/DB would regenerate the reported figures"
+
+  # F. Monitoring
+  monitoring_kind:
+    value: feedback_and_dashboard
+    evidence: ["src/app.py:33-47", "data/grafana.json"]
+    basis: "a /feedback endpoint records thumbs up/down and a Grafana dashboard definition is committed"
+
+  monitoring_dashboard_provenance:
+    value: committed_definitions
+    evidence: ["data/grafana.json"]
+    basis: "the dashboard's own panel definitions (7 panels) are committed as JSON, not merely a stock tool's default UI"
+
+  monitoring_instrumentation:
+    value: logged
+    evidence: ["src/db.py:96-149", "src/rag.py:174-217"]
+    basis: "each request writes structured fields (tokens, cost, latency, relevance) to a conversations table on the request path; no tracing/span framework is used"
+
+  monitoring_chart_count:
+    value: 7
+    evidence: ["data/grafana.json"]
+    basis: "the dashboard JSON's 'elements' map contains 7 panel definitions"
+
+  monitoring_charts_bound_to_data:
+    value: all
+    evidence: ["data/grafana.json", "src/db.py:32-58"]
+    basis: "every panel's SQL query references only tables/columns (conversations, feedback and their columns) that exist in the committed schema"
+
+  # G. Containerization and reproducibility
+  containerization_kind:
+    value: compose_full
+    evidence: ["docker-compose.yaml:1-42", "Dockerfile:1-16"]
+    basis: "postgres, the app, and grafana are all defined as services in docker-compose.yaml, with the app built from a committed Dockerfile"
+
+  run_instructions:
+    value: complete
+    evidence: ["README.md:319-370"]
+    basis: "setup, dependency install, env var configuration, container start, schema prep, data ingestion and app start are all named"
+
+  run_instructions_gap_count:
+    value: 2
+    evidence: ["Dockerfile:8", ".gitignore:3", "README.md:342-347", "README.md:274-281", "docker-compose.yaml:29-38"]
+    basis: "(1) Dockerfile:8 COPYs .python-version, which .gitignore:3 excludes from the repository, so 'docker compose up -d' (README.md:346) fails at image build on a fresh clone; (2) README.md:274-276 instructs opening the Grafana dashboard, but no step loads data/grafana.json into Grafana and docker-compose.yaml does not mount or provision it, so the pictured dashboard is not what following the steps produces"
+
+  dependency_versions_pinned:
+    value: lockfile_committed
+    evidence: ["uv.lock"]
+    basis: "a resolved uv.lock is committed alongside pyproject.toml's lower-bound specifiers"
+
+  data_accessible:
+    value: automated_or_committed
+    evidence: ["data/nhs-symptom.json", "data/nhs-symptom-chunks.json", "src/nhs_download.py"]
+    basis: "raw and chunked data are both committed and also regenerable via a scripted download"
+
+  # H. Techniques
+  hybrid_search:
+    present:
+      value: true
+      evidence: ["src/rag.py:76-83"]
+      basis: "hybrid_search combines keyword and vector search results"
+    shipped_enabled:
+      value: true
+      evidence: ["src/rag.py:136-148", "src/rag.py:174-185"]
+      basis: "hybrid_search is called by the tool used on the agentic request path"
+    evaluated:
+      value: true
+      evidence: ["README.md:192-199", "notebooks/nhs_search_pgdb.ipynb:cell37"]
+      basis: "hybrid is one of four compared approaches with reported hit rate and MRR"
+    measured_effect:
+      value: improves
+      evidence: ["README.md:192-199"]
+      basis: "hybrid has the highest hit rate and MRR of the four compared approaches"
+    decision_basis:
+      value: measured
+      evidence: ["README.md:197-199"]
+      basis: "hybrid is selected because it scored highest on the project's own reported hit rate and MRR"
+    decision_axes:
+      value: ["hit_rate", "mrr"]
+      evidence: ["README.md:192-199"]
+      basis: ""
+
+  reranking:
+    present:
+      value: false
+      evidence: ["src/rag.py:60-148"]
+      basis: "no reranking step (e.g. a cross-encoder or secondary rescoring stage) appears anywhere in the retrieval pipeline; a repository-wide search for 'rerank' returns no matches"
+    shipped_enabled:
+      value: false
+      evidence: []
+      basis: "not present"
+    evaluated:
+      value: false
+      evidence: []
+      basis: "not present"
+    measured_effect:
+      value: not_measured
+      evidence: []
+      basis: "not present"
+    decision_basis:
+      value: none
+      evidence: []
+      basis: "not present"
+    decision_axes:
+      value: []
+      evidence: []
+      basis: ""
+
+  query_rewriting:
+    present:
+      value: true
+      evidence: ["src/rag.py:31-57"]
+      basis: "rewrite_query rewrites the user question into a keyword search query via an LLM call"
+    shipped_enabled:
+      value: true
+      evidence: ["src/rag.py:76-83"]
+      basis: "hybrid_search calls rewrite_query and uses the rewritten query for keyword search on the request path"
+    evaluated:
+      value: true
+      evidence: ["README.md:192-199", "notebooks/nhs_search_pgdb.ipynb:cell35"]
+      basis: "'Keyword + Query Rewrite' is one of the four compared approaches with reported hit rate and MRR"
+    measured_effect:
+      value: improves
+      evidence: ["README.md:194-195"]
+      basis: "keyword+rewrite (0.865/0.633) improves on keyword alone (0.800/0.596) on both reported metrics"
+    decision_basis:
+      value: measured
+      evidence: ["README.md:194-195", "README.md:197-199"]
+      basis: "query rewriting is kept as part of the hybrid approach that was selected on the project's own measured hit rate and MRR"
+    decision_axes:
+      value: ["hit_rate", "mrr"]
+      evidence: ["README.md:192-199"]
+      basis: ""
+
+  # I. Deployment and bonus
+  cloud_deployment:
+    value: none
+    evidence: ["README.md:426-432"]
+    basis: "'Cloud deployment' is listed under Future Improvements as not yet done; no deployment code or documented cloud steps exist"
+
+  # J. Documentation accuracy
+  headline_numbers_traceable:
+    value: all_traceable
+    evidence: ["README.md:93-111,192-199,212-217", "data/nhs-symptom.json", "data/nhs-symptom-chunks.json", "data/ground-truth-retrieval.csv", "data/rag-eval-gpt-5.4-mini.csv", "data/rag-eval-gpt-4o.csv", "notebooks/nhs_search_pgdb.ipynb:cell34-cell37", "notebooks/nhs_llm_eval.ipynb:cell24,cell27"]
+    basis: "document/chunk counts, retrieval hit-rate/MRR table, and LLM-eval relevance percentages all match committed data files and notebook outputs"
+
+  untraceable_number_count:
+    value: 0
+    evidence: []
+    basis: "no reported figure was found without a committed artifact able to produce it"
+
+  document_number_conflicts:
+    value: 0
+    evidence: []
+    basis: "no figure was found to disagree between two committed documents"
+
+  document_code_conflicts:
+    value: 1
+    evidence: ["README.md:407", "src/rag.py:60-148"]
+    basis: "README's Evaluation Mapping table claims 'Document re-ranking' is done, but no reranking step exists anywhere in the retrieval code"
+
+  broken_reference_count:
+    value: 0
+    evidence: ["README.md"]
+    basis: "every markdown-linked path in README resolves to a committed file"
+
+  limitations_section:
+    value: cosmetic_only
+    evidence: ["README.md:426-432"]
+    basis: "the 'Future Improvements' section names only missing features/scope (cloud deployment, conversation memory, incremental updates, authentication, additional datasets), none concerning the system's own method or measurement"
+
+  artifact_reference_strength:
+    value: partially_referenced
+    evidence: ["README.md:97,111,203,221,281,297-315,342-347"]
+    basis: "evaluation notebooks, the evaluation question set, the monitoring dashboard definition and the ingestion entry point are all named by path; the deployment configuration (docker-compose.yaml) is never named by path anywhere in the documentation"
+
+  artifacts_unreferenced_count:
+    value: 1
+    evidence: ["README.md"]
+    basis: "of the fixed checklist (eval script/notebook, eval question set, monitoring dashboard definition, ingestion entry point, deployment configuration), only the deployment configuration is named nowhere by path"
+
+  # K. Descriptive
+  corpus_language:
+    value: en
+    evidence: ["README.md:1-49", "data/nhs-symptom.json"]
+    basis: ""
+  corpus_domain:
+    value: "public health information for illnesses and conditions (NHS Scotland A-Z)"
+    evidence: ["README.md:85-92"]
+    basis: ""
+  interface_framework:
+    value: "streamlit, flask"
+    evidence: ["src/streamlit_app.py:1", "src/app.py:2"]
+    basis: ""
+  vector_store:
+    value: pgvector
+    evidence: ["src/db.py:29", "docker-compose.yaml:3"]
+    basis: ""
+  llm_provider:
+    value: openai
+    evidence: ["src/rag.py:3,11"]
+    basis: ""
+  repo_file_count:
+    value: 31
+    evidence: ["<repo>"]
+    basis: "git ls-files | wc -l"
+
+extraction_notes:
+  - "README's Evaluation Mapping table (README.md:391-409) checks 'Document re-ranking' as done, but no reranking implementation exists in the repository; only Reciprocal Rank Fusion (RRF) over keyword+vector result lists is present, and that is already the mechanism scored under hybrid_search. Recorded as reranking.present: false and as one document_code_conflict; flagged in case the schema intends RRF fusion itself to count as 'reranking' in some projects, which would make this a naming-convention question rather than a fabricated claim."
+  - ".python-version is required by Dockerfile:8 but is listed in .gitignore:3, so it is absent from the pinned commit; a fresh clone following README's documented 'docker compose up -d' step (README.md:346) cannot build the app image. This is a structural, reproducible-on-any-clone gap, not an artifact of this particular checkout."
+  - "The Grafana dashboard shown in README's screenshot (images/dash.PNG) is not reachable by following the documented steps: data/grafana.json is committed but no README step imports it into Grafana, and docker-compose.yaml does not mount or provision it. monitoring_dashboard_provenance is still recorded as committed_definitions because the panel definitions themselves are committed and inspectable; the gap is in run_instructions_gap_count instead."
+  - "Both retrieval and answer evaluation run against a different configuration than what ships: eval notebooks use num_results=10 while the shipped tool hardcodes num_results=5, and the answer-evaluation notebook uses a fixed single-shot search+prompt+llm call while the shipped agentic_rag() lets a tool-calling agent invoke retrieval an unbounded number of times per request. The schema's *_config_matches_shipped fields capture the top-k difference cleanly; the agentic-vs-fixed-pipeline difference is a larger structural change than a parameter and has no dedicated field beyond 'differs' — noted here since 'differs' alone does not convey the size of the gap."
+  - "interface_framework is recorded as a single free-text string holding both frameworks ('streamlit, flask') since interface_kind's list upgrade (M2) was not mirrored onto interface_framework by this schema revision; a project with two interfaces built on two different frameworks cannot cleanly express that pairing (which framework serves which interface_kind) in one string."
+  - "limitations_section is a judgment call here: README has no section literally framed as limitations. 'Future Improvements' (README.md:426-432) is the nearest analog by content but is framed as a roadmap, not an admission of current shortcomings. Recorded as cosmetic_only under the reading that its content still functions as limitations; if the field is meant to require an explicit limitations framing, absent would be the more literal answer. Either reading yields the same practical consequence (no structural limitation is named), but the field cannot express the framing distinction."

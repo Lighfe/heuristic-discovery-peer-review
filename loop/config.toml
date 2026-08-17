@@ -15,7 +15,14 @@ schema_version = 1
 # response changes: prompt construction, the field-shuffle rule, the
 # sampling protocol. It is part of every cache key, so a bump can never
 # silently reuse results measured under the old protocol.
-protocol_version = 1
+#
+# Bumped 1 -> 2 at M2 schema closure (`deferred-to-m2.md` §3j,
+# `runs/2026-08-13-m2-schema-closure/proposal.md`): `loop/render.py` now
+# strips path-shaped locators from `basis` text before it reaches a
+# reviewer prompt. No M1 reviewer pass is invalidated by this — the M1
+# smoke test is already labelled non-baseline — but any cache entry from
+# protocol_version 1 must not be silently reused as if scored under 2.
+protocol_version = 2
 
 
 [gemini]

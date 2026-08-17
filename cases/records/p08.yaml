@@ -1,0 +1,317 @@
+schema_version: 1
+case_id: p08
+commit: "4b6aa8fb061a7fd8d379e51374cfd5fe4c36dd33"
+extracted_by: agents/extractor/v2
+extracted_on: "2026-08-14"
+
+fields:
+
+  # --- A. System shape ---
+  knowledge_base_present:
+    value: present
+    evidence: ["src/ingest.py:16-25"]
+    basis: "a minsearch index is built over the recipe corpus and queried at request time"
+  llm_in_flow:
+    value: present
+    evidence: ["src/llm.py:16-21"]
+    basis: "the request path calls a Gemini model to generate the answer"
+  retrieval_flow:
+    value: kb_and_llm
+    evidence: ["src/rag.py:43-70"]
+    basis: "the request handler both queries the minsearch index and calls the LLM before returning"
+  problem_statement:
+    value: brief
+    evidence: ["README.md:21-28"]
+    basis: "names the topic (recipe questions) and the difficulty being solved, but never names an intended audience"
+
+  # --- B. Interface ---
+  interface_kind:
+    value: [web_ui, api]
+    evidence: ["streamlit_app.py:1-157", "app.py:1-77"]
+    basis: "a Streamlit page (streamlit_app.py) and a Flask REST API (app.py, /ask and /evaluate) are both committed"
+  interface_evidence_kind:
+    value: code_and_screenshot
+    evidence: ["README.md:190-194", "images/example.png"]
+    basis: "README's User Interface section embeds a screenshot of the running UI; no recording is present"
+
+  # --- C. Ingestion ---
+  ingestion_kind:
+    value: script_or_notebook
+    evidence: ["src/ingest.py:1-41", "notebooks/01_data_exploration.ipynb:cell0-cell19"]
+    basis: "ingestion is a plain Python module plus an exploration notebook, not an orchestrated pipeline tool"
+  ingestion_single_command:
+    value: false
+    evidence: ["README.md:196-241"]
+    basis: "no documented command runs ingestion; it happens implicitly at import time via `df, index = ingest()` in src/rag.py:6, and its required input file is never obtained by any documented step"
+  ingestion_output_stated:
+    value: true
+    evidence: ["notebooks/01_data_exploration.ipynb:cell8"]
+    basis: "the row count of the processed document set (231636) is printed in the committed exploration notebook; not repeated in the README"
+
+  # --- D. Retrieval evaluation ---
+  retrieval_eval_present:
+    value: true
+    evidence: ["notebooks/03_evaluating_rag.ipynb:cell10", "README.md:107-112"]
+    basis: "hit rate is computed and reported for three retrieval depths"
+  retrieval_eval_approaches_compared:
+    value: 1
+    evidence: ["notebooks/03_evaluating_rag.ipynb:cell10"]
+    basis: "one retrieval method (the minsearch index) is evaluated at three top-k cutoffs; no second retrieval method is compared"
+  retrieval_eval_set_committed:
+    value: referenced_not_committed
+    evidence: ["notebooks/03_evaluating_rag.ipynb:cell4", "notebooks/04_evaluation.ipynb:cell14"]
+    basis: "the evaluation set is read from and written to data/processed/ground-truth-retrieval.csv, a path excluded by .gitignore (*.csv); the generating code is committed, the data file is not"
+  retrieval_eval_set_size:
+    value: 20
+    evidence: ["notebooks/04_evaluation.ipynb:cell3,cell12", "notebooks/03_evaluating_rag.ipynb:cell13"]
+    basis: "10 sampled items x 2 generated questions each = 20 rows; the evaluation loop's progress bar confirms a total of 20"
+  retrieval_eval_relevance_rule:
+    value: document_level
+    evidence: ["notebooks/03_evaluating_rag.ipynb:cell10"]
+    basis: "a retrieval counts as a hit when the retrieved item's id equals the ground-truth item's id"
+  retrieval_eval_config_matches_shipped:
+    value: differs
+    evidence: ["notebooks/03_evaluating_rag.ipynb:cell10", "src/rag.py:43-61"]
+    basis: "the evaluation calls index.search directly with the raw question; the shipped path additionally rewrites the query before searching, reranks the results, and truncates to the top 5 before those results reach the prompt"
+  retrieval_eval_uncertainty_stated:
+    value: false
+    evidence: []
+    basis: "only point hit-rate values are reported; no interval or variance statement appears anywhere in the notebooks or README"
+  retrieval_best_approach_shipped:
+    value: yes
+    evidence: ["notebooks/03_evaluating_rag.ipynb:cell7,cell10", "src/rag.py:48-52"]
+    basis: "top-10 has the highest reported hit rate among the three tested cutoffs, and the shipped retrieval call requests num_results=10"
+  retrieval_eval_reproducible:
+    value: traceable_not_reproducible
+    evidence: ["notebooks/03_evaluating_rag.ipynb:cell4,cell5,cell10", ".gitignore:comprehensive"]
+    basis: "every step from evaluation set to reported hit rate is readable in the committed notebook, but the notebook cannot be re-run as committed: its inputs (recipes_documents.csv, ground-truth-retrieval.csv) are excluded by .gitignore's *.csv rule and no committed step regenerates them"
+
+  # --- E. Answer evaluation ---
+  llm_eval_present:
+    value: true
+    evidence: ["notebooks/03_evaluating_rag.ipynb:cell24-cell31"]
+    basis: "two judge prompts are run over generated answers and their agreement rates reported"
+  llm_eval_approaches_compared:
+    value: 2
+    evidence: ["notebooks/03_evaluating_rag.ipynb:cell18,cell19"]
+    basis: "two distinct judge prompt templates (v1, v2) are each run and scored separately"
+  llm_eval_judge_kind:
+    value: model_judge
+    evidence: ["notebooks/03_evaluating_rag.ipynb:cell20,cell21"]
+    basis: "a Gemini model call classifies each answer as RELEVANT or NON_RELEVANT"
+  llm_eval_judge_spotchecked:
+    value: false
+    evidence: ["notebooks/03_evaluating_rag.ipynb:cell24-cell31"]
+    basis: "judge verdicts are aggregated directly into a reported score; no step samples verdicts for manual review"
+  llm_eval_question_generator:
+    value: generator_ties_question_to_passage
+    evidence: ["notebooks/04_evaluation.ipynb:cell8,cell12"]
+    basis: "the generator prompt is filled with one specific item's own fields and asked to produce questions about it, and the item's id is attached to each generated question and used later as its ground-truth match"
+  llm_eval_metric_at_ceiling:
+    value: true
+    evidence: ["notebooks/03_evaluating_rag.ipynb:cell31", "notebooks/03_evaluating_rag.ipynb:cell22"]
+    basis: "judge v1 accuracy (higher is better) is 85%, not at ceiling; judge v2 accuracy is 100% over its scored sample, at ceiling; at least one reported metric qualifies"
+  llm_eval_role_overlap:
+    value: same_model
+    evidence: ["src/llm.py:19", "src/query_rewriter.py:11", "notebooks/04_evaluation.ipynb:cell9", "notebooks/03_evaluating_rag.ipynb:cell20,cell21"]
+    basis: "answer generation, question generation, and judging all call gemini-3.1-flash-lite"
+  llm_eval_config_matches_shipped:
+    value: matches
+    evidence: ["notebooks/03_evaluating_rag.ipynb:cell13"]
+    basis: "the evaluated answers are produced by calling the same rag() function (src.rag) that the shipped API imports and calls, not a reimplementation"
+  llm_eval_reproducible:
+    value: traceable_not_reproducible
+    evidence: ["notebooks/03_evaluating_rag.ipynb:cell4,cell13,cell24-cell31"]
+    basis: "the judge and generation pipeline is fully readable in the committed notebook, but its inputs and intermediate outputs (ground-truth-retrieval.csv, rag-answers.csv, judgements.csv, judgements_v2.csv) are all excluded by .gitignore's *.csv rule, so it cannot be re-run as committed"
+
+  # --- F. Monitoring ---
+  monitoring_kind:
+    value: feedback_and_dashboard
+    evidence: ["app.py:52-69", "src/evaluate.py:4-26", "README.md:126-144"]
+    basis: "a feedback-logging endpoint and table exist, and a dashboard tool is deployed alongside the application"
+  monitoring_dashboard_provenance:
+    value: stock_tool_ui
+    evidence: ["docker-compose.yml:16-23"]
+    basis: "docker-compose deploys the unmodified grafana/grafana-oss image with no provisioning directory, datasource file, or dashboard JSON committed anywhere in the repository"
+  monitoring_instrumentation:
+    value: logged
+    evidence: ["app.py:29-37", "src/monitor.py:4-43"]
+    basis: "every /ask request writes a row to a SQLite table synchronously in the request handler; no span- or trace-based instrumentation is present"
+  monitoring_chart_count:
+    value: null
+    evidence: []
+    basis: "not applicable: monitoring_dashboard_provenance is stock_tool_ui, so there are no committed panel definitions to count"
+  monitoring_charts_bound_to_data:
+    value: not_applicable
+    evidence: []
+    basis: "no committed panel definitions exist to check against the application's schema"
+
+  # --- G. Containerization and reproducibility ---
+  containerization_kind:
+    value: compose_full
+    evidence: ["docker-compose.yml:1-24", "Dockerfile:1-11"]
+    basis: "compose defines both the application service (built from the committed Dockerfile) and its monitoring dependency"
+  run_instructions:
+    value: complete
+    evidence: ["README.md:196-241"]
+    basis: "setup, dependency installation, an environment variable, and a run command are each named"
+  run_instructions_gap_count:
+    value: 3
+    evidence: ["README.md:196-241", "src/ingest.py:5-13", "src/rag.py:1-6", "docker-compose.yml:16-23"]
+    basis: "(1) the run command imports src.rag, which builds the retrieval index from a CSV that no documented step ever produces or downloads; (2) the Streamlit UI is described as a feature but no command in Installation & Usage launches it, and its own import is not installable via the documented dependency file (see dependency_versions_pinned/extraction_notes); (3) the README states the Grafana dashboard is connected to the database, but no documented step configures a data source or provisions any panel, and docker-compose starts a bare Grafana image"
+  dependency_versions_pinned:
+    value: lockfile_committed
+    evidence: ["Pipfile.lock:1-30"]
+    basis: "a Pipfile.lock with exact versions and hashes is committed"
+  data_accessible:
+    value: missing
+    evidence: ["README.md:99-101"]
+    basis: "the source dataset is named as a Kaggle dataset but no link, download command, or automated retrieval step is documented, and no copy is committed"
+
+  # --- H. Techniques ---
+  hybrid_search:
+    present:
+      value: false
+      evidence: ["README.md:246"]
+      basis: "hybrid search combining keyword and vector search is listed under Future Improvements, and no code in src/ implements a second retrieval signal alongside the minsearch index"
+    shipped_enabled:
+      value: false
+      evidence: ["src/rag.py:43-61"]
+      basis: "not present, so not active on the request path"
+    evaluated:
+      value: false
+      evidence: []
+      basis: "not present, so no effect is measured"
+    measured_effect:
+      value: not_measured
+      evidence: []
+      basis: "no evaluation of this technique exists"
+    decision_basis:
+      value: none
+      evidence: []
+      basis: "no ship/do-not-ship reasoning is stated; it is listed only as unbuilt future work"
+    decision_axes: []
+
+  reranking:
+    present:
+      value: true
+      evidence: ["src/reranker.py:1-29"]
+      basis: "a reranking function is implemented"
+    shipped_enabled:
+      value: true
+      evidence: ["src/rag.py:54-58"]
+      basis: "the reranker is called unconditionally in the request path before results are truncated and sent to the LLM"
+    evaluated:
+      value: false
+      evidence: ["notebooks/03_evaluating_rag.ipynb:cell10"]
+      basis: "the reported hit rates are computed from raw index.search results; no reported number isolates the reranked results"
+    measured_effect:
+      value: not_measured
+      evidence: []
+      basis: "no reported number isolates this technique's effect"
+    decision_basis:
+      value: none
+      evidence: []
+      basis: "no ship/do-not-ship reasoning for this technique is stated anywhere"
+    decision_axes: []
+
+  query_rewriting:
+    present:
+      value: true
+      evidence: ["src/query_rewriter.py:1-34"]
+      basis: "a query-rewriting function is implemented"
+    shipped_enabled:
+      value: true
+      evidence: ["src/rag.py:45-46"]
+      basis: "the rewriter is called unconditionally as the first step of the request path"
+    evaluated:
+      value: false
+      evidence: ["notebooks/03_evaluating_rag.ipynb:cell10"]
+      basis: "the reported hit rates search with the raw question directly, bypassing rewrite_query; no reported number isolates the rewritten-query condition"
+    measured_effect:
+      value: not_measured
+      evidence: []
+      basis: "no reported number isolates this technique's effect"
+    decision_basis:
+      value: none
+      evidence: []
+      basis: "no ship/do-not-ship reasoning for this technique is stated anywhere"
+    decision_axes: []
+
+  # --- I. Deployment and bonus ---
+  cloud_deployment:
+    value: none
+    evidence: ["README.md:242-250"]
+    basis: "cloud deployment is listed only as a Future Improvement; no deployment configuration for any cloud target is committed"
+
+  # --- J. Documentation accuracy ---
+  headline_numbers_traceable:
+    value: none_traceable
+    evidence: ["README.md:108-123", "notebooks/03_evaluating_rag.ipynb:cell4,cell10,cell30,cell31"]
+    basis: "the five headline figures (three hit rates, two judge accuracies) are each computed by a committed notebook, but every one of those notebooks reads an input CSV excluded by .gitignore and never regenerated by any committed step, so as committed none of them can produce their figure"
+  untraceable_number_count:
+    value: 5
+    evidence: ["README.md:108-123"]
+    basis: "Top-3 hit rate, Top-5 hit rate, Top-10 hit rate, Judge V1 accuracy, Judge V2 accuracy: five individual reported figures, none reachable from committed artifacts alone"
+  document_number_conflicts:
+    value: 0
+    evidence: []
+    basis: "no figure is repeated with a different value between two committed documents"
+  document_code_conflicts:
+    value: 2
+    evidence: ["Pipfile:1-14", "requirements.txt", "streamlit_app.py:1-2", "src/llm.py:4", "src/ingest.py:2"]
+    basis: "(1) neither committed dependency file (requirements.txt, Pipfile) lists streamlit, which streamlit_app.py imports; (2) Pipfile additionally omits google-genai and minsearch, which src/llm.py and src/ingest.py import"
+  broken_reference_count:
+    value: 0
+    evidence: []
+    basis: "no documented path was found pointing at a committed artifact that does not exist"
+  limitations_section:
+    value: absent
+    evidence: ["README.md:242-250"]
+    basis: "no section is framed as stating limitations; the closest content, Future Improvements, lists unbuilt features rather than disclosing limits of the shipped method or measurement"
+  artifact_reference_strength:
+    value: partially_referenced
+    evidence: ["README.md:146-189"]
+    basis: "the evaluation notebooks, ingestion entry point, and deployment configuration are each named in the project-structure listing, but the evaluation question set is named nowhere in the documentation"
+  artifacts_unreferenced_count:
+    value: 1
+    evidence: ["README.md:1-261"]
+    basis: "of the fixed checklist, only the evaluation question set (ground-truth-retrieval.csv) is present in the project but named nowhere in the documentation; the monitoring dashboard definition is excluded from the count because the project has no committed one"
+
+  # --- K. Descriptive ---
+  corpus_language:
+    value: en
+    evidence: ["README.md:1-261"]
+    basis: "documentation and code comments are in English"
+  corpus_domain:
+    value: "recipes and cooking"
+    evidence: ["README.md:1-28"]
+    basis: "the system answers cooking and recipe-related questions"
+  interface_framework:
+    value: "flask, streamlit"
+    evidence: ["app.py:1", "streamlit_app.py:1"]
+    basis: "the API is built with Flask and the web UI with Streamlit; this field assumes one framework per project and the repository has two, see extraction_notes"
+  vector_store:
+    value: "minsearch"
+    evidence: ["src/ingest.py:16-25"]
+    basis: "the retrieval index is a minsearch.Index; see extraction_notes on fit with this field's name"
+  llm_provider:
+    value: "google_gemini"
+    evidence: ["src/llm.py:8-9,19"]
+    basis: "answers are generated via the google-genai client against a gemini model"
+  repo_file_count:
+    value: 34
+    evidence: ["<repo>"]
+    basis: "git ls-files | wc -l at the pinned commit"
+
+extraction_notes:
+  - "interface_framework is typed as a single string but this repository ships two interface frameworks (Flask for the API, Streamlit for the UI), the same one-value-per-project assumption that interface_kind was widened to a list to fix in M2. Recorded both, comma-joined; a criterion reading this field naively would see only whichever half a parser takes first."
+  - "vector_store presumes an embedding-based store (its own examples are qdrant, elasticsearch, in_memory). This project's retrieval is purely lexical — minsearch, a BM25/TF-IDF-style index — and has no embedding component anywhere in the codebase. Recorded the library name as the closest available fact; a project with genuinely no vector component has no clean value for this field."
+  - "retrieval_eval_approaches_compared: the repository compares one retrieval method at three top-k cutoffs (3/5/10), not distinct retrieval strategies. The field's definition ('distinct strategies with reported numbers') does not say whether a k-sweep of one method counts as one approach or as many; recorded 1 (one method) rather than 3 (three configurations). This is a schema-fit question, not a confident reading."
+  - "limitations_section is a borderline call here. The README's Future Improvements section (README.md:242-250) names concrete gaps in the current method — no hybrid search, a simple keyword-overlap reranker rather than 'advanced reranking models' — but frames them as future work, not as a stated limitation of what was shipped. Recorded absent on the literal reading; a schema or criterion treating forward-looking gap admissions as equivalent to limitations would read this repository differently."
+  - "monitoring_instrumentation: the enum's two non-none values are illustrated in the schema only by a span/trace example (OpenTelemetry). This repository's request-time behavior is a synchronous SQLite row insert inside the /ask handler — genuinely on the request path, but not tracing in the span sense either value's illustration assumes. Recorded logged as the better fit of the two, but the field does not cleanly distinguish 'runs during serving but is a plain write' from 'runs during serving and is a trace.'"
+  - "monitoring_dashboard_provenance: recorded stock_tool_ui because no Grafana provisioning, datasource, or dashboard JSON is committed. Unlike the schema's own stock_tool_ui illustration (a stock image whose UI shows request traces automatically), a Grafana+SQLite dashboard as pictured in the README screenshot requires manual runtime configuration (a SQLite plugin, hand-built panels) that this repository documents nowhere and that leaves no trace in git either way. The screenshot is the only evidence such a dashboard ever existed."
+  - "Load-bearing general knowledge: `df, index = ingest()` at src/rag.py:6 runs at import time, so importing src.rag (which app.py and the Streamlit page both do transitively) executes ingestion immediately; this is why the missing recipes_documents.csv is a run_instructions gap rather than merely an ingestion-step gap. Also load-bearing: Grafana OSS has no built-in SQLite data source or default dashboards without an installed plugin and provisioning files, neither of which is present, which is what makes the README's 'Grafana dashboard is connected to the database' claim unverifiable from the repository alone."
+  - "A documentation-internal contradiction has no field to record it in: README's Features list states 'Streamlit User Interface' as already built (README.md:41), while Future Improvements lists 'Build a user-friendly web interface using Streamlit' as unbuilt future work (README.md:247) — even though streamlit_app.py is committed and working code. document_number_conflicts only covers figures and document_code_conflicts only covers code-contradicts-claim; neither covers a claim contradicting another claim in the same document. Not counted anywhere."
+  - "src/llm.py:17 prints 'Using model: gemini-flash-latest' as a log message immediately before calling model='gemini-3.1-flash-lite' on the next line — the logged model name never matches the model actually called. This is a code-internal inconsistency, not a documentation claim, so it does not fit document_code_conflicts; noted here rather than silently dropped."
+  - "bash.exe.stackdump and images/desktop.ini are committed Windows/Git-Bash crash and folder-metadata artifacts with no bearing on any field; noted only so their presence in repo_file_count's denominator is not mysterious."
