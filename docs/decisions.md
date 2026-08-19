@@ -252,6 +252,34 @@ count" field the schema does not have, not a drop-in derivation from
 existing fields. A scoped entailment was cheaper than that redesign right
 now; the redesign stays open if a third field shows the same defect.
 
+**p21-gap-count-reconfirmed-not-corrected** — During the step 9(c) p21
+anomaly investigation (`findings.md` F6, `runs/2026-08-19-m2-step9-measurements/report.md`),
+I initially claimed `p21.yaml`'s `run_instructions_gap_count` basis was
+factually wrong on gap (1) — that `ingest.py`'s no-op standalone script
+meant "does not build the persistent index it claims to," when tracing
+`config.py`/`retriever.py` shows the app does build the index anyway, via
+an undocumented lazy path. **That claim was itself wrong, corrected on
+recheck against `cases/schema.md`'s own definition of the field**: the
+field is an explicit desk walk-through tracing *each documented step into
+the code it invokes*, and states plainly it does not ask whether the
+project works by any means — its own p01 worked example is the identical
+pattern (a documented step's real effect is wrong; the app happens to
+work anyway via an undocumented path), treated there as the canonical
+case the field exists to catch, not as curing the gap. Under that
+standard `ingest.py` still fails to do what the documented step claims,
+full stop, and the record's basis text never claimed more than that.
+**No error in `p21.yaml` — no file changed.** `run_instructions_gap_count`
+stays 2 (gap 1 confirmed valid on recheck; gap 2, the Postgres run-order
+crash, independently traced and confirmed — `README.md`'s "Run the Chat
+Application" section documents the streamlit option before "Run the
+Monitoring Dashboard" sets up Postgres, and `monitoring/app.py`'s
+unconditional `save_conversation()` call has no retry or guard).
+`reproducibility`'s 2→1 downgrade reading for p21 stands on both
+confirmed gaps, not the one I mistakenly thought remained after the first
+pass. Recorded because the reversal itself is the useful fact here: a
+"correction" that looked right on a first pass and only failed on
+tracing it against the schema's actual stated methodology.
+
 **monitoring-instrumentation-boundary-fixed** — Sealing checklist B1
 (2026-08-18): before splitting the schema field, tested whether
 `monitoring_instrumentation`'s `logged`/`traced_on_request_path` line is
@@ -299,6 +327,17 @@ the proposer's rationale runs one full budgeted attack round against the
 final candidate; successful attacks reopen an M3 round if the cap permits,
 else ship as named unpatched attacks (outcome defined in `plan.md` M4).
 Reason (B3): R2 had no independent check. Limit: session, not family.
+
+**step9-runs-after-checklist-not-after-formal-seal** — Owner decision
+2026-08-19, resolving `tasks/03-milestone-2.md`'s Hard Limits stop-item on
+step 9's reordering: step 9 (baseline agreement, r₀, real-score check 1)
+runs now, after the sealing-readiness checklist
+(`runs/2026-08-18-m2-sealing-checklist/checklist.md`) is fully resolved,
+without waiting for step 10's separate formal sealing STOP. Matches step
+9's own stated reasoning in the task file (a number computed against an
+unsealed case set isn't a real baseline) — the checklist closing is what
+makes the case set stable enough to measure, not the step 10 paperwork
+act itself. Step 10 still runs afterward, unchanged.
 
 ## Objective and measurement
 

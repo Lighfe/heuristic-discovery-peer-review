@@ -445,3 +445,67 @@ versus write the missing tier) and this sample cannot separate them.
 **Confound on record:** reviewer prompts render `basis` sentences that cite
 repository paths inline, so citation density varies between fields and may
 move a score for reasons unrelated to content (`deferred-to-m2.md` 3j).
+
+---
+
+## F6 — M2 real baseline: v0's certification rate, real-score fidelity, and same-model self-consistency
+
+**Date:** 2026-08-19
+**Runs:** `runs/20260819T135911Z-agreement/` (123 requests, `gemini-3.5-flash-lite`,
+temperature 0.7, protocol 2) — the agreement pass; `candidates/v0/score.py`
+over the 22-repo corpus and the 10 real-score repos — deterministic, zero
+requests.
+**Artifacts:** `runs/2026-08-19-m2-step9-measurements/report.md`,
+`runs/20260819T135911Z-agreement/agreement.json`
+
+Supersedes F5 as the real M2 baseline (`tasks/03-milestone-2.md` step
+9), run after the sealing-readiness checklist closed
+(`step9-runs-after-checklist-not-after-formal-seal`), over the full
+22-repo corpus and 18-twin case set.
+
+**v0's real certification rate: r₀ = 20/22 = 90.9%** (p05, p10 do not
+certify). Replaces the "0 of 12 fail" working hypothesis with a measured
+number; sets G2's erosion budget at r₀ − 75% = 15.9 percentage points
+(`g2-rate-floor`). Both non-certifying cases checked at the same rigor as
+the p21 anomaly below — real, defensible reasons in both (missing
+evaluation dimensions and a broken run process for p05; no run
+instructions at all, plus one first-occurrence containerization fallback
+case, for p10), no new mapping gap in either. Full per-criterion
+breakdown: `runs/2026-08-19-m2-step9-measurements/report.md`, "Why r₀'s
+two non-certifying cases fail."
+
+**Real-score check 1** (does v0's total match what a real reviewer
+awarded, applying the same written criteria, on the ten real-score
+repos): certification-decision agreement is **10/10**; exact-total
+agreement is **1/10**, with 8 of 9 mismatches in the expected direction
+(v0 below real, consistent with the stated 3-point unscoreable blind
+spot) and **one, p21, in the opposite direction** — v0 scores above the
+real reviewer even after that blind spot. Not resolved here: either the
+real reviewer under-scored p21 relative to the written criteria (human
+variance — the real process medians three reviewers, this real-score
+dataset gives one), or v0's mapping over-credits it on a criterion
+besides the known `llm_evaluation` gap. Named as an open anomaly, not
+explained away. Real score values are never printed anywhere in this
+finding or its artifacts, per `real-score-dataset-scoped`.
+
+The `mixed_result` reading question (`retrieval-best-approach-reading-flagged`)
+gets exactly one data point from this batch (p14) — not enough to settle
+it; item 3e stays open, sealed as a named risk
+(`retrieval-best-approach-not-normalised-open`).
+
+**Same-model self-consistency (the real G4 baseline): 29.3% exact-match**
+(12 of 41 cases have all three samples identical), mean spread 1.29
+points, max 4. Far below the 0.95 ceiling in `agreement-protocol-ceiling`
+— **G4 measures real variance here, is not decorative, and its form (one
+of the four options in `objective.md`) is a live step-10 decision**, now
+informed by an actual number instead of the owner's stated tendency
+alone. Constructed twins show spread in the same range as real records,
+not obviously worse.
+
+**The model's own arithmetic remains unreliable at M2 scale:** 69 of 123
+samples (56%) have a self-reported `total` disagreeing with the sum of
+that response's own listed per-criterion points — the defect
+`agreement-total-recomputed` found at 67%-of-24 in the M1 smoke test did
+not shrink with 5x the case count. Every number in this finding uses the
+mechanically recomputed total; the model's self-reported total is never
+trusted, unchanged from F5's fix.

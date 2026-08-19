@@ -41,7 +41,14 @@ from loop.run import build_calls, run_pass  # noqa: E402
 from score import load_candidate, score  # noqa: E402
 
 SAMPLES = 3
-DECLARED_BUDGET = 60  # tasks/02-milestone-1.md hard limit for this milestone
+# M2 baseline pass (tasks/03-milestone-2.md step 9(a)): 23 records (22 corpus
+# + p13 self) + 18 twins = 41 cases x 3 samples = 123 calls, plus retry
+# headroom (budget-headroom-floors-at-one-retry-sequence: max(25% of pass,
+# max_retries - 1)). Declared, not derived at call time, so a pass that
+# silently grew the case set would be visible as a budget mismatch rather
+# than quietly costing more. Was 60 (the M1 hard limit) through M1's smoke
+# test; bumped here for the real M2 baseline.
+DECLARED_BUDGET = 155
 
 
 def load_cases() -> dict[str, dict]:
@@ -151,9 +158,11 @@ def main(argv: list[str] | None = None) -> int:
         kind="agreement-probe", specs=specs, declared_budget=DECLARED_BUDGET,
         config=config, run_id=run_id,
         notes={
-            "baseline": False,
+            "baseline": True,
             "what_this_measures": "same-model self-consistency, not human agreement",
-            "label": "M1 pipeline smoke test; the baseline is measured at M2 over the full corpus",
+            "label": "M2 real baseline (tasks/03-milestone-2.md step 9(a)), measured over "
+                      "the full sealed-checklist case set (23 records + 18 twins); "
+                      "supersedes the M1 pipeline smoke test",
             "samples_per_case": SAMPLES,
             "candidate": candidate["candidate"],
             "reviewer_prompt": "agents/reviewer/v1/prompt.md",
@@ -164,7 +173,7 @@ def main(argv: list[str] | None = None) -> int:
     summary = summarise(cases, candidate, specs, ordered)
     out = config.runs_dir / result.run_id
     (out / "agreement.json").write_text(
-        json.dumps({"baseline": False, "per_case": summary}, indent=2, sort_keys=True),
+        json.dumps({"baseline": True, "per_case": summary}, indent=2, sort_keys=True),
         encoding="utf-8")
 
     print(f"\nrequests {result.budget.requests_needed} planned, "
@@ -174,7 +183,7 @@ def main(argv: list[str] | None = None) -> int:
         print(f"{name:<10} {str(s['totals']):<18} {str(s['spread']):>6} "
               f"{str(s['median']):>7} {s['executable_layer_total']:>4} "
               f"{str(s['median_minus_executable']):>5}  {s['samples_unparseable']}")
-    print(f"\nNON-BASELINE. runs/{result.run_id}/")
+    print(f"\nM2 BASELINE. runs/{result.run_id}/")
     return 0
 
 
