@@ -5,28 +5,33 @@ step 2), then revised in place at the 2026-08-10 owner gate (C1-C8) before any
 case was built on it. Nothing course-specific belongs
 here: this schema must survive pointing the project at a second zoomcamp.*
 
-**Status: M2 SCHEMA CLOSURE IN PROGRESS (2026-08-13).** `schema_version`
-bumped 0 → 1. This revision closes the M1-deferred items recorded in
-`docs/deferred-to-m2.md`, per owner sign-off on
-`runs/2026-08-13-m2-schema-closure/proposal.md`; the corresponding
-`decisions.md` entries name each change. Not yet sealed — sealing is a
-separate, later owner gate (`tasks/03-milestone-2.md` step 8). One item
-(3e, `retrieval_best_approach_shipped`) is intentionally not resolved in
-this revision; see that field's entry below.
+**Status: M2 SCHEMA CLOSURE COMPLETE, STEP 8 SEALING CHECKLIST RESOLVED
+(updated 2026-08-19).** `schema_version` bumped 0 → 1 at step 2's
+sign-off (2026-08-13); the 22-repo corpus was re-extracted under it at
+step 3, the twin catalogue built at step 5, and step 7's independent
+fidelity diff found and fixed two `candidates/v0/criteria.yaml`
+transcription defects (`runs/2026-08-18-m2-v0-fidelity-diff/`). The step
+8 sealing-readiness checklist (`runs/2026-08-18-m2-sealing-checklist/checklist.md`)
+is fully worked through and closed — every item resolved, one (3e,
+`retrieval_best_approach_shipped`) closed as a named, accepted open risk
+rather than fixed; see that field's entry below and `docs/decisions.md`
+`retrieval-best-approach-not-normalised-open`. Sealing itself (the
+`tasks/03-milestone-2.md` step 8 owner gate proper) is a separate act from
+this checklist and happens next, in `docs/decisions.md`.
 
-**Post-sign-off edit, flagged (2026-08-14, pending owner ratification):**
-group H below gained a worked YAML example during step 3 (re-extraction),
-after this schema was supposed to have stopped moving per step 2's
-sign-off. Made without asking first — a process violation of the same
-kind item 3e's handling was written to avoid, caught by owner review after
-the fact, not before. Recorded honestly rather than folded in silently:
-see `docs/decisions.md` `group-h-worked-example-post-hoc`. **This edit is
-documentation-only and does not change `schema_version`**: it adds no
-field, no value, no rule not already implied by "Record structure" above
-(every leaf is `{value, evidence, basis}`) — it makes an existing rule
-concrete after three independent extractors misread it, rather than
-stating a new one. No record needs re-checking against it for that reason
-alone.
+**Post-sign-off edit, ratified (2026-08-14, confirmed at the M2 sealing
+review 2026-08-18):** group H below gained a worked YAML example during
+step 3 (re-extraction), after this schema was supposed to have stopped
+moving per step 2's sign-off. Made without asking first — a process
+violation of the same kind item 3e's handling was written to avoid,
+caught by owner review after the fact, not before. Recorded honestly
+rather than folded in silently: see `docs/decisions.md`
+`group-h-worked-example-post-hoc`. **This edit is documentation-only and
+does not change `schema_version`**: it adds no field, no value, no rule
+not already implied by "Record structure" above (every leaf is `{value,
+evidence, basis}`) — it makes an existing rule concrete after three
+independent extractors misread it, rather than stating a new one. No
+record needs re-checking against it for that reason alone.
 
 The freeze is deliberate and its reason is arithmetic: a schema change
 before M2 sealing is free, because the corpus is being extracted then
@@ -250,16 +255,47 @@ change, not a protocol one).
 | `retrieval_eval_approaches_compared` | int | distinct strategies with reported numbers |
 | `retrieval_eval_set_committed` | enum | `absent` · `referenced_not_committed` · `committed` |
 | `retrieval_eval_set_size` | int \| null | stated or countable size |
-| `retrieval_eval_relevance_rule` | enum | `none` · `source_level` · `document_level` · `passage_level` · `human_labelled` · `other` · `undeterminable` |
+| `retrieval_eval_match_strictness` | enum | `none` · `source_level` · `document_level` · `passage_level` · `other` · `undeterminable` |
+| `retrieval_eval_label_origin` | enum | `none` · `human_labelled` · `generated` · `mixed` · `other` · `undeterminable` |
 | `retrieval_eval_config_matches_shipped` | enum | `matches` · `differs` · `undeterminable` |
 | `retrieval_eval_uncertainty_stated` | bool | any interval, variance or uncertainty statement |
 | `retrieval_best_approach_shipped` | enum | `yes` · `no` · `mixed_result` · `undeterminable` |
 | `retrieval_eval_reproducible` | enum | `reproducible_as_committed` · `traceable_not_reproducible` · `neither` |
 
-`retrieval_eval_relevance_rule` is read off the scoring function, not the
-prose: what does the code count as a hit? Coarser rules make more
+**Split into two fields (M2, step 8 sealing review) — was one field,
+`retrieval_eval_relevance_rule`.** The original field conflated two
+separate facts: *how strict the match is* (does a hit require the same
+document, the same passage, the same source only) and *who produced the
+ground-truth label being matched against* (a human hand-assigned it, a
+generator produced it, neither is known). Two independent extractions of
+the same repository (p03) read the same fact — a human hand-paired each
+question to a target chunk_id, then the scoring function exact-matched on
+that id — and landed on different values, one describing the mechanism
+(`passage_level`), one describing the provenance (`human_labelled`),
+because the field could only hold one answer for two different questions.
+
+`retrieval_eval_match_strictness` is read off the scoring function, not
+the prose: what does the code count as a hit? Coarser rules make more
 retrievals count, which is the "test almost nothing can fail" failure mode
-(`project-evaluation-issues.md` §3) reduced to something checkable.
+(`project-evaluation-issues.md` §3) reduced to something checkable. This
+is what the old field measured in every record except p03's genuine
+ambiguity.
+
+`retrieval_eval_label_origin` records whether the ground-truth label a
+retrieval is checked against was assigned by a person, produced by a
+committed generator, or can't be determined from what's stated. Filled at
+the M2 sealing review from each record's *already-recorded* basis text for
+the old field, not a fresh repository read: `human_labelled` where that
+text explicitly says a person assigned the label (p03 only, currently);
+`none` where no retrieval evaluation exists to have a label at all;
+`undeterminable` everywhere else, because the old field's basis text was
+written to answer the strictness question, not the provenance one, and
+usually says nothing about who produced the label. **This is expected,
+not a defect**: it reflects that group D never tracked question-set
+provenance the way group E's `llm_eval_question_generator` does, not that
+the fact is unknowable — a future extraction could resolve most of these
+`undeterminable`s by reading the repository specifically for this
+question, which the M2 sealing-review backfill deliberately did not do.
 
 `retrieval_eval_config_matches_shipped` is `differs` when any retrieval
 parameter in the evaluation script differs from the request path — depth,
@@ -424,6 +460,29 @@ Neither field decides whether a stock tool *should* score as well as a built
 dashboard. Together they make the distinction visible so a criterion can
 decide, which is the schema's job and not the schema's call.
 
+**The `logged`/`traced_on_request_path` boundary, made literal (M2, step 8
+sealing review).** This recurred as a flagged ambiguity on several
+records — extractors kept reading it as "is this OpenTelemetry-style
+tracing specifically," which the field was never meant to require. Read
+the definitions literally instead, as a two-part test: (1) does something
+run **during** request handling (not only on an explicit user action like
+a feedback click), and (2) is what it writes **consumed by a viewer**
+(a dashboard, not just a file nothing reads)? Both true →
+`traced_on_request_path`, regardless of whether a tracing/span library is
+involved — a synchronous DB write inside the request handler that feeds a
+committed dashboard qualifies just as much as OpenTelemetry spans do.
+Either false → `logged` (something is written, but not both conditions
+hold). Applying this test directly to two records that were flagged as
+ambiguous corrected real misclassifications: p05 and p09 were both
+`logged` despite a per-request write feeding a real, committed dashboard —
+both now `traced_on_request_path`. A third record initially suspected of
+the same problem, p12, is genuinely different under the same test: its
+write only happens when a user clicks a feedback button (not on every
+request) and lands in a CSV with no confirmed viewer — `logged` is correct
+there. One record resolving under this test does not confirm every other
+flagged record reads the same way; each was checked individually, not
+assumed from the pattern.
+
 `monitoring_charts_bound_to_data` checks each panel's query against the
 schema the application actually writes: does every referenced table and
 column exist? This is the checkbox-padding lever, and it is structural — a
@@ -488,6 +547,33 @@ answers a different question than it looks like it answers. v0 currently
 reads only the enum, faithfully transcribing the current guidance's own
 conflation of the two; this is unchanged (`v0-literal-no-inferences`).
 
+**`data_accessible` is defined (M2, step 8 sealing review).** Previously a
+bare enum with no prose — every sibling field in this section has one,
+this one didn't. Owner ruling:
+
+- **`manual_steps`** — the data source is named **and** access
+  instructions are given: a download link plus destination, or a named
+  API/key that is free to obtain (not the project's own LLM API key,
+  which is a separate reproducibility concern the schema tracks
+  elsewhere). A reader could follow the documented steps and get the data.
+- **`other`** — the data source is named but **no** access instructions
+  are given (e.g. "the corpus is proprietary hospital records" with
+  nothing else stated: what it is, but not how to get it). This is the
+  value that answers the guidance's "unclear how to access it" disjunct
+  (see `reproducibility`, group above M2's tier-order fix).
+- The distinction is whether instructions exist, not whether the source
+  is easy to reach: a key-gated source with a stated request process is
+  `manual_steps`; the same source with no stated process is `other`.
+
+Checked directly against the corpus at the time this was written: `other`
+had never been used for this field (`missing`: 1, `manual_steps`: 1,
+`automated_or_committed`: 21) — no empirical precedent existed to conflict
+with this ruling. The one `manual_steps` record (p05: "the rest require
+fetching from an external, key-gated source with no key or cached copy in
+the repository, and **no single documented command performs that
+fetch**") reads, under this definition, as `other` — source named, no
+access instructions given — and was corrected.
+
 ## H. Techniques — `scoreable`
 
 One block per technique, keys `hybrid_search`, `reranking`,
@@ -523,7 +609,10 @@ fields:
       value: measured
       evidence: ["README.md:120-124"]
       basis: "shipped because it wins on the project's own MRR comparison"
-    decision_axes: ["mrr", "hit_rate"]
+    decision_axes:
+      value: ["mrr", "hit_rate"]
+      evidence: ["README.md:120-124"]
+      basis: "quantities named in the decision_basis justification above"
 ```
 
 | sub-field | type | values |

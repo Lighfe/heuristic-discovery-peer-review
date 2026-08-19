@@ -107,11 +107,15 @@ fields:
     evidence:
     - college_rag/data/ground-truth-retrieval.csv
     basis: 'counted rows in the committed CSV: 60 data rows (30 universities x 2 question types)'
-  retrieval_eval_relevance_rule:
+  retrieval_eval_match_strictness:
     value: document_level
     evidence:
     - college_rag/evaluating.ipynb:cell16
     basis: evaluate() marks a result relevant when the retrieved document's university_id equals the ground-truth university_id, i.e. an exact whole-document match
+  retrieval_eval_label_origin:
+    value: undeterminable
+    evidence: []
+    basis: the retrieval-evaluation basis states the matching rule (university_id equality) but not who produced the ground-truth university_id labels
   retrieval_eval_config_matches_shipped:
     value: matches
     evidence:

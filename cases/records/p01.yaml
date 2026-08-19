@@ -81,11 +81,15 @@ fields:
     evidence:
     - src/evaluation/test_set.py:1-137
     basis: 27 question/answer/source entries in the committed list
-  retrieval_eval_relevance_rule:
+  retrieval_eval_match_strictness:
     value: source_level
     evidence:
     - notebooks/01_retrieval_evaluation.py:41-49
     basis: the hit_rate/mrr functions match a retrieved item's source-category label against the test item's expected source-category label, not exact document or passage identity
+  retrieval_eval_label_origin:
+    value: undeterminable
+    evidence: []
+    basis: the retrieval-evaluation basis states the matching rule (source-category label comparison) but not who produced the test items' expected labels
   retrieval_eval_config_matches_shipped:
     value: differs
     evidence:

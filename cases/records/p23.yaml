@@ -78,10 +78,14 @@ fields:
     value: null
     evidence: []
     basis: no evaluation set exists
-  retrieval_eval_relevance_rule:
+  retrieval_eval_match_strictness:
     value: none
     evidence: []
     basis: no retrieval scoring function exists
+  retrieval_eval_label_origin:
+    value: none
+    evidence: []
+    basis: no retrieval-evaluation scoring function exists, so there is no ground-truth label to have an origin
   retrieval_eval_config_matches_shipped:
     value: undeterminable
     evidence: []

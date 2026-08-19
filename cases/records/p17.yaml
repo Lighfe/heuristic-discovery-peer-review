@@ -73,11 +73,15 @@ fields:
     - README.md:144
     - eval/generate_golden_set.py:37
     basis: README states approximately 60 generated questions; the generator's default sample size is 60
-  retrieval_eval_relevance_rule:
+  retrieval_eval_match_strictness:
     value: passage_level
     evidence:
     - eval/evaluate_retrieval.py:20-25
     basis: a retrieval counts as a hit only when the specific chunk the question was generated from is present in the retrieved set
+  retrieval_eval_label_origin:
+    value: undeterminable
+    evidence: []
+    basis: the retrieval-evaluation basis states the matching rule (chunk membership) but not who produced the ground-truth chunk labels
   retrieval_eval_config_matches_shipped:
     value: differs
     evidence:
@@ -152,10 +156,10 @@ fields:
     - monitoring/grafana/dashboards/xai_digest.json:1-132
     basis: panel definitions are committed as a JSON file, not only a stock image UI
   monitoring_instrumentation:
-    value: logged
+    value: traced_on_request_path
     evidence:
     - common/db.py:49-85
-    basis: each request writes a record with mode, latency and token counts; no request-path tracing spans are emitted
+    basis: log_conversation (common/db.py) writes mode, latency and token counts for every request synchronously into the 'conversations' table of the 'xai_digest' Postgres database; the committed Grafana datasource (monitoring/grafana/provisioning/datasources/postgres.yml) points at that same database, and the committed dashboard (monitoring/grafana/dashboards/xai_digest.json) queries 'conversations' and 'documents' directly by rawSql - satisfies both halves of the schema definition (runs where requests are served, and is wired to a viewer). Corrected from logged at the M2 sealing review, literal-wording re-test.
   monitoring_chart_count:
     value: 8
     evidence:

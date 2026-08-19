@@ -81,11 +81,15 @@ fields:
     - docs/retrieval-evaluation.md:70
     - data/eval/questions_v3_full_manifest.json
     basis: 200 rows = 100 target chunks x {clean, noisy}.
-  retrieval_eval_relevance_rule:
+  retrieval_eval_match_strictness:
     value: passage_level
     evidence:
     - docs/retrieval-evaluation.md:38-44
     basis: Ground truth is one exact-match chunk_id per question; a chunk is a passage-sized section of wiki text.
+  retrieval_eval_label_origin:
+    value: undeterminable
+    evidence: []
+    basis: the retrieval-evaluation basis states the matching rule (exact-match chunk_id) but not who produced the ground-truth chunk_id labels
   retrieval_eval_config_matches_shipped:
     value: matches
     evidence:

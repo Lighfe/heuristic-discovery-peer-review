@@ -75,12 +75,16 @@ fields:
     evidence:
     - src/germany_decoded/evaluation/retrieval_benchmark.json
     basis: the committed benchmark file's top-level array has 10 entries
-  retrieval_eval_relevance_rule:
+  retrieval_eval_match_strictness:
     value: document_level
     evidence:
     - src/germany_decoded/evaluation/retrieval_eval.py:22-33
     - src/germany_decoded/db/init.py:26-37
     basis: a hit requires an exact (law, section) match, and each stored row is exactly one such section
+  retrieval_eval_label_origin:
+    value: undeterminable
+    evidence: []
+    basis: the retrieval-evaluation basis states the matching rule ((law, section) match) but not who produced the ground-truth labels
   retrieval_eval_config_matches_shipped:
     value: differs
     evidence:

@@ -80,12 +80,16 @@ fields:
     evidence:
     - data/eval/eval.jsonl
     basis: 44 non-empty lines (44 question records).
-  retrieval_eval_relevance_rule:
+  retrieval_eval_match_strictness:
     value: passage_level
     evidence:
     - src/evaluate.py:112-135
     - data/eval/eval.jsonl:1
     basis: hit_rate_at_k/mrr/ndcg_at_k score a hit as an exact match between a retrieved chunk id and one of the query's relevant_ids, which are specific chunk-level UUIDs (sub-document passages), not whole-document or source-level ids.
+  retrieval_eval_label_origin:
+    value: undeterminable
+    evidence: []
+    basis: the retrieval-evaluation basis states the matching rule (chunk id match against relevant_ids) but not who produced those relevant_ids labels
   retrieval_eval_config_matches_shipped:
     value: matches
     evidence:

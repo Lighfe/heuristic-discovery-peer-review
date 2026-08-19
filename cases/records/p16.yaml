@@ -78,11 +78,15 @@ fields:
     - data/ground_truth_dataset_5_doc.csv
     - notebooks/notebook.ipynb:cell31
     basis: 2955 data rows in the committed CSV; notebook prints the same count after loading it
-  retrieval_eval_relevance_rule:
+  retrieval_eval_match_strictness:
     value: document_level
     evidence:
     - src/evaluation_utils.py:120-127
     basis: compute_relevance() scores a hit as int(d['id'] == doc_id) — whether the source document appears among results, not a passage-level match
+  retrieval_eval_label_origin:
+    value: undeterminable
+    evidence: []
+    basis: the retrieval-evaluation basis states the matching rule (id equality) but not who produced the ground-truth doc_id labels
   retrieval_eval_config_matches_shipped:
     value: differs
     evidence:

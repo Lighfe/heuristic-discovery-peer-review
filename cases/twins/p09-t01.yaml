@@ -104,12 +104,16 @@ fields:
     evidence:
     - data/ground-truth-retrieval.csv
     basis: 427 data rows (428 lines including header).
-  retrieval_eval_relevance_rule:
+  retrieval_eval_match_strictness:
     value: passage_level
     evidence:
     - notebooks/retrieval-evaluation.ipynb:cell9
     - ingest/corpus.py:19-36
     basis: a hit requires the exact section-level chunk_id in the top-k results; a chunk is one heading section, not a whole document.
+  retrieval_eval_label_origin:
+    value: undeterminable
+    evidence: []
+    basis: the retrieval-evaluation basis states the matching rule (chunk_id membership) but not who produced the ground-truth chunk_id labels
   retrieval_eval_config_matches_shipped:
     value: differs
     evidence:
@@ -194,10 +198,10 @@ fields:
     - grafana/provisioning/dashboards/handbook-assistant.json:1-172
     basis: all 8 panel definitions, including their SQL, are committed JSON, not a stock tool's default UI.
   monitoring_instrumentation:
-    value: logged
+    value: traced_on_request_path
     evidence:
     - app/app.py:43-79,103-105
-    basis: log_interaction writes one row per request (question, answer, latency, tokens, retriever, refusal) via a synchronous INSERT within the request handler.
+    basis: log_interaction writes one row per request synchronously within the request handler, and that record is wired to the Grafana dashboard - satisfies both halves of the schema definition (runs where requests are served, and is wired to a viewer); corrected from logged at the M2 sealing review, literal-wording re-test. The record's own extraction_notes already flagged this exact tension before the correction.
   monitoring_chart_count:
     value: 8
     evidence:

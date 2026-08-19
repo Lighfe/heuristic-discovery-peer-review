@@ -81,11 +81,15 @@ fields:
     - data/ground_truth.csv
     - notebooks/02-sqlite-text-search-evals.ipynb:cell6
     basis: data/ground_truth.csv has 13875 lines including a header row; the notebook's own progress-bar total over the same data reads 13874
-  retrieval_eval_relevance_rule:
+  retrieval_eval_match_strictness:
     value: document_level
     evidence:
     - src/evaluation/evaluation.py:36-44
     basis: compute_relevance marks a retrieved item relevant only if its id equals the id of the single source document the question was generated from
+  retrieval_eval_label_origin:
+    value: undeterminable
+    evidence: []
+    basis: the retrieval-evaluation basis states the matching rule (source-document id equality) but not who produced the ground-truth document id labels
   retrieval_eval_config_matches_shipped:
     value: matches
     evidence:

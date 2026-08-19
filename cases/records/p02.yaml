@@ -74,11 +74,15 @@ fields:
     evidence:
     - data/ground_truth_dataset.csv
     basis: 997 data rows, counted with a CSV parser (a raw line count over-reports because several question fields contain embedded newlines inside quoted values); this also matches the 997 records in both rag_results_for_eval_*.json files
-  retrieval_eval_relevance_rule:
+  retrieval_eval_match_strictness:
     value: document_level
     evidence:
     - notebooks/rag.ipynb:cell7
     basis: a hit is scored when the ground-truth paper_id appears among the retrieved point IDs; each point is one paper (title+abstract embedded as a single vector, no passage-level chunking), so a hit is a whole-document match
+  retrieval_eval_label_origin:
+    value: undeterminable
+    evidence: []
+    basis: the retrieval-evaluation basis states the matching rule (paper_id membership) but not who produced the ground-truth paper_id labels
   retrieval_eval_config_matches_shipped:
     value: differs
     evidence:

@@ -113,11 +113,15 @@ fields:
     evidence:
     - data/demo/ground_truth_20260801-143303.csv
     basis: 51 lines including one header row = 50 questions (10 genres in data/genre.csv times 5 questions each, per config.yml.dist's ground_truth.fields.questions description).
-  retrieval_eval_relevance_rule:
+  retrieval_eval_match_strictness:
     value: document_level
     evidence:
     - src/musical_genres_rag/Evaluation.py:504-517
     basis: HitRate/MRR check whether the expected genre's own id appears in the list of ids the index returned; each indexed unit is one whole genre record, so a hit is at the level of that document.
+  retrieval_eval_label_origin:
+    value: undeterminable
+    evidence: []
+    basis: the retrieval-evaluation basis states the matching rule (genre id membership) but not who produced the expected-genre labels
   retrieval_eval_config_matches_shipped:
     value: differs
     evidence:
@@ -203,11 +207,11 @@ fields:
     - grafana/provisioning/dashboards/dashboards.yml
     basis: The dashboard's panels, queries and layout, and its datasource, are all provisioned from committed files rather than a stock image's own UI.
   monitoring_instrumentation:
-    value: logged
+    value: traced_on_request_path
     evidence:
     - src/musical_genres_rag/Repository.py:147-156
     - src/musical_genres_rag/models.py:200-219
-    basis: ConversationsRepository.create writes duration/input_tokens/output_tokens/cost/model onto each Conversation row as part of request handling; this is structured logging into Postgres, not span-based tracing.
+    basis: ConversationsRepository.create writes duration/input_tokens/output_tokens/cost/model onto each Conversation row synchronously as part of request handling, into Postgres; the committed Grafana dashboard (grafana/dashboards/conversations.json) is provisioned from that same Postgres datasource - satisfies both halves of the schema definition (runs where requests are served, and is wired to a viewer). Corrected from logged at the M2 sealing review, literal-wording re-test; the record's own extraction_notes already flagged this exact tension before the correction.
   monitoring_chart_count:
     value: 11
     evidence:

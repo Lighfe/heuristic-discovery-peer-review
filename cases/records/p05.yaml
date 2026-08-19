@@ -79,11 +79,16 @@ fields:
     - test_retriviel.ipynb
     - test_data_ingestion.ipynb
     basis: no evaluation set exists, so there is no size to state
-  retrieval_eval_relevance_rule:
+  retrieval_eval_match_strictness:
     value: none
     evidence:
     - test_retriviel.ipynb
     basis: no scoring function exists that counts a retrieval as a hit or miss
+  retrieval_eval_label_origin:
+    value: none
+    evidence:
+    - test_retriviel.ipynb
+    basis: no retrieval-evaluation scoring function exists, so there is no ground-truth label to have an origin
   retrieval_eval_config_matches_shipped:
     value: undeterminable
     evidence:
@@ -171,11 +176,11 @@ fields:
     - src/dashboard.py:1-47
     basis: the module rendering summary metrics and charts is committed source code that defines each panel itself, not a pre-built third-party UI
   monitoring_instrumentation:
-    value: logged
+    value: traced_on_request_path
     evidence:
     - src/app.py:41
     - src/db_save.py:15-49
-    basis: a record-writing call runs on the request path after each generated answer; no distributed-tracing or span library is used anywhere in the repository
+    basis: 'a record-writing call runs on the request path after each generated answer, and the same stored records are rendered by the committed dashboard module (monitoring_dashboard_provenance: committed_definitions) — satisfies both halves of the schema definition (runs where requests are served, and is wired to a viewer); corrected from logged at the M2 sealing review, literal-wording re-test'
   monitoring_chart_count:
     value: 11
     evidence:
@@ -218,12 +223,12 @@ fields:
     - requirements.txt
     basis: nearly every dependency is pinned with an exact version specifier; one dependency line is duplicated, with the second occurrence unpinned and redundant with the exact pin already present above it
   data_accessible:
-    value: manual_steps
+    value: other
     evidence:
     - data/transcripts/AAPL_2026Q3.json
     - src/data_ingestion.py:20-46
     - test_data_ingestion.ipynb:cell16
-    basis: one of five source records referenced by a notebook run is committed; the rest require fetching from an external, key-gated source with no key or cached copy in the repository, and no single documented command performs that fetch
+    basis: one of five source records referenced by a notebook run is committed; the rest require fetching from an external, key-gated source, but no key, no request process, and no single documented command for the fetch are given (M2 correction, schema.md's manual_steps/other definition, sealing review 2026-08-18 — source named, no access instructions given, so other rather than manual_steps)
   hybrid_search:
     present:
       value: true

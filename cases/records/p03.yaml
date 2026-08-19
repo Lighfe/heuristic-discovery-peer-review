@@ -72,13 +72,20 @@ fields:
     - data/ground_truth/Marcus Aurelius_Meditations_Stoicism_cleaned.json
     - data/ground_truth/Friedrich Nietzsche_Thus Spoke Zarathustra_Existentialism_cleaned.json
     basis: two committed ground-truth files with 13 and 21 entries respectively, used by the evaluation notebooks (13+21=34); a third ground-truth file with 13 entries exists but is not read by any committed .py or .ipynb
-  retrieval_eval_relevance_rule:
-    value: human_labelled
+  retrieval_eval_match_strictness:
+    value: passage_level
     evidence:
     - README.md:63
     - notebooks/01_data_preparation.ipynb:cell8
     - notebooks/02_ground_truth_evaluation_Meditations.ipynb:cell13
     basis: each ground-truth question was paired by hand with one target chunk_id during ground-truth preparation, and the scoring function counts a hit only on exact match against that human-assigned chunk_id
+  retrieval_eval_label_origin:
+    value: human_labelled
+    evidence:
+    - README.md:63
+    - notebooks/01_data_preparation.ipynb:cell8
+    - notebooks/02_ground_truth_evaluation_Meditations.ipynb:cell13
+    basis: each ground-truth question was paired by hand with one target chunk_id during ground-truth preparation (same fact previously recorded under the old field's basis)
   retrieval_eval_config_matches_shipped:
     value: differs
     evidence:

@@ -308,6 +308,9 @@ criteria:
       - points: 0
         text: "... the data is missing, or it's unclear how to access it"
         when: {data_accessible: missing}
+      - points: 0
+        text: "... or it's unclear how to access it"
+        when: {data_accessible: other}
     fallback: 1
     unmappable:
       - clause: "it's easy to run the code, and it works"
@@ -343,12 +346,23 @@ criteria:
       `complete` are both now claimed unconditionally by the 1-point tier
       above, per the guidance's own "some instructions... incomplete"
       disjunct, which carries no data condition either. Between them these
-      two tiers cover the entire value space, so the `data_accessible:
-      missing` 0-point tier below can never fire for any record, valid or
-      malformed. It is retained, not deleted, so the guidance's own
-      0-point clause stays visible in the transcription and the fact that
-      it is now unreachable is documented rather than silent - the same
-      treatment this file gives `retrieval_evaluation`'s fallback tier.
+      two tiers cover the entire value space, so BOTH `data_accessible: missing`
+      and `data_accessible: other` 0-point tiers below can never fire for
+      any record, valid or malformed. Both are retained, not deleted, so
+      the guidance's own 0-point clause (all three of its disjuncts -
+      "the data is missing, or it's unclear how to access it") stays
+      visible in the transcription and the fact that neither can fire is
+      documented rather than silent - the same treatment this file gives
+      `retrieval_evaluation`'s fallback tier.
+
+      `data_accessible: other` was added at the M2 step 8 sealing review
+      (`cases/schema.md`'s newly-written definition: source named, no
+      access instructions given - the field's reading for "unclear how to
+      access it"). One corpus record (p05) was reclassified from
+      `manual_steps` to `other` under this definition at the same time;
+      its `run_instructions` is `partial`, so it was already scored by the
+      unconditional 1-point tier above and this reclassification changes
+      nothing about its total.
 
       Corpus impact, checked directly against all 22 records at fix time:
       p08 (`run_instructions: complete`, `data_accessible: missing`) moves

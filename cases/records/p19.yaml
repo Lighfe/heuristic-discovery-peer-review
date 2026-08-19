@@ -79,11 +79,15 @@ fields:
     - data/evaluation_results.csv:2-4
     - docs/usage.md:103
     basis: evaluation_results.csv reports total_queries=55 for every method; docs/usage.md states '~55 test questions (5 per character class)' for 11 classes
-  retrieval_eval_relevance_rule:
+  retrieval_eval_match_strictness:
     value: document_level
     evidence:
     - src/bg_rag/evaluation.py:8-41
     basis: hit_rate_at_k/mrr_at_k count a hit when a result's doc_id exactly equals the target doc_id; each doc_id addresses one whole ingested character record (documents are not chunked into passages)
+  retrieval_eval_label_origin:
+    value: undeterminable
+    evidence: []
+    basis: the retrieval-evaluation basis states the matching rule (doc_id equality) but not who produced the target doc_id labels
   retrieval_eval_config_matches_shipped:
     value: matches
     evidence:

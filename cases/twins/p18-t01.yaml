@@ -102,11 +102,15 @@ fields:
     evidence:
     - data/evaluation/ground_truth.csv
     basis: row count of the committed ground-truth CSV
-  retrieval_eval_relevance_rule:
+  retrieval_eval_match_strictness:
     value: document_level
     evidence:
     - evaluation/02_evaluate_search.py:26-36
     basis: a hit requires the retrieved chunk's id, truncated to the part before its final '-<n>' suffix, to equal the source chunk's file-level id, so any sub-chunk of the same source file counts as a hit
+  retrieval_eval_label_origin:
+    value: undeterminable
+    evidence: []
+    basis: the retrieval-evaluation basis states the matching rule (file-level id equality after suffix truncation) but not who produced the ground-truth source chunk ids
   retrieval_eval_config_matches_shipped:
     value: differs
     evidence:
@@ -118,7 +122,7 @@ fields:
     - docs/evaluation.md:15-55
     basis: Hit Rate@5/MRR@5 are reported as point values with no interval, variance or repeated-run statement
   retrieval_best_approach_shipped:
-    value: true
+    value: 'yes'
     evidence:
     - docs/evaluation.md:45-47
     - src/hybrid_search.py:14-19

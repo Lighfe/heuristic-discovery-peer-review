@@ -112,12 +112,16 @@ fields:
     evidence:
     - <synthetic>
     basis: 6 lines including header = 5 question rows.
-  retrieval_eval_relevance_rule:
+  retrieval_eval_match_strictness:
     value: passage_level
     evidence:
     - notebooks/nhs_search_pgdb.ipynb:cell32
     - notebooks/nhs_ground_truth_generation.ipynb:cell2
     basis: the scoring function compares each retrieved result's chunk_id to the ground-truth chunk_id, which was assigned to one specific chunk when the question was generated
+  retrieval_eval_label_origin:
+    value: undeterminable
+    evidence: []
+    basis: the retrieval-evaluation basis states the matching rule (chunk_id comparison) but not who produced the ground-truth chunk_id labels
   retrieval_eval_config_matches_shipped:
     value: differs
     evidence:

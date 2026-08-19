@@ -72,11 +72,15 @@ fields:
     evidence:
     - data/ground_truth.json
     basis: count of entries in the committed evaluation set file
-  retrieval_eval_relevance_rule:
+  retrieval_eval_match_strictness:
     value: document_level
     evidence:
     - src/eval.py:41-49
     basis: a hit is scored when one specific expected record identifier appears among the retrieved identifiers; no passage- or source-level rule is used
+  retrieval_eval_label_origin:
+    value: undeterminable
+    evidence: []
+    basis: the retrieval-evaluation basis states the matching rule (identifier membership) but not who produced the expected identifier labels
   retrieval_eval_config_matches_shipped:
     value: differs
     evidence:

@@ -96,8 +96,10 @@ FIELD_SPEC: dict[str, tuple[str, str, list[str] | None]] = {
     "retrieval_eval_approaches_compared": (SCOREABLE, "int", None),
     "retrieval_eval_set_committed": (SCOREABLE, "enum", ["absent", "referenced_not_committed", "committed"]),
     "retrieval_eval_set_size": (SCOREABLE, "int_or_null", None),
-    "retrieval_eval_relevance_rule": (SCOREABLE, "enum", [
-        "none", "source_level", "document_level", "passage_level", "human_labelled", "other", "undeterminable"]),
+    "retrieval_eval_match_strictness": (SCOREABLE, "enum", [
+        "none", "source_level", "document_level", "passage_level", "other", "undeterminable"]),
+    "retrieval_eval_label_origin": (SCOREABLE, "enum", [
+        "none", "human_labelled", "generated", "mixed", "other", "undeterminable"]),
     "retrieval_eval_config_matches_shipped": (SCOREABLE, "enum", ["matches", "differs", "undeterminable"]),
     "retrieval_eval_uncertainty_stated": (SCOREABLE, "bool", None),
     "retrieval_best_approach_shipped": (SCOREABLE, "enum", ["yes", "no", "mixed_result", "undeterminable"]),

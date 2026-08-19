@@ -76,11 +76,15 @@ fields:
     evidence:
     - data/ground_truth.csv
     basis: wc -l data/ground_truth.csv is 171 (1 header + 170 rows)
-  retrieval_eval_relevance_rule:
+  retrieval_eval_match_strictness:
     value: document_level
     evidence:
     - evaluation/01_ground_truth_and_search_eval.ipynb:cell36
     basis: a retrieved result counts as a hit when its 'id' equals the ground-truth question's source FAQ document id
+  retrieval_eval_label_origin:
+    value: undeterminable
+    evidence: []
+    basis: the retrieval-evaluation basis states the matching rule (id equality against the source FAQ document) but not who produced the ground-truth id labels
   retrieval_eval_config_matches_shipped:
     value: matches
     evidence:

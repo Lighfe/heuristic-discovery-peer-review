@@ -111,11 +111,15 @@ fields:
     evidence:
     - evaluation/retrieval_cases.json
     basis: 12 labeled case objects in the committed file.
-  retrieval_eval_relevance_rule:
+  retrieval_eval_match_strictness:
     value: document_level
     evidence:
     - evaluation/retrieval.py:99-130
     basis: score_ranked_ids counts a hit when a retrieved activity ID exactly matches one of a case's listed relevant_activity_ids (one activity record = one document).
+  retrieval_eval_label_origin:
+    value: undeterminable
+    evidence: []
+    basis: the retrieval-evaluation basis states the matching rule (activity ID membership) but not who produced the relevant_activity_ids labels
   retrieval_eval_config_matches_shipped:
     value: differs
     evidence:

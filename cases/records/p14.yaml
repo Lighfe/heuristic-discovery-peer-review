@@ -76,11 +76,15 @@ fields:
     evidence:
     - data/eval/ground_truth_filtered.json
     basis: evaluate.py prefers ground_truth_filtered.json when present (149-question set mechanically filtered for circularity to 101), the file evaluate.py actually loads
-  retrieval_eval_relevance_rule:
+  retrieval_eval_match_strictness:
     value: passage_level
     evidence:
     - src/retrieval/evaluate.py:175-182
     basis: a hit is scored when a retrieved chunk_id equals the single labeled correct_chunk_id (one committed chunk, i.e. passage), not a document- or source-level match
+  retrieval_eval_label_origin:
+    value: undeterminable
+    evidence: []
+    basis: the retrieval-evaluation basis states the matching rule (chunk_id equality) but not who produced the correct_chunk_id labels
   retrieval_eval_config_matches_shipped:
     value: differs
     evidence:
@@ -176,11 +180,11 @@ fields:
     - grafana/provisioning/
     basis: panel definitions are committed JSON, not a stock tool's default UI
   monitoring_instrumentation:
-    value: logged
+    value: traced_on_request_path
     evidence:
     - src/interface/app.py:139-163
     - src/interface/db.py:34-64
-    basis: every request writes one row to Postgres from the app code; no distributed tracing (e.g. OpenTelemetry) was found on the request path
+    basis: every request writes one row to Postgres (database 'interactions') from the app code synchronously in the request handler (src/interface/db.py); the committed Grafana datasource (grafana/provisioning/datasources/postgres.yml) points at the same 'interactions' database, and the committed dashboard (grafana/dashboards/interactions.json) is provisioned from it - satisfies both halves of the schema definition (runs where requests are served, and is wired to a viewer). Corrected from logged at the M2 sealing review, literal-wording re-test.
   monitoring_chart_count:
     value: 6
     evidence:

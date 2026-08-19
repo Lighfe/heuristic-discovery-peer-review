@@ -77,11 +77,15 @@ fields:
     - notebooks/04_evaluation.ipynb:cell3,cell12
     - notebooks/03_evaluating_rag.ipynb:cell13
     basis: 10 sampled items x 2 generated questions each = 20 rows; the evaluation loop's progress bar confirms a total of 20
-  retrieval_eval_relevance_rule:
+  retrieval_eval_match_strictness:
     value: document_level
     evidence:
     - notebooks/03_evaluating_rag.ipynb:cell10
     basis: a retrieval counts as a hit when the retrieved item's id equals the ground-truth item's id
+  retrieval_eval_label_origin:
+    value: undeterminable
+    evidence: []
+    basis: the retrieval-evaluation basis states the matching rule (id equality) but not who produced the ground-truth item ids
   retrieval_eval_config_matches_shipped:
     value: differs
     evidence:
@@ -93,7 +97,7 @@ fields:
     evidence: []
     basis: only point hit-rate values are reported; no interval or variance statement appears anywhere in the notebooks or README
   retrieval_best_approach_shipped:
-    value: true
+    value: 'yes'
     evidence:
     - notebooks/03_evaluating_rag.ipynb:cell7,cell10
     - src/rag.py:48-52
@@ -170,7 +174,7 @@ fields:
     evidence:
     - app.py:29-37
     - src/monitor.py:4-43
-    basis: every /ask request writes a row to a SQLite table synchronously in the request handler; no span- or trace-based instrumentation is present
+    basis: 'every /ask request writes a row to a SQLite table synchronously in the request handler; no span- or trace-based instrumentation is present. Checked at the M2 sealing review under the literal-wording test (runs during request AND wired to a viewer): monitoring_dashboard_provenance is stock_tool_ui with no committed provisioning, datasource, or dashboard JSON connecting this SQLite table to the deployed Grafana instance - the write and the dashboard are not confirmed connected, so only the first half of the test holds. logged confirmed correct, not a misclassification.'
   monitoring_chart_count:
     value: null
     evidence: []

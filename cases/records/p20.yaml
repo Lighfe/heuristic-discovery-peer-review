@@ -77,12 +77,16 @@ fields:
     evidence:
     - data/ground_truth.json
     basis: 600 top-level entries in the committed JSON array
-  retrieval_eval_relevance_rule:
+  retrieval_eval_match_strictness:
     value: passage_level
     evidence:
     - eval/retrieval_eval.py:27-42
     - eval/ground_truth.py:48-59,74-96
     basis: a hit requires the retrieved doc_id to equal the exact chunk id the question was generated from, and each chunk is a section-level passage of a species article, not the whole article
+  retrieval_eval_label_origin:
+    value: undeterminable
+    evidence: []
+    basis: the retrieval-evaluation basis states the matching rule (chunk id equality) but not who produced the ground-truth chunk id labels
   retrieval_eval_config_matches_shipped:
     value: matches
     evidence:

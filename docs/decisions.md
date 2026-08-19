@@ -120,6 +120,46 @@ question by `constructed-base-policy`, not decided by default — a
 constructed base can be added later, at owner request, if red-teaming
 shows this sub-case needs more coverage.
 
+**sealing-review-fixes** — Found during the step 8 sealing-readiness
+checklist review (2026-08-18), owner-directed. (1) **Real data bug**: p08
+and p18 held `retrieval_best_approach_shipped` as the Python/YAML boolean
+`true` instead of the string `"yes"` — the exact unquoted-`yes` trap
+`candidates/v0/criteria.yaml`'s own comments warn about. Fixed to the
+string. Corpus impact: p18 17→18 (was silently falling to `fallback: 1`,
+now correctly scores the 2-point tier); p08 unaffected by coincidence
+(`retrieval_eval_approaches_compared: 1` decided its tier independently
+of this field). Full corpus scanned for the same class of bug on every
+enum field with string members resembling YAML booleans — no other
+instance found. (2) **`retrieval_eval_relevance_rule` split** into
+`retrieval_eval_match_strictness` and `retrieval_eval_label_origin`
+(schema M2) — the old field conflated match mechanism with label
+provenance, which is what produced p03's cross-extraction disagreement.
+Backfilled from each record's existing basis text only, no re-read: 21 of
+23 records land `undeterminable` for label origin, because the old
+field's basis text was written to answer the strictness question, not
+this one — expected, not an error. (3) `data_accessible`'s `manual_steps`
+vs. `other` boundary defined (owner ruling: `manual_steps` needs both a
+named source and stated access instructions; `other` is source named,
+no instructions) — p05 reclassified from `manual_steps` to `other`
+under this definition, scoring-neutral (its `run_instructions: partial`
+already decided its tier independently). `candidates/v0/criteria.yaml`'s
+`reproducibility` criterion gained an explicit (structurally unreachable,
+documented, same treatment as the `missing` tier) 0-point mapping for
+`data_accessible: other`. (4) Investigated whether `mixed_result` ships
+get reasoned about or silently dropped, across all 9 corpus records
+holding that value: 8 of 9 have a measurement-grounded
+`decision_basis: measured` on the relevant group-H technique; only p01
+has none — consistent with p01's known role as the harmful-component-kept
+example. (5) Checked whether a retrieval-eval config mismatch is visible
+through `retrieval_best_approach_shipped`: **it is not** — 6 of those same
+9 `mixed_result` records also hold
+`retrieval_eval_config_matches_shipped: differs`, meaning most of the
+corpus's `mixed_result` evidence comes from an evaluation that does not
+reflect the shipped system, and `retrieval_best_approach_shipped` does not
+cross-reference that fact. This strengthens, not resolves, item 3e's open
+status — recorded as new evidence for that item, not a fix to it. Full
+detail: `runs/2026-08-18-m2-sealing-checklist/checklist.md`.
+
 **v0-fidelity-diff-fixes** — M2 step 7's independent fidelity diff ran in
 a technically-isolated scratch directory (owner decision, 2026-08-18: only
 the 3 permitted files present on disk, not just instructed-not-to-read;
@@ -211,6 +251,23 @@ normalising it at score time would need a new "total headline number
 count" field the schema does not have, not a drop-in derivation from
 existing fields. A scoped entailment was cheaper than that redesign right
 now; the redesign stays open if a third field shows the same defect.
+
+**monitoring-instrumentation-boundary-fixed** — Sealing checklist B1
+(2026-08-18): before splitting the schema field, tested whether
+`monitoring_instrumentation`'s `logged`/`traced_on_request_path` line is
+already decidable from its own wording (runs during request handling AND
+consumed by a viewer), checked record-by-record, not assumed from one
+result. Checked 9: p05, p07, p09, p14, p17 misclassified as `logged`,
+corrected to `traced_on_request_path` (each confirmed by reading the
+clone directly — request-handler write and Grafana datasource/dashboard
+target the same table); p04, p06, p08, p10, p12 confirmed already
+correct (p04/p12: write happens on explicit feedback submission, not
+automatically per request; p08: dashboard not confirmed wired to the
+write table). Rule written into `cases/schema.md` as a literal-wording
+test; no schema field split needed. Corpus impact: none —
+`monitoring_instrumentation` is not read by `candidates/v0/criteria.yaml`
+or any twin (confirmed by grep); scorer and test suite rerun clean,
+twins regenerated clean.
 
 ## Loop protocol
 
@@ -562,12 +619,61 @@ time). Reason: this field anchors the single most contested interpretation
 in v0 (`retrieval-best-approach-reading-flagged`, findings F2/F3), and a
 derivation formula needs dedicated owner review, not a bundled sign-off.
 Item 3e stays open; `APPROVED_ENTAILMENTS` still governs any twin on it.
+**Sealing decision (checklist A3/C2, 2026-08-18):** seal M2 with this as
+a named risk, not held. Reason it looks cheap to defer, **checked but not
+built**: `shipped_enabled` + `measured_effect` + `decision_basis` already
+exist per technique in every group-H block, so a derivation formula
+should need no new corpus facts, and even dropping the stored field from
+all 23 records later should be a mechanical structural edit (like
+`decision-axes-nesting-fixed`), not a re-extraction — neither claim is
+confirmed by writing the formula, only by inspecting what data the
+formula would need. The risk has two compounding, separate layers, both must
+be named in the writeup, not just the first: **(1) the reading itself.**
+Of the 9 `mixed_result` records, 8 carry `decision_basis: measured` on
+the driving technique (only p01 has none); but one of those 8, p02, is
+the schema's own showcase "documented removal" case — its `mixed_result`
+compares the shipped config against a technique measured *and rejected*
+(`reranking.shipped_enabled: false`), not evidence the shipped config
+itself underperforms. v0 cannot currently tell that case apart from the
+other 7's "shipped anyway despite mixed metrics." **(2) config drift.**
+6 of the 9 (p01, p02, p03, p04, p06, p14) also hold
+`retrieval_eval_config_matches_shipped: differs` — the evaluation
+producing the "mixed" reading did not test the shipped configuration at
+all, on top of whichever reading of (1) applies. Full per-record table:
+`runs/2026-08-18-m2-sealing-checklist/checklist.md` A3.
 
-**group-j-restructure-deferred** — Group J (documentation accuracy, 8
-fields) is not restructured at M2 schema closure. Owner ruling stands:
+**commit-pins-reverified-post-b1** — The 9 clones re-read directly during
+B1's investigation (p04, p07, p08, p09, p10, p11, p12, p14, p17) were
+checked against `courses/llm-zoomcamp-2026/repos.yaml`'s pinned commits
+(`git rev-parse HEAD` in each clone vs. the `commit` field): all 9 match
+exactly, no drift. Closes the residual "re-read but not re-verified"
+gap flagged when B1 closed.
+
+**group-j-restructure-deferred** — Group J (documentation accuracy, 6
+fields — corrected from "8" here, `cases/schema.md`'s own table lists
+6) is not restructured at M2 schema closure. Owner ruling stands:
 restructure once, after twin/red-team work (step 5+) shows which fields
 carry signal. Explicitly deferred with a revisit point (end of M2 or M3
-planning), not silently dropped. Resolves item 4.
+planning), not silently dropped. Resolves item 4. **Update (sealing
+checklist B5, 2026-08-18):** only 1 twin type (`claim-without-artifact`,
+`p04-t01`) touches group J, and only 2 of the 6 fields
+(`untraceable_number_count`, `headline_numbers_traceable`, one
+entailing the other); `document_number_conflicts`,
+`document_code_conflicts`, `broken_reference_count`,
+`limitations_section` have zero twin coverage. Thin, not "shows which
+fields carry signal" yet — strengthens rather than resolves the
+deferral's trigger condition; still open. Separate observation, same
+review: all four count fields reward *silence* the same way
+(`all_traceable`/zero-conflict is reachable by documenting few things
+correctly, not only by documenting much accurately) — a real
+gameability gap in the criteria this group would feed, not a lab-build
+defect, and owner-flagged as one with no clean fix (no field can
+distinguish "little to check, and it checks out" from "much to check,
+and it checks out" without a size-of-claim denominator this schema
+does not have). Recorded here as it bears directly on when to trigger
+the restructure; not written to `findings.md` since it is not
+run-backed. Binds: none new — restructure trigger unchanged, thinness
+is now a fact about it instead of an assumption.
 
 **single-repo-fields-kept** — `decision_basis`/`decision_axes`,
 `llm_eval_role_overlap`, `monitoring_instrumentation`,
@@ -591,12 +697,20 @@ condition evaluator now treats `in`/equality against a list field as
 membership-of-any-element; p01/p02 totals unchanged (rerun and verified).
 Resolves item 7.
 
-**binds-line-going-forward** — New `decisions.md` entries from 2026-08-13
-onward carry an implicit `Binds:` obligation (a plan item, an enforcement
-point, or `inert` with a one-line justification), per the mechanism
-proposed in `deferred-to-m2.md` item 9, amended to require `inert` entries
-to justify themselves. Not retrofitted across the ~50 existing entries —
-an optional follow-up, not an M2 blocker. Resolves item 9.
+**binds-line-going-forward** — New `decisions.md` entries from the batch
+*after* this one onward carry an implicit `Binds:` obligation (a plan
+item, an enforcement point, or `inert` with a one-line justification),
+per the mechanism proposed in `deferred-to-m2.md` item 9, amended to
+require `inert` entries to justify themselves. Not retrofitted across
+the ~50 existing entries, and not applied to the 19 M2 schema-closure
+entries this rule itself was written alongside — the rule takes effect
+starting with the next entries written, not the ones already on the
+page when it landed. Optional follow-up, not an M2 blocker. Resolves
+item 9. **Confirmed at sealing checklist B8 (2026-08-18):** owner
+decision — leave as going-forward only, no retrofit of the ~28
+pre-existing entries. Reason: nothing reads `Binds:` mechanically, every
+entry has only ever been used by being read directly, and the retrofit
+cost isn't worth spending against the sealing work still ahead.
 
 **course-materials-anchor** — A capstone cannot be required to exceed what
 `06-best-practices` and `07-project-example` demonstrate; this bounds what
