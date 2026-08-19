@@ -39,11 +39,24 @@ from typing import Any
 
 import yaml
 
+# Every legality and entailment check in this file is a plain `assert`.
+# Running under `python -O` / `PYTHONOPTIMIZE` strips all of them silently,
+# and `main()`'s "all assertions passed" print is not gated on anything, so
+# a stripped run would print success while checking nothing. Checked
+# 2026-08-17: no `-O` flag or `PYTHONOPTIMIZE` appears anywhere in this
+# repo's pyproject.toml, uv.lock, or any Makefile/CI config, and `uv run`
+# does not set it by default. Fail loudly rather than silently if that
+# ever changes.
+if sys.flags.optimize:
+    raise SystemExit(
+        "generate_twins.py: refusing to run under python -O / PYTHONOPTIMIZE — "
+        "every legality and entailment check in this file is a bare assert, "
+        "and optimized mode strips them all silently."
+    )
+
 REPO = pathlib.Path(__file__).resolve().parent.parent
 RECORDS = REPO / "cases" / "records"
 TWINS = REPO / "cases" / "twins"
-
-BASE_CASE = "p01"
 
 # Evidence locator written onto any field whose value this generator changed.
 # The value is constructed, so pointing a human re-verifier at the base
@@ -63,7 +76,8 @@ DESCRIPTIVE = "descriptive"
 
 # field name -> (read_set, kind, allowed)
 #   kind "enum": allowed is the member list
-#   kind "int" / "int_or_null" / "bool" / "str" / "list_str": allowed is None
+#   kind "list_enum": allowed is the member list, value is a list of members
+#   kind "int" / "int_or_null" / "bool" / "bool_or_null" / "str" / "list_str": allowed is None
 FIELD_SPEC: dict[str, tuple[str, str, list[str] | None]] = {
     # A. System shape
     "knowledge_base_present": (SCOREABLE, "enum", ["absent", "present"]),
@@ -71,7 +85,7 @@ FIELD_SPEC: dict[str, tuple[str, str, list[str] | None]] = {
     "retrieval_flow": (SCOREABLE, "enum", ["no_kb_no_llm", "llm_only", "kb_and_llm"]),
     "problem_statement": (SCOREABLE, "enum", ["absent", "brief", "specific"]),
     # B. Interface
-    "interface_kind": (SCOREABLE, "enum", ["none", "script_or_notebook", "cli", "api", "web_ui", "other"]),
+    "interface_kind": (SCOREABLE, "list_enum", ["none", "script_or_notebook", "cli", "api", "web_ui", "other"]),
     "interface_evidence_kind": (SCOREABLE, "enum", ["none", "code_only", "code_and_screenshot", "code_and_recording"]),
     # C. Ingestion
     "ingestion_kind": (SCOREABLE, "enum", ["none", "manual", "script_or_notebook", "orchestrated_tool", "other"]),
@@ -87,6 +101,8 @@ FIELD_SPEC: dict[str, tuple[str, str, list[str] | None]] = {
     "retrieval_eval_config_matches_shipped": (SCOREABLE, "enum", ["matches", "differs", "undeterminable"]),
     "retrieval_eval_uncertainty_stated": (SCOREABLE, "bool", None),
     "retrieval_best_approach_shipped": (SCOREABLE, "enum", ["yes", "no", "mixed_result", "undeterminable"]),
+    "retrieval_eval_reproducible": (SCOREABLE, "enum", [
+        "reproducible_as_committed", "traceable_not_reproducible", "neither"]),
     # E. Answer evaluation
     "llm_eval_present": (SCOREABLE, "bool", None),
     "llm_eval_approaches_compared": (SCOREABLE, "int", None),
@@ -94,9 +110,11 @@ FIELD_SPEC: dict[str, tuple[str, str, list[str] | None]] = {
     "llm_eval_judge_spotchecked": (SCOREABLE, "bool", None),
     "llm_eval_question_generator": (SCOREABLE, "enum", [
         "none_committed", "generator_committed", "generator_ties_question_to_passage", "other", "undeterminable"]),
-    "llm_eval_metric_at_ceiling": (SCOREABLE, "bool", None),
+    "llm_eval_metric_at_ceiling": (SCOREABLE, "bool_or_null", None),
     "llm_eval_role_overlap": (SCOREABLE, "enum", ["distinct", "same_family", "same_model", "undeterminable"]),
     "llm_eval_config_matches_shipped": (SCOREABLE, "enum", ["matches", "differs", "undeterminable"]),
+    "llm_eval_reproducible": (SCOREABLE, "enum", [
+        "reproducible_as_committed", "traceable_not_reproducible", "neither"]),
     # F. Monitoring
     "monitoring_kind": (SCOREABLE, "enum", [
         "none", "feedback_only", "dashboard_only", "feedback_and_dashboard", "other"]),
@@ -132,6 +150,7 @@ FIELD_SPEC: dict[str, tuple[str, str, list[str] | None]] = {
     "vector_store": (DESCRIPTIVE, "str", None),
     "llm_provider": (DESCRIPTIVE, "str", None),
     "repo_file_count": (DESCRIPTIVE, "int", None),
+    "project_name": (DESCRIPTIVE, "str", None),
 }
 
 # H. Techniques — one block per technique, same sub-fields, all scoreable.
@@ -141,7 +160,7 @@ TECHNIQUE_SPEC: dict[str, tuple[str, str, list[str] | None]] = {
     "shipped_enabled": (SCOREABLE, "bool", None),
     "evaluated": (SCOREABLE, "bool", None),
     "measured_effect": (SCOREABLE, "enum", ["improves", "mixed", "hurts", "not_measured"]),
-    "decision_documented": (SCOREABLE, "bool", None),
+    "decision_basis": (SCOREABLE, "enum", ["none", "argued", "measured"]),
     "decision_axes": (SCOREABLE, "list_str", None),
 }
 
@@ -194,6 +213,9 @@ APPROVED_ENTAILMENTS: dict[str, dict[str, str]] = {
     "p01-t02": {
         "fields.retrieval_best_approach_shipped.value": "fields.reranking.measured_effect.value",
     },
+    "p04-t01": {
+        "fields.headline_numbers_traceable.value": "fields.untraceable_number_count.value",
+    },
 }
 
 
@@ -214,6 +236,7 @@ class Restate:
 @dataclasses.dataclass(frozen=True)
 class TwinSpec:
     twin_id: str
+    base_case_id: str
     twin_type: str
     direction: str  # down | zero | not_below_base
     against: str  # twin_id or case_id this twin's direction is claimed against
@@ -237,6 +260,7 @@ RERANK_HURTS_BASIS = (
 SPECS: tuple[TwinSpec, ...] = (
     TwinSpec(
         twin_id="p01-t01",
+        base_case_id="p01",
         twin_type="harmful-component-kept",
         direction="down",
         against="p01",
@@ -279,7 +303,7 @@ SPECS: tuple[TwinSpec, ...] = (
                 ),
             ),
             Restate(
-                path="fields.reranking.decision_documented.basis",
+                path="fields.reranking.decision_basis.basis",
                 after=(
                     "the component ships enabled although its own reported numbers trail hybrid alone on "
                     "every metric; no committed text states why it was kept. limitations.md:10 notes the "
@@ -291,6 +315,7 @@ SPECS: tuple[TwinSpec, ...] = (
     ),
     TwinSpec(
         twin_id="p01-t02",
+        base_case_id="p01",
         twin_type="harmful-component-kept/documented-removal",
         direction="not_below_base",
         against="p01-t01",
@@ -302,7 +327,7 @@ SPECS: tuple[TwinSpec, ...] = (
         note=(
             "The mitigation pair is p01-t01 vs p01-t02 and the only claim made is that this twin scores at "
             "least as high as p01-t01. The two differ in exactly four values: shipped_enabled, "
-            "decision_documented, decision_axes and retrieval_best_approach_shipped. No relation to p01 "
+            "decision_basis, decision_axes and retrieval_best_approach_shipped. No relation to p01 "
             "itself is claimed - the base ships a component whose metrics merely disagree, which is a "
             "different situation from either half of this pair."
         ),
@@ -325,8 +350,8 @@ SPECS: tuple[TwinSpec, ...] = (
                 ),
             ),
             Change(
-                path="fields.reranking.decision_documented.value",
-                after=True,
+                path="fields.reranking.decision_basis.value",
+                after="measured",
                 justification=(
                     "The removal is stated and justified by the project's own measurements. This is the field "
                     "that distinguishes a reasoned removal from a silent one - without it the twin is "
@@ -338,9 +363,9 @@ SPECS: tuple[TwinSpec, ...] = (
                 after=["hit_rate", "mrr"],
                 justification=(
                     "Names the measured quantities the stated justification rests on. Required for coherence "
-                    "with `decision_documented: true`, whose schema definition is 'stated AND justified by "
-                    "the project's own measurements'; an empty axis list would assert the justification rests "
-                    "on nothing measured."
+                    "with `decision_basis: measured`, whose schema definition ties the value to a choice "
+                    "'justified by the project's own measurements'; an empty axis list would assert the "
+                    "justification rests on nothing measured."
                 ),
             ),
             Change(
@@ -364,7 +389,7 @@ SPECS: tuple[TwinSpec, ...] = (
                 ),
             ),
             Restate(
-                path="fields.reranking.decision_documented.basis",
+                path="fields.reranking.decision_basis.basis",
                 after=(
                     "a committed section states the re-ranker was implemented, measured and not shipped, and "
                     "justifies that with the project's own numbers: Hit Rate@1, @3, @5 and MRR@10 all fall "
@@ -396,6 +421,7 @@ SPECS: tuple[TwinSpec, ...] = (
     ),
     TwinSpec(
         twin_id="p01-t03",
+        base_case_id="p01",
         twin_type="claim-without-artifact",
         direction="down",
         against="p01",
@@ -463,6 +489,7 @@ SPECS: tuple[TwinSpec, ...] = (
     ),
     TwinSpec(
         twin_id="p01-t04",
+        base_case_id="p01",
         twin_type="checkbox-padding",
         direction="down",
         against="p01",
@@ -494,6 +521,7 @@ SPECS: tuple[TwinSpec, ...] = (
     ),
     TwinSpec(
         twin_id="p01-t05",
+        base_case_id="p01",
         twin_type="no-change",
         direction="zero",
         against="p01",
@@ -535,6 +563,7 @@ SPECS: tuple[TwinSpec, ...] = (
     ),
     TwinSpec(
         twin_id="p01-t06",
+        base_case_id="p01",
         twin_type="no-change",
         direction="zero",
         against="p01",
@@ -560,6 +589,492 @@ SPECS: tuple[TwinSpec, ...] = (
         ),
         # No restatement: `repo_file_count`'s own basis is the command that
         # produced it, and no other field's basis or evidence cites the count.
+    ),
+    # ------------------------------------------------------------------
+    # M2 step 5 additions — real bases identified via the 22-repo six-field
+    # table (runs/2026-08-14-m2-corpus-extraction/step4-real-score-extraction.md).
+    # Each mutates exactly one independent scoreable field: no entailment,
+    # so none needs an APPROVED_ENTAILMENTS entry.
+    # ------------------------------------------------------------------
+    TwinSpec(
+        twin_id="p07-t01",
+        base_case_id="p07",
+        twin_type="config-drift",
+        direction="down",
+        against="p07",
+        relation="strictly_below",
+        summary="The committed retrieval evaluation runs at a different depth than the shipped default.",
+        changes=(
+            Change(
+                path="fields.retrieval_eval_config_matches_shipped.value",
+                after="differs",
+                justification=(
+                    "In the base, the committed run's k=4 matches Index.py's DEFAULT_LIMIT=4, which the "
+                    "shipped chat and CLI both use unless overridden. Here the committed run is recorded at "
+                    "k=10 instead, while the shipped default stays at 4; retriever (postgres_hybrid) and "
+                    "embedding model are unchanged. A single retrieval-depth parameter now differs between "
+                    "what was measured and what ships, which is exactly the 'measured system is not the "
+                    "shipped system' fact this field exists to catch - down by construction, independent of "
+                    "whether either depth is a better choice."
+                ),
+            ),
+        ),
+        restates=(
+            Restate(
+                path="fields.retrieval_eval_config_matches_shipped.basis",
+                after=(
+                    "The committed retrieval run recorded retriever=postgres_hybrid, k=10, "
+                    "embedding_model=Xenova/bge-small-en-v1.5. k=10 differs from config.yml.dist's "
+                    "index_engine defaults and Index.py's DEFAULT_LIMIT=4, which the shipped chat and CLI "
+                    "both use unless overridden; retriever and embedding model still match."
+                ),
+            ),
+        ),
+    ),
+    TwinSpec(
+        twin_id="p12-t01",
+        base_case_id="p12",
+        twin_type="unfailable-eval",
+        direction="down",
+        against="p12",
+        relation="strictly_below",
+        summary="One of three reported judge metrics now sits at ceiling; the other two are unchanged.",
+        note=(
+            "Only one of the three group-H judge metrics needs to hit ceiling for the field to flip - "
+            "`llm_eval_metric_at_ceiling` is true iff at least one qualifying metric exists (schema group E, "
+            "M2 ceiling rule), evaluated per metric and never averaged. avg_faithfulness and avg_completeness "
+            "are left exactly as measured in the base so the twin makes the smallest change that forces the "
+            "field, rather than rewriting the whole evaluation."
+        ),
+        changes=(
+            Change(
+                path="fields.llm_eval_metric_at_ceiling.value",
+                after=True,
+                justification=(
+                    "In the base, all three reported metrics (avg_relevance 4.159, avg_faithfulness 3.568, "
+                    "avg_completeness 3.795, out of 5) sit well under the 95%-of-items ceiling threshold, and "
+                    "individual items score as low as 1/5 on each. Here avg_relevance alone rises to 4.95/5 "
+                    "with at least 95% of items scoring the metric's maximum, while faithfulness and "
+                    "completeness are unchanged. A measurement where the reported metric can no longer "
+                    "separate a good answer from a bad one is the unfailable-test lever this field exists to "
+                    "catch, and it takes only one qualifying metric to trigger - down by construction, no "
+                    "view needed on whether the judged answers are actually good."
+                ),
+            ),
+        ),
+        restates=(
+            Restate(
+                path="fields.llm_eval_metric_at_ceiling.basis",
+                after=(
+                    "avg_relevance rises to 4.95 (maximise direction, at least 95% of items scoring the "
+                    "metric's maximum 5/5) while avg_faithfulness (3.568) and avg_completeness (3.795) are "
+                    "unchanged from the base - one qualifying metric makes the field true, evaluated per "
+                    "metric and never averaged."
+                ),
+            ),
+        ),
+    ),
+    TwinSpec(
+        twin_id="p04-t01",
+        base_case_id="p04",
+        twin_type="claim-without-artifact",
+        direction="down",
+        against="p04",
+        relation="strictly_below",
+        summary=(
+            "The itinerary evaluation script is no longer committed, so the one headline figure it alone "
+            "produces has nothing behind it."
+        ),
+        note=(
+            "Uses the owner-approved entailment `p04-t01` (`APPROVED_ENTAILMENTS`): "
+            "`headline_numbers_traceable` is a coarse summary of `untraceable_number_count`, not an "
+            "independently-measured fact, so moving the count from 0 forces the summary to move too - one "
+            "fact, two representations, same shape as `retrieval_best_approach_shipped` (item 3e). "
+            "`claim-without-artifact` moved off p01 for this base per `claim-without-artifact-base-switch`: "
+            "p04 is `all_traceable` with zero untraceable figures currently, giving real headroom instead of "
+            "p01's marginal 18-to-21 move."
+        ),
+        changes=(
+            Change(
+                path="fields.untraceable_number_count.value",
+                after=1,
+                justification=(
+                    "In the base, every headline figure across retrieval, itinerary and LLM-contract "
+                    "evaluation traces to a committed, importable script (retrieval.py, itinerary.py, "
+                    "llm.py). Here evaluation/itinerary.py is no longer committed, so the itinerary "
+                    "mean-fairness figure it alone produces has no committed artifact able to produce it; "
+                    "the retrieval and LLM-contract scripts, and every figure they produce, are unchanged. "
+                    "One artifact removed, one figure newly untraceable - down by construction, independent "
+                    "of whether the fairness figure itself is accurate."
+                ),
+            ),
+            Change(
+                path="fields.headline_numbers_traceable.value",
+                after="some_traceable",
+                justification=(
+                    "Entailed by the mutation above, not an independent defect: with one of several headline "
+                    "figures no longer traceable to any committed artifact while the rest remain traceable "
+                    "via retrieval.py and llm.py, the record can no longer honestly read `all_traceable`. "
+                    "The schema's own summary distinguishes this from `none_traceable`, which would require "
+                    "every figure to lose its artifact, not just one - a base was deliberately chosen with "
+                    "enough real headline figures (retrieval MRR/recall, itinerary fairness, LLM-contract "
+                    "scores) that removing one script's worth leaves others intact."
+                ),
+                entailed_by="fields.untraceable_number_count.value",
+            ),
+        ),
+        restates=(
+            Restate(
+                path="fields.headline_numbers_traceable.basis",
+                after=(
+                    "Retrieval and LLM-contract headline figures still trace to committed "
+                    "evaluation/retrieval.py and evaluation/llm.py; the itinerary mean-fairness figure has "
+                    "no committed artifact able to produce it, since evaluation/itinerary.py is not "
+                    "committed."
+                ),
+            ),
+        ),
+    ),
+    TwinSpec(
+        twin_id="p11-t01",
+        base_case_id="p11",
+        twin_type="sample-too-small",
+        direction="down",
+        against="p11",
+        relation="strictly_below",
+        summary="The same retrieval evaluation, on a ground-truth set shrunk from 200 questions to 5.",
+        note=(
+            "`retrieval_eval_uncertainty_stated` is already `false` in the base (point values only, no "
+            "interval or variance) and stays `false` here - only the set size moves. The compound failure "
+            "signature the catalogue names ('many config decisions settled on a tiny set with no uncertainty "
+            "statement') needs both halves true; the second half was already true and unchanged, so a "
+            "single-field move produces the full pattern."
+        ),
+        changes=(
+            Change(
+                path="fields.retrieval_eval_set_size.value",
+                after=5,
+                justification=(
+                    "In the base, 200 question rows back the reported hit-rate/MRR figures. Here only 5 do, "
+                    "with no interval or variance stated either in the base or here. Every retrieval-config "
+                    "decision the project reports numbers for now rests on a sample too small to distinguish "
+                    "signal from noise, and nothing in the record says so - down by construction, independent "
+                    "of what the actual hit-rate/MRR values are."
+                ),
+            ),
+        ),
+        restates=(
+            Restate(
+                path="fields.retrieval_eval_set_size.basis",
+                after="6 lines including header = 5 question rows.",
+            ),
+        ),
+    ),
+    TwinSpec(
+        twin_id="p10-t01",
+        base_case_id="p10",
+        twin_type="unlocatable-project",
+        direction="down",
+        against="p10",
+        relation="strictly_below",
+        summary=(
+            "The same three artifacts exist; a third one - the evaluation question set - now joins the two "
+            "already unreferenced."
+        ),
+        note=(
+            "`artifact_reference_strength` stays `partially_referenced`: that value means 'at least one "
+            "expected artifact is named nowhere', already true in the base at count 2 and still true at "
+            "count 3. No entailment needed - unlike the p04-t01 pair, the enum does not have to move for the "
+            "count to move, because the base was chosen already past the enum's threshold."
+        ),
+        changes=(
+            Change(
+                path="fields.artifacts_unreferenced_count.value",
+                after=3,
+                justification=(
+                    "In the base, the evaluation notebook and the ingestion module exist but are named "
+                    "nowhere in the README, while the evaluation question set is named - two of the fixed "
+                    "checklist's five items are unreferenced (monitoring dashboard and deployment "
+                    "configuration are absent from the project and excluded from the count per the field's "
+                    "own rule). Here the evaluation question set is also named nowhere, joining the other "
+                    "two; the artifacts referenced by every other field are unchanged. One more artifact "
+                    "unreferenced, same fixed checklist - down by construction."
+                ),
+            ),
+        ),
+        restates=(
+            Restate(
+                path="fields.artifacts_unreferenced_count.basis",
+                after=(
+                    "of the fixed checklist, three present artifacts are named nowhere in the documentation: "
+                    "the evaluation script/notebook, the ingestion entry point, and the evaluation question "
+                    "set; a monitoring dashboard definition and a deployment configuration are absent from "
+                    "the repository and excluded from the count."
+                ),
+            ),
+        ),
+    ),
+    TwinSpec(
+        twin_id="p01-t07",
+        base_case_id="p01",
+        twin_type="no-change/cosmetic-rename",
+        direction="zero",
+        against="p01",
+        relation="exactly_equal",
+        summary="The same system, same everything, under a different synthetic project name.",
+        note=(
+            "The third no-change kind, unbuildable until `project_name` existed (schema M2 addition, group "
+            "K) - no field held anything like a project or brand name before this. `project_name` is itself "
+            "synthetic on every record (`tools/assign_project_names.py`, never extracted), so this twin "
+            "swaps one synthetic label for another; the real-world equivalent (renaming an actual repository) "
+            "is exactly what this mutation stands in for without touching real names."
+        ),
+        changes=(
+            Change(
+                path="fields.project_name.value",
+                after="Project Omega",
+                justification=(
+                    "`project_name` is descriptive and synthetic by construction - it is never read off the "
+                    "repository and no other field's `basis` or `evidence` cites it (checked: it is assigned "
+                    "after extraction, by a separate deterministic tool, specifically so nothing else in the "
+                    "record can depend on it). Changing it is the purest possible no-change mutation: nothing "
+                    "about the system, its evidence, or any other field's text moves. A criterion reading "
+                    "this field would be scoring a label that carries no information at all."
+                ),
+            ),
+        ),
+        # No restatement: `project_name.basis` already reads generically ("assigned by
+        # tools/assign_project_names.py from case_id"), true of any value it could hold.
+    ),
+    # ------------------------------------------------------------------
+    # M2 step 5, cross-criterion conditional family (`twin-catalogue-conditional`,
+    # idea 1): the same config-drift mutation (retrieval_eval_config_matches_shipped
+    # matches -> differs), held against hybrid_search's three possible
+    # measured_effect readings, on three different real bases. Tests whether a
+    # future candidate applies the config-drift penalty uniformly rather than
+    # only in the `improves` case, which is the one most obviously exploitable
+    # and the one a partial implementation would be tempted to special-case.
+    # ------------------------------------------------------------------
+    TwinSpec(
+        twin_id="p12-t02",
+        base_case_id="p12",
+        twin_type="config-drift/conditional",
+        direction="down",
+        against="p12",
+        relation="strictly_below",
+        summary="hybrid_search measures to improve retrieval, but now under a drifted evaluation config.",
+        note=(
+            "Conditional family, `improves` branch. hybrid_search.decision_basis stays `measured` and "
+            "unchanged: the project still *believes* its ship decision is grounded in measurement. What "
+            "changes is whether that measurement can be trusted - a candidate that credits `improves` "
+            "without checking `retrieval_eval_config_matches_shipped` cannot tell this twin from the base."
+        ),
+        changes=(
+            Change(
+                path="fields.retrieval_eval_config_matches_shipped.value",
+                after="differs",
+                justification=(
+                    "In the base, strategy hybrid_k20_rerank_rewrite's parameters (top_k=5, retrieve_k=20, "
+                    "rewrite and rerank enabled) match rag_pipeline's own shipped defaults exactly. Here the "
+                    "evaluated strategy runs at retrieve_k=50 instead of 20, everything else unchanged. The "
+                    "hybrid_search.measured_effect: improves claim behind the ship decision now rests on a "
+                    "measurement of a system that is not the one shipped - down by construction, independent "
+                    "of whether hybrid search actually helps."
+                ),
+            ),
+        ),
+        restates=(
+            Restate(
+                path="fields.retrieval_eval_config_matches_shipped.basis",
+                after=(
+                    "Strategy hybrid_k20_rerank_rewrite uses top_k=5/retrieve_k=50 with rewrite and rerank "
+                    "enabled; rag_pipeline's own shipped defaults are top_k=5/retrieve_k=20. Retrieval depth "
+                    "differs; rewrite and rerank flags still match."
+                ),
+            ),
+        ),
+    ),
+    TwinSpec(
+        twin_id="p09-t01",
+        base_case_id="p09",
+        twin_type="config-drift/conditional",
+        direction="down",
+        against="p09",
+        relation="strictly_below",
+        summary="hybrid_search's mixed retrieval result now comes from a drifted evaluation config.",
+        note="Conditional family, `mixed` branch - same mutation as p12-t02, different measured_effect value.",
+        changes=(
+            Change(
+                path="fields.retrieval_eval_config_matches_shipped.value",
+                after="differs",
+                justification=(
+                    "In the base, the evaluation notebook imports the retriever module directly and runs at "
+                    "k=5, the app's own default. Here the notebook is recorded as running at k=10 instead, "
+                    "everything else in the retriever call unchanged. The mixed hit-rate/MRR disagreement "
+                    "hybrid_search.decision_basis rests on - hybrid wins on hit-rate, loses on MRR - was "
+                    "measured at a depth the shipped path never uses, so neither reported number can be "
+                    "trusted to describe the shipped system - down by construction, independent of which "
+                    "metric the project chose to decide on."
+                ),
+            ),
+        ),
+        restates=(
+            Restate(
+                path="fields.retrieval_eval_config_matches_shipped.basis",
+                after=(
+                    "the notebook imports RETRIEVERS/connection directly from retrieval/retrieve.py but "
+                    "evaluates at k=10; the app's own default, used on the request path, is k=5."
+                ),
+            ),
+        ),
+    ),
+    TwinSpec(
+        twin_id="p18-t01",
+        base_case_id="p18",
+        twin_type="config-drift/conditional",
+        direction="down",
+        against="p18",
+        relation="strictly_below",
+        summary="hybrid_search's measured-to-hurt result, and the decision built on it, now rest on a drifted config.",
+        note=(
+            "Conditional family, `hurts` branch - the case most likely to be treated as already 'safe' by an "
+            "unconditional candidate, since a technique measured to hurt and correctly kept off the request "
+            "path looks like a good outcome regardless of eval trust. It is not: if the eval that produced "
+            "'hurts' does not reflect the shipped system, the decision it justified is unverified either way "
+            "- the project could equally be wrongly rejecting a technique that would have helped."
+        ),
+        changes=(
+            Change(
+                path="fields.retrieval_eval_config_matches_shipped.value",
+                after="differs",
+                justification=(
+                    "In the base, the eval's keyword-only arm and the shipped default (HybridSearcher, "
+                    "kw_weight=1.0, vec_weight=0.0) both retrieve at limit=5, so the shipped path returns "
+                    "exactly what the keyword-only eval arm measured. Here the eval's keyword-only arm is "
+                    "recorded as running at limit=10 instead, while the shipped default stays at limit=5. "
+                    "The keyword-only-wins result hybrid_search.decision_basis cites was measured on a "
+                    "retrieval depth the shipped path never uses - the 'hurts' verdict, and the ship decision "
+                    "resting on it, are both unverified against what actually ships - down by construction, "
+                    "independent of whether keyword-only genuinely is the better choice."
+                ),
+            ),
+        ),
+        restates=(
+            Restate(
+                path="fields.retrieval_eval_config_matches_shipped.basis",
+                after=(
+                    "eval's keyword-only arm retrieves at limit=10; the shipped default (HybridSearcher, "
+                    "kw_weight=1.0, vec_weight=0.0) retrieves at limit=5. Retrieval depth differs between "
+                    "what was measured and what ships."
+                ),
+            ),
+        ),
+    ),
+    TwinSpec(
+        twin_id="p02-t01",
+        base_case_id="p02",
+        twin_type="decision-basis-unsupported/conditional",
+        direction="down",
+        against="p02",
+        relation="strictly_below",
+        summary="The same removal, the same claim of measurement grounding, with no axes left to name it.",
+        note=(
+            "Conditional family (`twin-catalogue-conditional`, idea 4): tests whether a candidate requires "
+            "`decision_axes` to be non-empty and explanatory when `decision_basis` claims `measured`, or "
+            "credits `measured` at face value regardless. No real base in the 22-repo corpus holds "
+            "`measured_effect: improves` alongside a measured removal (searched directly, none found); p02's "
+            "reranking case (`mixed`, one axis winning, one losing) is the closest real analogue and is used "
+            "as-is - the tension idea 4 names does not need `improves` specifically, only a plausible-looking "
+            "`measured` claim with the actual axes stripped out."
+        ),
+        changes=(
+            Change(
+                path="fields.reranking.decision_axes.value",
+                after=[],
+                justification=(
+                    "In the base, the stated rejection names both traded-off quantities (MRR gain, latency "
+                    "cost) that `measured_effect: mixed` itself reports. Here `decision_basis` still reads "
+                    "`measured` - the record still claims the choice rests on the project's own numbers - but "
+                    "no axis is named at all. A candidate that credits `measured` without checking "
+                    "`decision_axes` cannot tell this twin from the base; a candidate that correctly demands "
+                    "the axes actually resolve the tension should score this strictly lower, independent of "
+                    "whether the underlying removal itself was reasonable."
+                ),
+            ),
+        ),
+        restates=(
+            Restate(
+                path="fields.reranking.decision_axes.basis",
+                after="No measured quantities named alongside this technique's decision_basis.",
+            ),
+        ),
+    ),
+    TwinSpec(
+        twin_id="p17-t01",
+        base_case_id="p17",
+        twin_type="no-change/dataset-domain-swap",
+        direction="zero",
+        against="p17",
+        relation="exactly_equal",
+        summary="The same system over a completely different subject: XAI research literature swapped for beekeeping.",
+        note=(
+            "Checked field by field, not by keyword search: a keyword grep on domain terms gives false "
+            "clears (it read p11 as clean when `problem_statement` there names 'patients seeking medical "
+            "advice' without using any word a domain grep would catch). All ~53 scoreable fields on p17 read "
+            "as structural or mechanistic, none naming the XAI subject or an audience for it. p17 is not the "
+            "only clean base: p01's current record (schema_version 1, re-extracted at step 3 under the "
+            "tightened basis rule) also passes the same field-by-field check - the leaky p01 named in early "
+            "M1/M2 documents was the v1 extraction, since overwritten. This twin is built on p17 rather than "
+            "p01 because p17 was checked first and one clean base is what the catalogue needs; a second "
+            "domain-swap twin on p01 is possible but not built here."
+        ),
+        changes=(
+            Change(
+                path="fields.corpus_domain.value",
+                after="urban beekeeping and pollinator conservation",
+                justification=(
+                    "Descriptive by schema section K. Every scoreable field on this record was read in full "
+                    "and none names the corpus subject, the intended audience, or anything that would read "
+                    "differently under a different domain - including `problem_statement`, whose basis "
+                    "states only that the Problem section names no audience, not what the problem is. A "
+                    "criterion moving on this field is scoring the corpus's subject matter, not the system."
+                ),
+            ),
+        ),
+        # No restatement: corpus_domain's own basis ("stated subject of the ingested corpus") is generic and
+        # does not name the subject itself, so it needs no rewrite when the subject changes.
+    ),
+    TwinSpec(
+        twin_id="p13-t01",
+        base_case_id="p13",
+        twin_type="circular-eval",
+        direction="down",
+        against="p13",
+        relation="strictly_below",
+        summary="The same LLM-eval question generator, but the judge's verdicts are no longer spot-checked.",
+        changes=(
+            Change(
+                path="fields.llm_eval_judge_spotchecked.value",
+                after=False,
+                justification=(
+                    "In the base, all 30 trap answers from the shipping prompt variant were read by hand and "
+                    "compared to the judge's own verdicts (18/30 agreement, reported). Here that check does "
+                    "not exist. The question generator is unchanged "
+                    "(`generator_ties_question_to_passage` - questions still trace to a specific chunk or a "
+                    "fetched external passage), so the only fact that changes is whether the judge's own "
+                    "error rate was ever measured against a human reading. Removing the one spot-check this "
+                    "project actually ran restores the circularity failure mode the schema names: generated "
+                    "questions judged by machinery whose own error rate is never checked - down by "
+                    "construction, independent of any view on the corpus or the judge model."
+                ),
+            ),
+        ),
+        restates=(
+            Restate(
+                path="fields.llm_eval_judge_spotchecked.basis",
+                after="No committed artifact reports a human check of judge verdicts against a reading of the answers.",
+            ),
+        ),
     ),
 )
 
@@ -616,8 +1131,14 @@ def check_legal(path: str, value: Any) -> None:
     if kind == "enum":
         assert isinstance(value, str), f"{label}: enum value must be a string, got {value!r}"
         assert value in (allowed or []) + ENUM_UNIVERSAL, f"{label}: {value!r} is not a legal member"
+    elif kind == "list_enum":
+        assert isinstance(value, list) and value, f"{label}: expected a non-empty list, got {value!r}"
+        for v in value:
+            assert v in (allowed or []) + ENUM_UNIVERSAL, f"{label}: {v!r} is not a legal member"
     elif kind == "bool":
         assert isinstance(value, bool), f"{label}: expected bool, got {value!r}"
+    elif kind == "bool_or_null":
+        assert value is None or isinstance(value, bool), f"{label}: expected bool or null, got {value!r}"
     elif kind == "int":
         assert isinstance(value, int) and not isinstance(value, bool), f"{label}: expected int, got {value!r}"
     elif kind == "int_or_null":
@@ -738,12 +1259,13 @@ def flatten(node: Any, prefix: str = "") -> dict[str, Any]:
     return out
 
 
-def verify(base: dict, written: dict[str, dict], specs: tuple[TwinSpec, ...]) -> list[str]:
+def verify(bases: dict[str, dict], written: dict[str, dict], specs: tuple[TwinSpec, ...]) -> list[str]:
     """Re-derive every claim from the files on disk. Returns the checks run."""
     checks: list[str] = []
-    base_flat = flatten({k: v for k, v in base.items() if k != "case_id"})
 
     for spec in specs:
+        base = bases[spec.base_case_id]
+        base_flat = flatten({k: v for k, v in base.items() if k != "case_id"})
         doc = written[spec.twin_id]
         meta = doc["twin"]
         record = {k: v for k, v in doc.items() if k not in ("twin", "case_id")}
@@ -796,7 +1318,7 @@ def verify(base: dict, written: dict[str, dict], specs: tuple[TwinSpec, ...]) ->
     pair_diff = {p.removesuffix(".value") for p in kept if kept[p] != removed[p] and p.endswith(".value")}
     expected = {
         "fields.reranking.shipped_enabled",
-        "fields.reranking.decision_documented",
+        "fields.reranking.decision_basis",
         "fields.reranking.decision_axes",
         "fields.retrieval_best_approach_shipped",
     }
@@ -814,21 +1336,25 @@ def verify(base: dict, written: dict[str, dict], specs: tuple[TwinSpec, ...]) ->
 
 
 def main() -> int:
-    base_path = RECORDS / f"{BASE_CASE}.yaml"
-    base = yaml.safe_load(base_path.read_text(encoding="utf-8"))
+    base_ids = sorted({spec.base_case_id for spec in SPECS})
+    bases: dict[str, dict] = {}
+    for base_id in base_ids:
+        base_path = RECORDS / f"{base_id}.yaml"
+        base = yaml.safe_load(base_path.read_text(encoding="utf-8"))
 
-    unknown = [n for n in base["fields"] if n not in FIELD_SPEC and n not in TECHNIQUES]
-    if unknown:
-        print(f"base record has fields absent from FIELD_SPEC: {unknown}", file=sys.stderr)
-        return 1
-    missing = [n for n in FIELD_SPEC if n not in base["fields"]]
-    if missing:
-        print(f"note: schema fields absent from {BASE_CASE}: {missing}")
+        unknown = [n for n in base["fields"] if n not in FIELD_SPEC and n not in TECHNIQUES]
+        if unknown:
+            print(f"{base_id}: base record has fields absent from FIELD_SPEC: {unknown}", file=sys.stderr)
+            return 1
+        missing = [n for n in FIELD_SPEC if n not in base["fields"]]
+        if missing:
+            print(f"note: schema fields absent from {base_id}: {missing}")
+        bases[base_id] = base
 
     TWINS.mkdir(parents=True, exist_ok=True)
     written: dict[str, dict] = {}
     for spec in SPECS:
-        doc = build(base, spec)
+        doc = build(bases[spec.base_case_id], spec)
         (TWINS / f"{spec.twin_id}.yaml").write_text(dump(doc), encoding="utf-8")
         written[spec.twin_id] = doc
 
@@ -836,9 +1362,13 @@ def main() -> int:
         spec.twin_id: yaml.safe_load((TWINS / f"{spec.twin_id}.yaml").read_text(encoding="utf-8"))
         for spec in SPECS
     }
-    checks = verify(base, reloaded, SPECS)
+    checks = verify(bases, reloaded, SPECS)
 
-    print(f"wrote {len(SPECS)} twins of {BASE_CASE} to {TWINS.relative_to(REPO)}/")
+    by_base: dict[str, int] = {}
+    for spec in SPECS:
+        by_base[spec.base_case_id] = by_base.get(spec.base_case_id, 0) + 1
+    summary = ", ".join(f"{n} of {b}" for b, n in sorted(by_base.items()))
+    print(f"wrote {len(SPECS)} twins ({summary}) to {TWINS.relative_to(REPO)}/")
     for line in checks:
         print(line)
     print("all assertions passed")

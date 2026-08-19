@@ -1,361 +1,412 @@
 schema_version: 1
 case_id: p01
-commit: "42cda614c65c970bc1b5ca9b25f4252baef233e7"
+commit: 42cda614c65c970bc1b5ca9b25f4252baef233e7
 extracted_by: agents/extractor/v2
-extracted_on: "2026-08-13"
-
+extracted_on: '2026-08-13'
 fields:
-
-  # A. System shape
   knowledge_base_present:
     value: present
-    evidence: ["src/ingestion/qdrant_index.py:16-32", "src/search/dense.py:9-15"]
-    basis: "a vector collection is created and populated at ingestion, and queried on the request path"
-
+    evidence:
+    - src/ingestion/qdrant_index.py:16-32
+    - src/search/dense.py:9-15
+    basis: a vector collection is created and populated at ingestion, and queried on the request path
   llm_in_flow:
     value: present
-    evidence: ["src/api/answer.py:44-51", "src/search/query_rewriter.py:30-36"]
-    basis: "the request handler calls a hosted chat-completion model both to rewrite the query and to generate the final answer"
-
+    evidence:
+    - src/api/answer.py:44-51
+    - src/search/query_rewriter.py:30-36
+    basis: the request handler calls a hosted chat-completion model both to rewrite the query and to generate the final answer
   retrieval_flow:
     value: kb_and_llm
-    evidence: ["src/api/routes.py:47-56", "src/api/routes.py:66-78"]
-    basis: "the request handler queries the knowledge base (dense + sparse + fusion + rerank) and then calls an LLM to generate the answer"
-
+    evidence:
+    - src/api/routes.py:47-56
+    - src/api/routes.py:66-78
+    basis: the request handler queries the knowledge base (dense + sparse + fusion + rerank) and then calls an LLM to generate the answer
   problem_statement:
     value: specific
-    evidence: ["README.md:62-64"]
-    basis: "the Problem Statement section names both an intended audience and the question the system answers"
-
-  # B. Interface
+    evidence:
+    - README.md:62-64
+    basis: the Problem Statement section names both an intended audience and the question the system answers
   interface_kind:
-    value: [web_ui, api]
-    evidence: ["src/api/static/index.html:1-527", "src/api/app.py:67-69", "src/api/routes.py:22-173"]
-    basis: "two distinct interfaces are present: a served web chat UI, and directly callable JSON API endpoints (chat, feedback, health)"
-
+    value:
+    - web_ui
+    - api
+    evidence:
+    - src/api/static/index.html:1-527
+    - src/api/app.py:67-69
+    - src/api/routes.py:22-173
+    basis: 'two distinct interfaces are present: a served web chat UI, and directly callable JSON API endpoints (chat, feedback, health)'
   interface_evidence_kind:
     value: code_and_screenshot
-    evidence: ["README.md:39-43", "screenshots/chat-ui.png"]
-    basis: "screenshots of the running interface are committed and embedded in the README; no recording is committed"
-
-  # C. Ingestion
+    evidence:
+    - README.md:39-43
+    - screenshots/chat-ui.png
+    basis: screenshots of the running interface are committed and embedded in the README; no recording is committed
   ingestion_kind:
     value: script_or_notebook
-    evidence: ["src/ingestion/run.py:28-125", "pyproject.toml:30-31"]
-    basis: "ingestion is invoked as a single argparse-driven Python module, not through a scheduler or orchestration framework"
-
+    evidence:
+    - src/ingestion/run.py:28-125
+    - pyproject.toml:30-31
+    basis: ingestion is invoked as a single argparse-driven Python module, not through a scheduler or orchestration framework
   ingestion_single_command:
     value: true
-    evidence: ["README.md:21-22", "src/ingestion/run.py:28-125"]
-    basis: "one documented command runs fetch, chunk, embed and upload end to end"
-
+    evidence:
+    - README.md:21-22
+    - src/ingestion/run.py:28-125
+    basis: one documented command runs fetch, chunk, embed and upload end to end
   ingestion_output_stated:
     value: true
-    evidence: ["docs/architecture.md:108"]
-    basis: "document, chunk and vector counts are stated as a single pipeline output line"
-
-  # D. Retrieval evaluation
+    evidence:
+    - docs/architecture.md:108
+    basis: document, chunk and vector counts are stated as a single pipeline output line
   retrieval_eval_present:
     value: true
-    evidence: ["docs/evaluation.md:3-10", "notebooks/01_retrieval_evaluation.py:1-119"]
-    basis: ""
-
+    evidence:
+    - docs/evaluation.md:3-10
+    - notebooks/01_retrieval_evaluation.py:1-119
+    basis: ''
   retrieval_eval_approaches_compared:
     value: 4
-    evidence: ["docs/evaluation.md:5-10", "notebooks/01_retrieval_evaluation.py:55"]
-    basis: "four strategies have reported numbers: dense-only, sparse-only, hybrid fusion, hybrid+rerank"
-
+    evidence:
+    - docs/evaluation.md:5-10
+    - notebooks/01_retrieval_evaluation.py:55
+    basis: 'four strategies have reported numbers: dense-only, sparse-only, hybrid fusion, hybrid+rerank'
   retrieval_eval_set_committed:
     value: committed
-    evidence: ["src/evaluation/test_set.py:1-137"]
-    basis: ""
-
+    evidence:
+    - src/evaluation/test_set.py:1-137
+    basis: ''
   retrieval_eval_set_size:
     value: 27
-    evidence: ["src/evaluation/test_set.py:1-137"]
-    basis: "27 question/answer/source entries in the committed list"
-
+    evidence:
+    - src/evaluation/test_set.py:1-137
+    basis: 27 question/answer/source entries in the committed list
   retrieval_eval_relevance_rule:
     value: source_level
-    evidence: ["notebooks/01_retrieval_evaluation.py:41-49"]
-    basis: "the hit_rate/mrr functions match a retrieved item's source-category label against the test item's expected source-category label, not exact document or passage identity"
-
+    evidence:
+    - notebooks/01_retrieval_evaluation.py:41-49
+    basis: the hit_rate/mrr functions match a retrieved item's source-category label against the test item's expected source-category label, not exact document or passage identity
   retrieval_eval_config_matches_shipped:
     value: differs
-    evidence: ["notebooks/01_retrieval_evaluation.py:65-69", "src/api/routes.py:52-55"]
-    basis: "notebook retrieves at k=20 (dense/sparse/hybrid) and reranks to top_k=10; the request path retrieves at k=50 and reranks to top_k=5"
-
+    evidence:
+    - notebooks/01_retrieval_evaluation.py:65-69
+    - src/api/routes.py:52-55
+    basis: notebook retrieves at k=20 (dense/sparse/hybrid) and reranks to top_k=10; the request path retrieves at k=50 and reranks to top_k=5
   retrieval_eval_uncertainty_stated:
     value: false
-    evidence: ["docs/evaluation.md:3-19"]
-    basis: "no interval, variance or uncertainty statement accompanies the reported figures"
-
+    evidence:
+    - docs/evaluation.md:3-19
+    basis: no interval, variance or uncertainty statement accompanies the reported figures
   retrieval_best_approach_shipped:
     value: mixed_result
-    evidence: ["docs/evaluation.md:9-10", "src/api/routes.py:54-55"]
-    basis: "the shipped configuration (hybrid+rerank) beats hybrid-alone on Hit Rate@1 and @3 but loses to it on Hit Rate@5 and MRR@10 — metrics disagree on which approach wins"
-
+    evidence:
+    - docs/evaluation.md:9-10
+    - src/api/routes.py:54-55
+    basis: the shipped configuration (hybrid+rerank) beats hybrid-alone on Hit Rate@1 and @3 but loses to it on Hit Rate@5 and MRR@10 — metrics disagree on which approach wins
   retrieval_eval_reproducible:
     value: traceable_not_reproducible
-    evidence: ["notebooks/01_retrieval_evaluation.py:1-119"]
-    basis: "the file imports only one library; every name it uses for the evaluation set, the three retrievers and the fusion function is referenced without a corresponding import or definition anywhere in the file, so running it as committed fails on the first such reference — but the retrieval and metric logic is fully written out and each referenced name matches an identically-named object defined elsewhere in the committed repository"
-
-  # E. Answer evaluation
+    evidence:
+    - notebooks/01_retrieval_evaluation.py:1-119
+    basis: the file imports only one library; every name it uses for the evaluation set, the three retrievers and the fusion function is referenced without a corresponding import or definition anywhere in the file, so running it as committed fails on the first such reference — but the retrieval and metric logic is fully written out and each referenced name matches an identically-named object defined elsewhere in the committed repository
   llm_eval_present:
     value: true
-    evidence: ["docs/evaluation.md:12-19", "notebooks/02_llm_evaluation.py:1-124"]
-    basis: ""
-
+    evidence:
+    - docs/evaluation.md:12-19
+    - notebooks/02_llm_evaluation.py:1-124
+    basis: ''
   llm_eval_approaches_compared:
     value: 1
-    evidence: ["docs/evaluation.md:14-17"]
-    basis: "one generation configuration has reported numbers; no alternative prompt or model is compared"
-
+    evidence:
+    - docs/evaluation.md:14-17
+    basis: one generation configuration has reported numbers; no alternative prompt or model is compared
   llm_eval_judge_kind:
     value: model_judge
-    evidence: ["notebooks/02_llm_evaluation.py:64-88"]
-    basis: "a second model call, distinct from the answer generator, scores each answer and returns a structured verdict"
-
+    evidence:
+    - notebooks/02_llm_evaluation.py:64-88
+    basis: a second model call, distinct from the answer generator, scores each answer and returns a structured verdict
   llm_eval_judge_spotchecked:
     value: false
-    evidence: ["notebooks/02_llm_evaluation.py:1-124", "docs/evaluation.md:12-19"]
-    basis: "no sample of judge verdicts is checked by hand and reported anywhere in the committed evaluation artifacts"
-
+    evidence:
+    - notebooks/02_llm_evaluation.py:1-124
+    - docs/evaluation.md:12-19
+    basis: no sample of judge verdicts is checked by hand and reported anywhere in the committed evaluation artifacts
   llm_eval_question_generator:
     value: none_committed
-    evidence: ["src/evaluation/test_set.py:1-137"]
-    basis: "the test set is a static literal list; no generator script that produced it is committed"
-
+    evidence:
+    - src/evaluation/test_set.py:1-137
+    basis: the test set is a static literal list; no generator script that produced it is committed
   llm_eval_metric_at_ceiling:
     value: true
-    evidence: ["docs/evaluation.md:14-17"]
-    basis: "Relevance (max 5): reported average 3.04/5 over 27 items, not at ceiling. Faithfulness (max 5): reported average 5.00/5 over 27 integer-scored items — an average of exactly 5.00 over 27 integer scores requires all 27 at the maximum, which is at ceiling"
-
+    evidence:
+    - docs/evaluation.md:14-17
+    basis: 'Relevance (max 5): reported average 3.04/5 over 27 items, not at ceiling. Faithfulness (max 5): reported average 5.00/5 over 27 integer-scored items — an average of exactly 5.00 over 27 integer scores requires all 27 at the maximum, which is at ceiling'
   llm_eval_role_overlap:
     value: same_family
-    evidence: ["src/api/answer.py:22", "notebooks/02_llm_evaluation.py:79-84"]
-    basis: "the answer generator and the judge are two differently-sized models from the same base model family; the question-generator role has no model (none_committed), so only these two roles are compared"
-
+    evidence:
+    - src/api/answer.py:22
+    - notebooks/02_llm_evaluation.py:79-84
+    basis: the answer generator and the judge are two differently-sized models from the same base model family; the question-generator role has no model (none_committed), so only these two roles are compared
   llm_eval_config_matches_shipped:
     value: differs
-    evidence: ["notebooks/02_llm_evaluation.py:37-48", "src/api/routes.py:52-56"]
-    basis: "the notebook's generation path retrieves at k=20 before reranking to top_k=5; the request path retrieves at k=50 before reranking to top_k=5"
-
+    evidence:
+    - notebooks/02_llm_evaluation.py:37-48
+    - src/api/routes.py:52-56
+    basis: the notebook's generation path retrieves at k=20 before reranking to top_k=5; the request path retrieves at k=50 before reranking to top_k=5
   llm_eval_reproducible:
     value: traceable_not_reproducible
-    evidence: ["notebooks/02_llm_evaluation.py:1-124"]
-    basis: "the file's module-level imports do not include the evaluation set, the retrievers, the reranker, the answer generator or the query rewriter, so running it as committed fails on the first such reference — but the run/judge/aggregate logic is fully written out and each referenced name matches an identically-named object defined elsewhere in the committed repository"
-
-  # F. Monitoring
+    evidence:
+    - notebooks/02_llm_evaluation.py:1-124
+    basis: the file's module-level imports do not include the evaluation set, the retrievers, the reranker, the answer generator or the query rewriter, so running it as committed fails on the first such reference — but the run/judge/aggregate logic is fully written out and each referenced name matches an identically-named object defined elsewhere in the committed repository
   monitoring_kind:
     value: feedback_and_dashboard
-    evidence: ["src/api/routes.py:161-173", "dashboards/food-wine-dashboard.json:1-63"]
-    basis: "a feedback endpoint plus UI control is present, and a provisioned dashboard is present"
-
+    evidence:
+    - src/api/routes.py:161-173
+    - dashboards/food-wine-dashboard.json:1-63
+    basis: a feedback endpoint plus UI control is present, and a provisioned dashboard is present
   monitoring_dashboard_provenance:
     value: committed_definitions
-    evidence: ["dashboards/food-wine-dashboard.json:1-63", "dashboards/grafana-dashboard.yml:1-7", "dashboards/grafana-datasource.yml:1-15"]
-    basis: "panel definitions, datasource and provisioning config are committed files, not a stock image UI"
-
+    evidence:
+    - dashboards/food-wine-dashboard.json:1-63
+    - dashboards/grafana-dashboard.yml:1-7
+    - dashboards/grafana-datasource.yml:1-15
+    basis: panel definitions, datasource and provisioning config are committed files, not a stock image UI
   monitoring_instrumentation:
     value: traced_on_request_path
-    evidence: ["src/api/routes.py:33-93"]
-    basis: "per-request retrieval latency, LLM latency, total latency and token counts are computed inline during request handling and persisted via the same request path"
-
+    evidence:
+    - src/api/routes.py:33-93
+    basis: per-request retrieval latency, LLM latency, total latency and token counts are computed inline during request handling and persisted via the same request path
   monitoring_chart_count:
     value: 8
-    evidence: ["dashboards/food-wine-dashboard.json:1-63"]
-    basis: "8 panel objects are defined in the committed dashboard JSON"
-
+    evidence:
+    - dashboards/food-wine-dashboard.json:1-63
+    basis: 8 panel objects are defined in the committed dashboard JSON
   monitoring_charts_bound_to_data:
     value: all
-    evidence: ["dashboards/food-wine-dashboard.json:1-63", "src/api/db.py:40-67"]
-    basis: "every panel's SQL target references only columns present in the committed table schema"
-
-  # G. Containerization and reproducibility
+    evidence:
+    - dashboards/food-wine-dashboard.json:1-63
+    - src/api/db.py:40-67
+    basis: every panel's SQL target references only columns present in the committed table schema
   containerization_kind:
     value: compose_full
-    evidence: ["docker-compose.yml:1-86"]
-    basis: "the full application (api, vector store, relational store, dashboard, optional TLS proxy) is defined as compose services, not only its dependencies"
-
+    evidence:
+    - docker-compose.yml:1-86
+    basis: the full application (api, vector store, relational store, dashboard, optional TLS proxy) is defined as compose services, not only its dependencies
   run_instructions:
     value: complete
-    evidence: ["README.md:9-26"]
-    basis: "setup, dependencies, configuration, required environment variable and the run command are all stated"
-
+    evidence:
+    - README.md:9-26
+    basis: setup, dependencies, configuration, required environment variable and the run command are all stated
   run_instructions_gap_count:
     value: 1
-    evidence: ["README.md:18-22", "src/api/app.py:23-51"]
-    basis: "the documented order starts the API container (step 3) before running ingestion (step 4); the API process builds its keyword-search index once at startup from whatever is in the vector store at that moment and has no mechanism to rebuild it later, so following the documented order as written leaves that index empty for the life of the running process"
-
+    evidence:
+    - README.md:18-22
+    - src/api/app.py:23-51
+    basis: the documented order starts the API container (step 3) before running ingestion (step 4); the API process builds its keyword-search index once at startup from whatever is in the vector store at that moment and has no mechanism to rebuild it later, so following the documented order as written leaves that index empty for the life of the running process
   dependency_versions_pinned:
     value: lockfile_committed
-    evidence: ["uv.lock"]
-    basis: "a lockfile is committed alongside a pyproject.toml that itself states only lower bounds"
-
+    evidence:
+    - uv.lock
+    basis: a lockfile is committed alongside a pyproject.toml that itself states only lower bounds
   data_accessible:
     value: automated_or_committed
-    evidence: ["data/data-03-00009-s001.zip", "src/ingestion/wikipedia.py:32-43", "src/ingestion/infovini.py:15-22"]
-    basis: "one source is a committed archive, the other two are fetched over HTTP by committed code with no manual step required"
-
-  # H. Techniques
+    evidence:
+    - data/data-03-00009-s001.zip
+    - src/ingestion/wikipedia.py:32-43
+    - src/ingestion/infovini.py:15-22
+    basis: one source is a committed archive, the other two are fetched over HTTP by committed code with no manual step required
   hybrid_search:
     present:
       value: true
-      evidence: ["src/search/hybrid.py:6-51"]
-      basis: ""
+      evidence:
+      - src/search/hybrid.py:6-51
+      basis: ''
     shipped_enabled:
       value: true
-      evidence: ["src/api/routes.py:54"]
-      basis: "called unconditionally on the request path"
+      evidence:
+      - src/api/routes.py:54
+      basis: called unconditionally on the request path
     evaluated:
       value: true
-      evidence: ["docs/evaluation.md:5-9"]
-      basis: "reported against dense-only and sparse-only baselines on four metrics"
+      evidence:
+      - docs/evaluation.md:5-9
+      basis: reported against dense-only and sparse-only baselines on four metrics
     measured_effect:
       value: improves
-      evidence: ["docs/evaluation.md:7-9"]
-      basis: "hybrid beats both single-method baselines on all four reported metrics"
+      evidence:
+      - docs/evaluation.md:7-9
+      basis: hybrid beats both single-method baselines on all four reported metrics
     decision_basis:
       value: none
-      evidence: ["docs/architecture.md:80-92"]
-      basis: "the technology-decisions section gives no ship/do-not-ship reasoning for this technique, measured or a-priori"
+      evidence:
+      - docs/architecture.md:80-92
+      basis: the technology-decisions section gives no ship/do-not-ship reasoning for this technique, measured or a-priori
     decision_axes:
       value: []
       evidence: []
-      basis: ""
+      basis: ''
   reranking:
     present:
       value: true
-      evidence: ["src/search/reranker.py:18-45"]
-      basis: ""
+      evidence:
+      - src/search/reranker.py:18-45
+      basis: ''
     shipped_enabled:
       value: true
-      evidence: ["src/api/routes.py:55"]
-      basis: "called unconditionally on the request path"
+      evidence:
+      - src/api/routes.py:55
+      basis: called unconditionally on the request path
     evaluated:
       value: true
-      evidence: ["docs/evaluation.md:9-10"]
-      basis: "reported against hybrid-without-rerank on four metrics"
+      evidence:
+      - docs/evaluation.md:9-10
+      basis: reported against hybrid-without-rerank on four metrics
     measured_effect:
       value: mixed
-      evidence: ["docs/evaluation.md:9-10"]
-      basis: "adding the reranker raises Hit Rate@1 and Hit Rate@3 over hybrid alone but lowers Hit Rate@5 and MRR@10"
+      evidence:
+      - docs/evaluation.md:9-10
+      basis: adding the reranker raises Hit Rate@1 and Hit Rate@3 over hybrid alone but lowers Hit Rate@5 and MRR@10
     decision_basis:
       value: none
-      evidence: ["docs/architecture.md:80-92", "docs/limitations.md:10"]
-      basis: "no ship/do-not-ship reasoning tied to the measured effect appears in the technology-decisions section or elsewhere; the one related remark is a caveat about the model's training language, not a justification for keeping it despite the mixed result"
+      evidence:
+      - docs/architecture.md:80-92
+      - docs/limitations.md:10
+      basis: no ship/do-not-ship reasoning tied to the measured effect appears in the technology-decisions section or elsewhere; the one related remark is a caveat about the model's training language, not a justification for keeping it despite the mixed result
     decision_axes:
       value: []
       evidence: []
-      basis: ""
+      basis: ''
   query_rewriting:
     present:
       value: true
-      evidence: ["src/search/query_rewriter.py:16-42"]
-      basis: ""
+      evidence:
+      - src/search/query_rewriter.py:16-42
+      basis: ''
     shipped_enabled:
       value: true
-      evidence: ["src/api/routes.py:40"]
-      basis: "called unconditionally on the request path"
+      evidence:
+      - src/api/routes.py:40
+      basis: called unconditionally on the request path
     evaluated:
       value: false
-      evidence: ["docs/evaluation.md:1-19", "notebooks/02_llm_evaluation.py:1-124"]
-      basis: "no committed evaluation artifact compares retrieval or answer metrics with and without this technique"
+      evidence:
+      - docs/evaluation.md:1-19
+      - notebooks/02_llm_evaluation.py:1-124
+      basis: no committed evaluation artifact compares retrieval or answer metrics with and without this technique
     measured_effect:
       value: not_measured
-      evidence: ["docs/evaluation.md:1-19"]
-      basis: ""
+      evidence:
+      - docs/evaluation.md:1-19
+      basis: ''
     decision_basis:
       value: none
-      evidence: ["docs/architecture.md:80-92"]
-      basis: "no ship/do-not-ship reasoning for this technique appears in the technology-decisions section or elsewhere"
+      evidence:
+      - docs/architecture.md:80-92
+      basis: no ship/do-not-ship reasoning for this technique appears in the technology-decisions section or elsewhere
     decision_axes:
       value: []
       evidence: []
-      basis: ""
-
-  # I. Deployment and bonus
+      basis: ''
   cloud_deployment:
     value: deployment_code_committed
-    evidence: ["deploy/provision.sh:1-27", "deploy/deploy.sh:1-27", "docker/Caddyfile:1-7"]
-    basis: "provisioning and deploy scripts, plus a reverse-proxy config, are committed and documented"
-
-  # J. Documentation accuracy
+    evidence:
+    - deploy/provision.sh:1-27
+    - deploy/deploy.sh:1-27
+    - docker/Caddyfile:1-7
+    basis: provisioning and deploy scripts, plus a reverse-proxy config, are committed and documented
   headline_numbers_traceable:
     value: some_traceable
-    evidence: ["docs/architecture.md:108", "dashboards/food-wine-dashboard.json:1-63", "docs/evaluation.md:5-17"]
-    basis: "the ingestion output counts and the dashboard panel count are each producible by reading a working committed artifact; the 18 retrieval- and answer-quality figures in the evaluation results are not, because the only artifacts that could produce them fail to execute as committed (see retrieval_eval_reproducible, llm_eval_reproducible)"
-
+    evidence:
+    - docs/architecture.md:108
+    - dashboards/food-wine-dashboard.json:1-63
+    - docs/evaluation.md:5-17
+    basis: the ingestion output counts and the dashboard panel count are each producible by reading a working committed artifact; the 18 retrieval- and answer-quality figures in the evaluation results are not, because the only artifacts that could produce them fail to execute as committed (see retrieval_eval_reproducible, llm_eval_reproducible)
   untraceable_number_count:
     value: 18
-    evidence: ["docs/evaluation.md:5-17"]
-    basis: "16 retrieval figures (4 strategies x 4 metrics) plus 2 answer-quality figures (Relevance, Faithfulness), each traceable only to a notebook that cannot execute as committed"
-
+    evidence:
+    - docs/evaluation.md:5-17
+    basis: 16 retrieval figures (4 strategies x 4 metrics) plus 2 answer-quality figures (Relevance, Faithfulness), each traceable only to a notebook that cannot execute as committed
   document_number_conflicts:
     value: 0
-    evidence: ["README.md:1-80", "docs/architecture.md:1-108", "docs/monitoring.md:1-18", "docs/limitations.md:1-26"]
-    basis: "no headline figure found stated differently between two committed documents"
-
+    evidence:
+    - README.md:1-80
+    - docs/architecture.md:1-108
+    - docs/monitoring.md:1-18
+    - docs/limitations.md:1-26
+    basis: no headline figure found stated differently between two committed documents
   document_code_conflicts:
     value: 1
-    evidence: ["docs/evaluation.md:9", "notebooks/01_retrieval_evaluation.py:41-49", "src/evaluation/test_set.py:5", "src/ingestion/wikipedia.py:67"]
-    basis: "evaluation.md reports Hybrid Hit Rate@5 of 52%; the eval code's hit_rate function matches only on an exact source-category string, and the test set's source label used by 12 of 27 items never equals the corresponding label the ingestion code assigns to that source, so those 12 items can never register a hit; the remaining categories match exactly, capping the achievable hit rate at 13/27 = 48.1%, below the reported 52%"
-
+    evidence:
+    - docs/evaluation.md:9
+    - notebooks/01_retrieval_evaluation.py:41-49
+    - src/evaluation/test_set.py:5
+    - src/ingestion/wikipedia.py:67
+    basis: evaluation.md reports Hybrid Hit Rate@5 of 52%; the eval code's hit_rate function matches only on an exact source-category string, and the test set's source label used by 12 of 27 items never equals the corresponding label the ingestion code assigns to that source, so those 12 items can never register a hit; the remaining categories match exactly, capping the achievable hit rate at 13/27 = 48.1%, below the reported 52%
   broken_reference_count:
     value: 0
-    evidence: ["README.md:30-43", "docs/monitoring.md:3", "docs/deployment.md:39-40"]
-    basis: "every checked documented path or artifact reference resolves to a file present in the repository"
-
+    evidence:
+    - README.md:30-43
+    - docs/monitoring.md:3
+    - docs/deployment.md:39-40
+    basis: every checked documented path or artifact reference resolves to a file present in the repository
   limitations_section:
     value: includes_structural
-    evidence: ["docs/limitations.md:10"]
-    basis: "one listed limitation concerns a core retrieval component's own suitability for the corpus, not only hardware, scope or budget"
-
+    evidence:
+    - docs/limitations.md:10
+    basis: one listed limitation concerns a core retrieval component's own suitability for the corpus, not only hardware, scope or budget
   artifact_reference_strength:
     value: all_referenced
-    evidence: ["README.md:45-60", "docs/monitoring.md:3", "docs/evaluation.md:19", "docs/deployment.md:39-40"]
-    basis: "every checklist artifact is named by path somewhere (a plain-text project tree entry or a code span), and none is reached by a markdown link"
-
+    evidence:
+    - README.md:45-60
+    - docs/monitoring.md:3
+    - docs/evaluation.md:19
+    - docs/deployment.md:39-40
+    basis: every checklist artifact is named by path somewhere (a plain-text project tree entry or a code span), and none is reached by a markdown link
   artifacts_unreferenced_count:
     value: 0
-    evidence: ["README.md:45-60", "docs/monitoring.md:3", "docs/evaluation.md:19", "docs/deployment.md:39-40"]
-    basis: "all five checklist artifacts (eval script/notebook, eval question set, monitoring dashboard definition, ingestion entry point, deployment configuration) are named somewhere"
-
-  # K. Descriptive
+    evidence:
+    - README.md:45-60
+    - docs/monitoring.md:3
+    - docs/evaluation.md:19
+    - docs/deployment.md:39-40
+    basis: all five checklist artifacts (eval script/notebook, eval question set, monitoring dashboard definition, ingestion entry point, deployment configuration) are named somewhere
   corpus_language:
     value: pt
-    evidence: ["src/api/answer.py:8-15"]
-    basis: "the system prompt mandates answering exclusively in this language"
-
+    evidence:
+    - src/api/answer.py:8-15
+    basis: the system prompt mandates answering exclusively in this language
   corpus_domain:
-    value: "portuguese food, wine and gastronomy"
-    evidence: ["README.md:1-3"]
-    basis: ""
-
+    value: portuguese food, wine and gastronomy
+    evidence:
+    - README.md:1-3
+    basis: ''
   interface_framework:
     value: flask
-    evidence: ["src/api/app.py:4-18"]
-    basis: ""
-
+    evidence:
+    - src/api/app.py:4-18
+    basis: ''
   vector_store:
     value: qdrant
-    evidence: ["src/ingestion/qdrant_index.py:4"]
-    basis: ""
-
+    evidence:
+    - src/ingestion/qdrant_index.py:4
+    basis: ''
   llm_provider:
     value: openai
-    evidence: ["src/api/answer.py:4", "src/search/query_rewriter.py:4"]
-    basis: ""
-
+    evidence:
+    - src/api/answer.py:4
+    - src/search/query_rewriter.py:4
+    basis: ''
   repo_file_count:
     value: 53
-    evidence: ["<repo>"]
-    basis: "git ls-files | wc -l"
-
+    evidence:
+    - <repo>
+    basis: git ls-files | wc -l
+  project_name:
+    value: Project Alpha
+    evidence: []
+    basis: Synthetic label, assigned by tools/assign_project_names.py from case_id. Not derived from the repository and carries no real information about it.
 extraction_notes:
-  - "retrieval_eval_reproducible and llm_eval_reproducible: both marimo notebooks import only one library (marimo, plus one local scoped `from openai import OpenAI` inside a single cell in the LLM-eval notebook). Every other name the files depend on — the test set, the three retriever/reranker classes, the fusion and embedding helpers, the answer generator, the query rewriter, numpy/pandas/matplotlib, and marimo's own `mo` output handle — is referenced without any import or definition anywhere in the file. Running either file as committed would raise a NameError on its first such reference. This is ordinary Python import-resolution knowledge, not domain knowledge, and it is load-bearing for both `*_reproducible` values and for `headline_numbers_traceable`/`untraceable_number_count`. I read this as `traceable_not_reproducible` rather than `neither` because the retrieval/metric/judge logic is fully and correctly written out, and every undefined name matches an identically-named object that does exist elsewhere in the committed repository — a reader can inspect the intended computation even though nothing is wired to run it. A stricter reading (`neither`) is defensible given how many names are missing and how central they are; this is a genuine judgment call the schema does not fully resolve, since its `traceable_not_reproducible` definition speaks of steps being 'inspectable by reading committed artifacts' without saying whether cross-file name-matching without any import counts as inspection."
-  - "document_code_conflicts / retrieval_best_approach_shipped: the schema's own text for group D describes exactly this repository's retrieval-metrics ceiling issue in the abstract (52% reported vs. 48.1% achievable). I derived the mechanism independently from the evaluation code and the ingestion/test-set source labels rather than from that description, and it checks out arithmetically: 13 of 27 test items (8 + 5) can register a hit under the code's exact string-match rule, giving a 48.1% ceiling, against a reported Hybrid Hit Rate@5 of 52%. This required counting label distributions across two files by hand, which is ordinary code-reading, not domain knowledge."
-  - "llm_eval_metric_at_ceiling: the 'at ceiling' call for the second reported metric rests on an arithmetic inference (an average of exactly 5.00 over 27 integer 1-5 scores is only possible if all 27 are 5) rather than on a directly reported per-item breakdown, since no per-item scores are committed. This is ordinary arithmetic, not domain knowledge, but it is load-bearing and worth flagging: the schema's ceiling rule technically asks for 'at least 95% of scored items,' and this repository does not commit the per-item data needed to check that directly — only the average, from which the 100% figure is inferred rather than counted."
-  - "run_instructions_gap_count: the one counted gap (API container built and started before ingestion runs, keyword index never rebuilt afterward) required tracing the API's startup code, not just the documented steps in isolation, consistent with the schema's instruction to trace each step into the code it invokes. I did not find a second gap on the same walk-through of the documented quick-start; I did not extend the same depth of tracing to the cloud-deployment doc's steps, since `run_instructions`/`run_instructions_gap_count` appear scoped to the primary run procedure."
-  - "No schema field was left undeterminable and no value needed the `other` bucket in this extraction."
+- 'retrieval_eval_reproducible and llm_eval_reproducible: both marimo notebooks import only one library (marimo, plus one local scoped `from openai import OpenAI` inside a single cell in the LLM-eval notebook). Every other name the files depend on — the test set, the three retriever/reranker classes, the fusion and embedding helpers, the answer generator, the query rewriter, numpy/pandas/matplotlib, and marimo''s own `mo` output handle — is referenced without any import or definition anywhere in the file. Running either file as committed would raise a NameError on its first such reference. This is ordinary Python import-resolution knowledge, not domain knowledge, and it is load-bearing for both `*_reproducible` values and for `headline_numbers_traceable`/`untraceable_number_count`. I read this as `traceable_not_reproducible` rather than `neither` because the retrieval/metric/judge logic is fully and correctly written out, and every undefined name matches an identically-named object that does exist elsewhere in the committed repository — a reader can inspect the intended computation even though nothing is wired to run it. A stricter reading (`neither`) is defensible given how many names are missing and how central they are; this is a genuine judgment call the schema does not fully resolve, since its `traceable_not_reproducible` definition speaks of steps being ''inspectable by reading committed artifacts'' without saying whether cross-file name-matching without any import counts as inspection.'
+- 'document_code_conflicts / retrieval_best_approach_shipped: the schema''s own text for group D describes exactly this repository''s retrieval-metrics ceiling issue in the abstract (52% reported vs. 48.1% achievable). I derived the mechanism independently from the evaluation code and the ingestion/test-set source labels rather than from that description, and it checks out arithmetically: 13 of 27 test items (8 + 5) can register a hit under the code''s exact string-match rule, giving a 48.1% ceiling, against a reported Hybrid Hit Rate@5 of 52%. This required counting label distributions across two files by hand, which is ordinary code-reading, not domain knowledge.'
+- 'llm_eval_metric_at_ceiling: the ''at ceiling'' call for the second reported metric rests on an arithmetic inference (an average of exactly 5.00 over 27 integer 1-5 scores is only possible if all 27 are 5) rather than on a directly reported per-item breakdown, since no per-item scores are committed. This is ordinary arithmetic, not domain knowledge, but it is load-bearing and worth flagging: the schema''s ceiling rule technically asks for ''at least 95% of scored items,'' and this repository does not commit the per-item data needed to check that directly — only the average, from which the 100% figure is inferred rather than counted.'
+- 'run_instructions_gap_count: the one counted gap (API container built and started before ingestion runs, keyword index never rebuilt afterward) required tracing the API''s startup code, not just the documented steps in isolation, consistent with the schema''s instruction to trace each step into the code it invokes. I did not find a second gap on the same walk-through of the documented quick-start; I did not extend the same depth of tracing to the cloud-deployment doc''s steps, since `run_instructions`/`run_instructions_gap_count` appear scoped to the primary run procedure.'
+- No schema field was left undeterminable and no value needed the `other` bucket in this extraction.

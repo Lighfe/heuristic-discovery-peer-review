@@ -2,45 +2,27 @@
 # A complete evidence record - the base with one mutation applied - plus a
 # `twin` block stating the diff and the direction that diff forces.
 twin:
-  twin_id: p01-t01
+  twin_id: p01-t07
   base_case_id: p01
   base_commit: 42cda614c65c970bc1b5ca9b25f4252baef233e7
-  type: harmful-component-kept
-  direction: down
+  type: no-change/cosmetic-rename
+  direction: zero
   comparison:
     against: p01
-    relation: strictly_below
-  summary: The re-ranker's own reported numbers trail hybrid alone on every metric, and it ships enabled anyway.
+    relation: exactly_equal
+  summary: The same system, same everything, under a different synthetic project name.
+  note: The third no-change kind, unbuildable until `project_name` existed (schema M2 addition, group K) - no field held anything like a project or brand name before this. `project_name` is itself synthetic on every record (`tools/assign_project_names.py`, never extracted), so this twin swaps one synthetic label for another; the real-world equivalent (renaming an actual repository) is exactly what this mutation stands in for without touching real names.
   diff:
-  - field: fields.reranking.measured_effect.value
-    read_set: scoreable
-    before: mixed
-    after: hurts
-    justification: In the base the component's own metrics disagree about it (`mixed`); here they agree it degrades retrieval, while `shipped_enabled` stays true. Same shipping decision, strictly more of the project's own evidence against it, so the direction is down by construction and needs no view on whether re-rankers are a good idea.
+  - field: fields.project_name.value
+    read_set: descriptive
+    before: Project Alpha
+    after: Project Omega
+    justification: '`project_name` is descriptive and synthetic by construction - it is never read off the repository and no other field''s `basis` or `evidence` cites it (checked: it is assigned after extraction, by a separate deterministic tool, specifically so nothing else in the record can depend on it). Changing it is the purest possible no-change mutation: nothing about the system, its evidence, or any other field''s text moves. A criterion reading this field would be scoring a label that carries no information at all.'
     independent_defect: true
-  - field: fields.retrieval_best_approach_shipped.value
-    read_set: scoreable
-    before: mixed_result
-    after: 'no'
-    justification: 'Entailed by the mutation above, not an independent defect: `mixed_result` means the reported metrics disagree about which approach wins. Once the re-ranked row trails on all four columns they no longer disagree, and the shipped path is the losing one. Leaving this at `mixed_result` would make the twin arithmetically self-contradictory.'
-    entailed_by: fields.reranking.measured_effect.value
-    independent_defect: false
-  restated:
-  - field: fields.reranking.measured_effect.basis
-    read_set: scoreable
-    before: adding the reranker raises Hit Rate@1 and Hit Rate@3 over hybrid alone but lowers Hit Rate@5 and MRR@10
-    after: 'Read off the project''s own reported numbers: adding the re-ranker lowers every reported column - Hit Rate@1 (15% to 11%), @3 (37% to 30%), @5 (52% to 44%) and MRR@10 (0.39 to 0.31).'
-  - field: fields.retrieval_best_approach_shipped.basis
-    read_set: scoreable
-    before: the shipped configuration (hybrid+rerank) beats hybrid-alone on Hit Rate@1 and @3 but loses to it on Hit Rate@5 and MRR@10 — metrics disagree on which approach wins
-    after: The shipped path is hybrid then re-ranker; hybrid alone leads on all four reported metrics (15/37/52/0.39 vs 11/30/44/0.31), so the best-measured approach is not the one shipped.
-  - field: fields.reranking.decision_basis.basis
-    read_set: scoreable
-    before: no ship/do-not-ship reasoning tied to the measured effect appears in the technology-decisions section or elsewhere; the one related remark is a caveat about the model's training language, not a justification for keeping it despite the mixed result
-    after: the component ships enabled although its own reported numbers trail hybrid alone on every metric; no committed text states why it was kept. limitations.md:10 notes the cross-encoder is English-trained but draws no ship/do-not-ship conclusion from the measurements
+  restated: []
   generated_by: tools/generate_twins.py
 schema_version: 1
-case_id: p01-t01
+case_id: p01-t07
 commit: 42cda614c65c970bc1b5ca9b25f4252baef233e7
 extracted_by: agents/extractor/v2
 extracted_on: '2026-08-13'
@@ -139,10 +121,11 @@ fields:
     - docs/evaluation.md:3-19
     basis: no interval, variance or uncertainty statement accompanies the reported figures
   retrieval_best_approach_shipped:
-    value: 'no'
+    value: mixed_result
     evidence:
-    - <synthetic>
-    basis: The shipped path is hybrid then re-ranker; hybrid alone leads on all four reported metrics (15/37/52/0.39 vs 11/30/44/0.31), so the best-measured approach is not the one shipped.
+    - docs/evaluation.md:9-10
+    - src/api/routes.py:54-55
+    basis: the shipped configuration (hybrid+rerank) beats hybrid-alone on Hit Rate@1 and @3 but loses to it on Hit Rate@5 and MRR@10 — metrics disagree on which approach wins
   retrieval_eval_reproducible:
     value: traceable_not_reproducible
     evidence:
@@ -301,16 +284,16 @@ fields:
       - docs/evaluation.md:9-10
       basis: reported against hybrid-without-rerank on four metrics
     measured_effect:
-      value: hurts
+      value: mixed
       evidence:
-      - <synthetic>
-      basis: 'Read off the project''s own reported numbers: adding the re-ranker lowers every reported column - Hit Rate@1 (15% to 11%), @3 (37% to 30%), @5 (52% to 44%) and MRR@10 (0.39 to 0.31).'
+      - docs/evaluation.md:9-10
+      basis: adding the reranker raises Hit Rate@1 and Hit Rate@3 over hybrid alone but lowers Hit Rate@5 and MRR@10
     decision_basis:
       value: none
       evidence:
       - docs/architecture.md:80-92
       - docs/limitations.md:10
-      basis: the component ships enabled although its own reported numbers trail hybrid alone on every metric; no committed text states why it was kept. limitations.md:10 notes the cross-encoder is English-trained but draws no ship/do-not-ship conclusion from the measurements
+      basis: no ship/do-not-ship reasoning tied to the measured effect appears in the technology-decisions section or elsewhere; the one related remark is a caveat about the model's training language, not a justification for keeping it despite the mixed result
     decision_axes:
       value: []
       evidence: []
@@ -441,8 +424,9 @@ fields:
     - <repo>
     basis: git ls-files | wc -l
   project_name:
-    value: Project Alpha
-    evidence: []
+    value: Project Omega
+    evidence:
+    - <synthetic>
     basis: Synthetic label, assigned by tools/assign_project_names.py from case_id. Not derived from the repository and carries no real information about it.
 extraction_notes:
 - 'retrieval_eval_reproducible and llm_eval_reproducible: both marimo notebooks import only one library (marimo, plus one local scoped `from openai import OpenAI` inside a single cell in the LLM-eval notebook). Every other name the files depend on — the test set, the three retriever/reranker classes, the fusion and embedding helpers, the answer generator, the query rewriter, numpy/pandas/matplotlib, and marimo''s own `mo` output handle — is referenced without any import or definition anywhere in the file. Running either file as committed would raise a NameError on its first such reference. This is ordinary Python import-resolution knowledge, not domain knowledge, and it is load-bearing for both `*_reproducible` values and for `headline_numbers_traceable`/`untraceable_number_count`. I read this as `traceable_not_reproducible` rather than `neither` because the retrieval/metric/judge logic is fully and correctly written out, and every undefined name matches an identically-named object that does exist elsewhere in the committed repository — a reader can inspect the intended computation even though nothing is wired to run it. A stricter reading (`neither`) is defensible given how many names are missing and how central they are; this is a genuine judgment call the schema does not fully resolve, since its `traceable_not_reproducible` definition speaks of steps being ''inspectable by reading committed artifacts'' without saying whether cross-file name-matching without any import counts as inspection.'

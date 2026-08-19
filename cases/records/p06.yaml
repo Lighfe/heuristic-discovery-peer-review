@@ -1,224 +1,241 @@
 schema_version: 1
 case_id: p06
-commit: "a31849d43b270f2666353cc8c200501c771c6f75"
+commit: a31849d43b270f2666353cc8c200501c771c6f75
 extracted_by: agents/extractor/v2
-extracted_on: "2026-08-13"
-
+extracted_on: '2026-08-13'
 fields:
-
-  # --- A. System shape ---
   knowledge_base_present:
     value: present
-    evidence: ["src/germany_decoded/db/init.py:26-37", "src/germany_decoded/ingestion.py", "src/germany_decoded/loaders/bgb.py"]
-    basis: "a documents table with an embedding column is created and populated by a committed ingestion pipeline"
-
+    evidence:
+    - src/germany_decoded/db/init.py:26-37
+    - src/germany_decoded/ingestion.py
+    - src/germany_decoded/loaders/bgb.py
+    basis: a documents table with an embedding column is created and populated by a committed ingestion pipeline
   llm_in_flow:
     value: present
-    evidence: ["src/germany_decoded/assistant.py:42,114-123"]
-    basis: "a hosted language model client is called to generate the final answer on the request path"
-
+    evidence:
+    - src/germany_decoded/assistant.py:42,114-123
+    basis: a hosted language model client is called to generate the final answer on the request path
   retrieval_flow:
     value: kb_and_llm
-    evidence: ["src/germany_decoded/assistant.py:56-79"]
-    basis: "the request handler both queries the knowledge base (self.search) and calls a language model (self.llm) before returning"
-
+    evidence:
+    - src/germany_decoded/assistant.py:56-79
+    basis: the request handler both queries the knowledge base (self.search) and calls a language model (self.llm) before returning
   problem_statement:
     value: specific
-    evidence: ["README.md:33-47"]
-    basis: "a named section states the audience (English-speaking residents navigating German legal information) and the question answered (understanding a defined scope of German tenancy law)"
-
-  # --- B. Interface ---
+    evidence:
+    - README.md:33-47
+    basis: a named section states the audience (English-speaking residents navigating German legal information) and the question answered (understanding a defined scope of German tenancy law)
   interface_kind:
-    value: [cli, web_ui]
-    evidence: ["Makefile:19-20", "src/germany_decoded/main.py", "app.py"]
-    basis: "a console entry point and a browser-based application are both committed; no separate API server was found"
-
+    value:
+    - cli
+    - web_ui
+    evidence:
+    - Makefile:19-20
+    - src/germany_decoded/main.py
+    - app.py
+    basis: a console entry point and a browser-based application are both committed; no separate API server was found
   interface_evidence_kind:
     value: code_and_recording
-    evidence: ["README.md:51-89"]
-    basis: "screenshots of the running application are embedded and a linked recording is also referenced in a named section"
-
-  # --- C. Ingestion ---
+    evidence:
+    - README.md:51-89
+    basis: screenshots of the running application are embedded and a linked recording is also referenced in a named section
   ingestion_kind:
     value: script_or_notebook
-    evidence: ["src/germany_decoded/index.py", "src/germany_decoded/ingestion.py"]
-    basis: "a plain Python script chains loading, embedding and storage; no orchestration tool is used"
-
+    evidence:
+    - src/germany_decoded/index.py
+    - src/germany_decoded/ingestion.py
+    basis: a plain Python script chains loading, embedding and storage; no orchestration tool is used
   ingestion_single_command:
     value: true
-    evidence: ["Makefile:16-17", "src/germany_decoded/index.py"]
-    basis: "one committed command runs loading, embedding and storage end to end"
-
+    evidence:
+    - Makefile:16-17
+    - src/germany_decoded/index.py
+    basis: one committed command runs loading, embedding and storage end to end
   ingestion_output_stated:
     value: true
-    evidence: ["src/germany_decoded/index.py:19"]
-    basis: "the ingestion script prints the number of indexed sections on completion; no chunk or vector-dimension count is stated elsewhere"
-
-  # --- D. Retrieval evaluation ---
+    evidence:
+    - src/germany_decoded/index.py:19
+    basis: the ingestion script prints the number of indexed sections on completion; no chunk or vector-dimension count is stated elsewhere
   retrieval_eval_present:
     value: true
-    evidence: ["src/germany_decoded/evaluation/retrieval_eval.py"]
-
+    evidence:
+    - src/germany_decoded/evaluation/retrieval_eval.py
   retrieval_eval_approaches_compared:
     value: 2
-    evidence: ["README.md:285-304"]
-    basis: "a results table reports Hit@1/3/5 for two named retrieval strategies"
-
+    evidence:
+    - README.md:285-304
+    basis: a results table reports Hit@1/3/5 for two named retrieval strategies
   retrieval_eval_set_committed:
     value: committed
-    evidence: ["src/germany_decoded/evaluation/retrieval_benchmark.json"]
-
+    evidence:
+    - src/germany_decoded/evaluation/retrieval_benchmark.json
   retrieval_eval_set_size:
     value: 10
-    evidence: ["src/germany_decoded/evaluation/retrieval_benchmark.json"]
-    basis: "the committed benchmark file's top-level array has 10 entries"
-
+    evidence:
+    - src/germany_decoded/evaluation/retrieval_benchmark.json
+    basis: the committed benchmark file's top-level array has 10 entries
   retrieval_eval_relevance_rule:
     value: document_level
-    evidence: ["src/germany_decoded/evaluation/retrieval_eval.py:22-33", "src/germany_decoded/db/init.py:26-37"]
-    basis: "a hit requires an exact (law, section) match, and each stored row is exactly one such section"
-
+    evidence:
+    - src/germany_decoded/evaluation/retrieval_eval.py:22-33
+    - src/germany_decoded/db/init.py:26-37
+    basis: a hit requires an exact (law, section) match, and each stored row is exactly one such section
   retrieval_eval_config_matches_shipped:
     value: differs
-    evidence: ["src/germany_decoded/evaluation/retrieval_eval.py:20", "src/germany_decoded/assistant.py:60,87-88"]
-    basis: "the evaluation script retrieves the top 5 hybrid results per question; the shipped request path retrieves the top 3"
-
+    evidence:
+    - src/germany_decoded/evaluation/retrieval_eval.py:20
+    - src/germany_decoded/assistant.py:60,87-88
+    basis: the evaluation script retrieves the top 5 hybrid results per question; the shipped request path retrieves the top 3
   retrieval_eval_uncertainty_stated:
     value: false
     evidence: []
-
   retrieval_best_approach_shipped:
     value: mixed_result
-    evidence: ["README.md:296-304", "src/germany_decoded/retrieval.py:37-99", "src/germany_decoded/assistant.py:87-88"]
-    basis: "the shipped strategy wins on two of the three reported metrics and loses on the third"
-
+    evidence:
+    - README.md:296-304
+    - src/germany_decoded/retrieval.py:37-99
+    - src/germany_decoded/assistant.py:87-88
+    basis: the shipped strategy wins on two of the three reported metrics and loses on the third
   retrieval_eval_reproducible:
     value: traceable_not_reproducible
-    evidence: ["src/germany_decoded/evaluation/retrieval_eval.py:1-20", "src/germany_decoded/retrieval.py:19-25,37-99"]
-    basis: "running the committed evaluation script as committed regenerates only one of the two reported columns; the function needed for the other is committed but is never invoked by any Hit@K-computing script, so it is inspectable but not run-reproducible as a whole"
-
-  # --- E. Answer evaluation ---
+    evidence:
+    - src/germany_decoded/evaluation/retrieval_eval.py:1-20
+    - src/germany_decoded/retrieval.py:19-25,37-99
+    basis: running the committed evaluation script as committed regenerates only one of the two reported columns; the function needed for the other is committed but is never invoked by any Hit@K-computing script, so it is inspectable but not run-reproducible as a whole
   llm_eval_present:
     value: true
-    evidence: ["src/germany_decoded/evaluation/judge_eval.py"]
-
+    evidence:
+    - src/germany_decoded/evaluation/judge_eval.py
   llm_eval_approaches_compared:
     value: 1
-    evidence: ["src/germany_decoded/evaluation/judge_eval.py:41-83"]
-    basis: "one judged configuration exists; no alternative prompt or model is compared"
-
+    evidence:
+    - src/germany_decoded/evaluation/judge_eval.py:41-83
+    basis: one judged configuration exists; no alternative prompt or model is compared
   llm_eval_judge_kind:
     value: model_judge
-    evidence: ["src/germany_decoded/evaluation/judge_eval.py:41-83"]
-    basis: "each conversation is classified by a call to a hosted language model into one of three relevance labels"
-
+    evidence:
+    - src/germany_decoded/evaluation/judge_eval.py:41-83
+    basis: each conversation is classified by a call to a hosted language model into one of three relevance labels
   llm_eval_judge_spotchecked:
     value: false
     evidence: []
-
   llm_eval_question_generator:
     value: none_committed
-    evidence: ["src/germany_decoded/db/judge.py:4-28"]
-    basis: "judged questions are whatever was previously asked through the application; no committed generator produces them"
-
+    evidence:
+    - src/germany_decoded/db/judge.py:4-28
+    basis: judged questions are whatever was previously asked through the application; no committed generator produces them
   llm_eval_metric_at_ceiling:
     value: null
     evidence: []
-    basis: "the judge emits a categorical label per conversation; no committed artifact aggregates these into a static numeric metric"
-
+    basis: the judge emits a categorical label per conversation; no committed artifact aggregates these into a static numeric metric
   llm_eval_role_overlap:
     value: same_model
-    evidence: ["src/germany_decoded/assistant.py:49,114-123", "src/germany_decoded/evaluation/judge_eval.py:41-62"]
-    basis: "the answer-generation call and the judge call are configured with the same model identifier; no question-generation role exists to compare, so this compares only those two roles"
-
+    evidence:
+    - src/germany_decoded/assistant.py:49,114-123
+    - src/germany_decoded/evaluation/judge_eval.py:41-62
+    basis: the answer-generation call and the judge call are configured with the same model identifier; no question-generation role exists to compare, so this compares only those two roles
   llm_eval_config_matches_shipped:
     value: matches
-    evidence: ["src/germany_decoded/db/judge.py:4-28", "src/germany_decoded/assistant.py:125-154"]
-    basis: "judged answers are pulled from the same conversation records the shipped request path writes; no separate generation configuration is used for evaluation"
-
+    evidence:
+    - src/germany_decoded/db/judge.py:4-28
+    - src/germany_decoded/assistant.py:125-154
+    basis: judged answers are pulled from the same conversation records the shipped request path writes; no separate generation configuration is used for evaluation
   llm_eval_reproducible:
     value: reproducible_as_committed
-    evidence: ["src/germany_decoded/evaluation/judge_eval.py:86-116", "src/germany_decoded/db/judge.py:4-60"]
-    basis: "the committed pipeline reads unjudged records and writes results back through committed functions with no missing imports or undefined names"
-
-  # --- F. Monitoring ---
+    evidence:
+    - src/germany_decoded/evaluation/judge_eval.py:86-116
+    - src/germany_decoded/db/judge.py:4-60
+    basis: the committed pipeline reads unjudged records and writes results back through committed functions with no missing imports or undefined names
   monitoring_kind:
     value: feedback_and_dashboard
-    evidence: ["src/germany_decoded/db/feedback.py", "app.py:314-592"]
-
+    evidence:
+    - src/germany_decoded/db/feedback.py
+    - app.py:314-592
   monitoring_dashboard_provenance:
     value: committed_definitions
-    evidence: ["app.py:314-592"]
-    basis: "the metric and chart widgets are defined directly in committed application code, not supplied by an external tool's default view"
-
+    evidence:
+    - app.py:314-592
+    basis: the metric and chart widgets are defined directly in committed application code, not supplied by an external tool's default view
   monitoring_instrumentation:
     value: traced_on_request_path
-    evidence: ["src/germany_decoded/assistant.py:56-79,125-154"]
-    basis: "search time, generation time, token counts and cost are recorded during the same call that serves the request, and the same records feed the dashboard"
-
+    evidence:
+    - src/germany_decoded/assistant.py:56-79,125-154
+    basis: search time, generation time, token counts and cost are recorded during the same call that serves the request, and the same records feed the dashboard
   monitoring_chart_count:
     value: 5
-    evidence: ["app.py:427-544"]
-    basis: "5 chart widgets are defined (3 line charts, 2 bar charts); this excludes 8 single-value metric tiles elsewhere in the same view"
-
+    evidence:
+    - app.py:427-544
+    basis: 5 chart widgets are defined (3 line charts, 2 bar charts); this excludes 8 single-value metric tiles elsewhere in the same view
   monitoring_charts_bound_to_data:
     value: all
-    evidence: ["app.py:429-544", "src/germany_decoded/db/init.py:52-110", "src/germany_decoded/db/monitoring.py"]
-    basis: "every chart's fields trace to columns returned by committed queries against tables defined in the committed schema"
-
-  # --- G. Containerization and reproducibility ---
+    evidence:
+    - app.py:429-544
+    - src/germany_decoded/db/init.py:52-110
+    - src/germany_decoded/db/monitoring.py
+    basis: every chart's fields trace to columns returned by committed queries against tables defined in the committed schema
   containerization_kind:
     value: compose_dependencies_only
-    evidence: ["docker-compose.yaml"]
-    basis: "compose defines only the database service; no Dockerfile for the application itself is committed"
-
+    evidence:
+    - docker-compose.yaml
+    basis: compose defines only the database service; no Dockerfile for the application itself is committed
   run_instructions:
     value: complete
-    evidence: ["README.md:398-557"]
-    basis: "setup, dependencies, required environment variables and the run commands are all stated in sequence"
-
+    evidence:
+    - README.md:398-557
+    basis: setup, dependencies, required environment variables and the run commands are all stated in sequence
   run_instructions_gap_count:
     value: 1
-    evidence: ["README.md:518-532", "src/germany_decoded/db/judge.py:4-28"]
-    basis: "the documented evaluation step reads previously stored conversations, but the procedure never instructs the reader to generate any by using the assistant first, so running it as the first evaluation action produces no results"
-
+    evidence:
+    - README.md:518-532
+    - src/germany_decoded/db/judge.py:4-28
+    basis: the documented evaluation step reads previously stored conversations, but the procedure never instructs the reader to generate any by using the assistant first, so running it as the first evaluation action produces no results
   dependency_versions_pinned:
     value: lockfile_committed
-    evidence: ["uv.lock", "pyproject.toml:12-22"]
-
+    evidence:
+    - uv.lock
+    - pyproject.toml:12-22
   data_accessible:
     value: automated_or_committed
-    evidence: ["src/germany_decoded/loaders/bgb.py:1,14", "README.md:181"]
-    basis: "source documents are fetched by a committed loader call at indexing time; no manual download step is documented"
-
-  # --- H. Techniques ---
+    evidence:
+    - src/germany_decoded/loaders/bgb.py:1,14
+    - README.md:181
+    basis: source documents are fetched by a committed loader call at indexing time; no manual download step is documented
   hybrid_search:
     present:
       value: true
-      evidence: ["src/germany_decoded/retrieval.py:37-99"]
+      evidence:
+      - src/germany_decoded/retrieval.py:37-99
     shipped_enabled:
       value: true
-      evidence: ["src/germany_decoded/assistant.py:87-88"]
+      evidence:
+      - src/germany_decoded/assistant.py:87-88
     evaluated:
       value: true
-      evidence: ["src/germany_decoded/evaluation/retrieval_eval.py"]
+      evidence:
+      - src/germany_decoded/evaluation/retrieval_eval.py
     measured_effect:
       value: mixed
-      evidence: ["README.md:296-304"]
-      basis: "the compared metrics disagree: the alternative wins one reported metric, hybrid wins the other two"
+      evidence:
+      - README.md:296-304
+      basis: 'the compared metrics disagree: the alternative wins one reported metric, hybrid wins the other two'
     decision_basis:
       value: measured
-      evidence: ["README.md:302-304"]
-      basis: "the stated choice is tied to two of the three reported metrics, not to an a-priori argument"
+      evidence:
+      - README.md:302-304
+      basis: the stated choice is tied to two of the three reported metrics, not to an a-priori argument
     decision_axes:
-      value: ["hit_rate"]
-      evidence: ["README.md:302-304"]
-
+      value:
+      - hit_rate
+      evidence:
+      - README.md:302-304
   reranking:
     present:
       value: false
-      evidence: ["README.md:390-395", "TODO.md:73-75,106-110"]
-      basis: "reranking is listed as not yet implemented, and no reranking code was found"
+      evidence:
+      - README.md:390-395
+      - TODO.md:73-75,106-110
+      basis: reranking is listed as not yet implemented, and no reranking code was found
     shipped_enabled:
       value: false
       evidence: []
@@ -234,105 +251,109 @@ fields:
     decision_axes:
       value: []
       evidence: []
-
   query_rewriting:
     present:
       value: true
-      evidence: ["src/germany_decoded/rewrite.py"]
+      evidence:
+      - src/germany_decoded/rewrite.py
     shipped_enabled:
       value: true
-      evidence: ["src/germany_decoded/retrieval.py:27-40"]
-      basis: "the rewriting call is invoked from within the keyword-search branch of the default hybrid search path"
+      evidence:
+      - src/germany_decoded/retrieval.py:27-40
+      basis: the rewriting call is invoked from within the keyword-search branch of the default hybrid search path
     evaluated:
       value: false
       evidence: []
-      basis: "no committed evaluation isolates this component's own effect separately from the combined retrieval strategy"
+      basis: no committed evaluation isolates this component's own effect separately from the combined retrieval strategy
     measured_effect:
       value: not_measured
       evidence: []
     decision_basis:
       value: none
       evidence: []
-      basis: "no ship/do-not-ship reasoning for this component is stated anywhere in committed documentation"
+      basis: no ship/do-not-ship reasoning for this component is stated anywhere in committed documentation
     decision_axes:
       value: []
       evidence: []
-
-  # --- I. Deployment and bonus ---
   cloud_deployment:
     value: none
-    evidence: ["README.md:670-677"]
-    basis: "public deployment is listed only as future work; no deployment code or configuration is committed"
-
-  # --- J. Documentation accuracy ---
+    evidence:
+    - README.md:670-677
+    basis: public deployment is listed only as future work; no deployment code or configuration is committed
   headline_numbers_traceable:
     value: some_traceable
-    evidence: ["README.md:296-304", "src/germany_decoded/evaluation/retrieval_eval.py"]
-    basis: "the figures for the shipped strategy are producible by running a committed script; the figures for the comparison strategy are not produced by any committed script"
-
+    evidence:
+    - README.md:296-304
+    - src/germany_decoded/evaluation/retrieval_eval.py
+    basis: the figures for the shipped strategy are producible by running a committed script; the figures for the comparison strategy are not produced by any committed script
   untraceable_number_count:
     value: 3
-    evidence: ["README.md:296-304"]
-    basis: "the three reported figures for the comparison strategy (Hit@1, Hit@3, Hit@5) have no committed artifact that would produce them"
-
+    evidence:
+    - README.md:296-304
+    basis: the three reported figures for the comparison strategy (Hit@1, Hit@3, Hit@5) have no committed artifact that would produce them
   document_number_conflicts:
     value: 0
     evidence: []
-
   document_code_conflicts:
     value: 1
-    evidence: ["README.md:308-320", "src/germany_decoded/evaluation/debug_retrieval.py"]
-    basis: "the documentation states that a debugging tool displays a per-question hit metric; the committed script does not compute or print any such metric"
-
+    evidence:
+    - README.md:308-320
+    - src/germany_decoded/evaluation/debug_retrieval.py
+    basis: the documentation states that a debugging tool displays a per-question hit metric; the committed script does not compute or print any such metric
   broken_reference_count:
     value: 0
-    evidence: ["README.md:578-616"]
-    basis: "every path named in the documented repository structure exists at the pinned commit"
-
+    evidence:
+    - README.md:578-616
+    basis: every path named in the documented repository structure exists at the pinned commit
   limitations_section:
     value: includes_structural
-    evidence: ["README.md:632-641"]
-    basis: "one named limitation concerns what the answer judge measures, and another concerns the evaluation set's own coverage, rather than only hardware, scope or budget"
-
+    evidence:
+    - README.md:632-641
+    basis: one named limitation concerns what the answer judge measures, and another concerns the evaluation set's own coverage, rather than only hardware, scope or budget
   artifact_reference_strength:
     value: all_referenced
-    evidence: ["README.md:578-616"]
-    basis: "every present expected artifact (evaluation script, evaluation question set, monitoring view, ingestion entry point) is at least named by path in a plain-text project tree; no deployment configuration exists to check"
-
+    evidence:
+    - README.md:578-616
+    basis: every present expected artifact (evaluation script, evaluation question set, monitoring view, ingestion entry point) is at least named by path in a plain-text project tree; no deployment configuration exists to check
   artifacts_unreferenced_count:
     value: 0
-    evidence: ["README.md:578-616"]
-
-  # --- K. Descriptive ---
+    evidence:
+    - README.md:578-616
   corpus_language:
-    value: "de"
-    evidence: ["src/germany_decoded/loaders/bgb.py:40"]
-    basis: "ingested documents are tagged with this language; the interface and generated answers are in a different language"
-
+    value: de
+    evidence:
+    - src/germany_decoded/loaders/bgb.py:40
+    basis: ingested documents are tagged with this language; the interface and generated answers are in a different language
   corpus_domain:
-    value: "german civil code, tenancy law provisions"
-    evidence: ["README.md:43", "src/germany_decoded/loaders/bgb.py:3-4"]
-
+    value: german civil code, tenancy law provisions
+    evidence:
+    - README.md:43
+    - src/germany_decoded/loaders/bgb.py:3-4
   interface_framework:
-    value: "streamlit"
-    evidence: ["app.py:1", "pyproject.toml:21"]
-
+    value: streamlit
+    evidence:
+    - app.py:1
+    - pyproject.toml:21
   vector_store:
-    value: "pgvector"
-    evidence: ["src/germany_decoded/db/init.py:22,35,40-43"]
-
+    value: pgvector
+    evidence:
+    - src/germany_decoded/db/init.py:22,35,40-43
   llm_provider:
-    value: "openai"
-    evidence: ["src/germany_decoded/assistant.py:3,42"]
-
+    value: openai
+    evidence:
+    - src/germany_decoded/assistant.py:3,42
   repo_file_count:
     value: 42
-    evidence: ["<repo>"]
-    basis: "git ls-files | wc -l at the pinned commit"
-
+    evidence:
+    - <repo>
+    basis: git ls-files | wc -l at the pinned commit
+  project_name:
+    value: Project Zeta
+    evidence: []
+    basis: Synthetic label, assigned by tools/assign_project_names.py from case_id. Not derived from the repository and carries no real information about it.
 extraction_notes:
-  - "retrieval_eval_reproducible / headline_numbers_traceable interaction: the reported retrieval comparison has one arm that is fully committed-and-runnable and one arm that is only reconstructable by substituting a different, already-committed function into the same evaluation harness by hand. The current three-way enum has no value for 'reproducible for the shipped approach, merely traceable for the comparison baseline that justified the choice'; I recorded the whole-pipeline value as traceable_not_reproducible and used untraceable_number_count/headline_numbers_traceable to carry the finer distinction, but a reader relying on retrieval_eval_reproducible alone would not see that half of the pipeline is actually reproducible_as_committed."
-  - "llm_eval_approaches_compared: this repository's answer evaluation produces only a live database aggregate (visible in an admin view), never a static reported number in any committed document, unlike the retrieval-evaluation table. I counted the one existing judged configuration as 1, but the field's phrase 'with reported numbers' is ambiguous when the only aggregation is computed on demand from a database rather than committed as a document or results file. This same fact is why llm_eval_metric_at_ceiling is null here, consistent with that field's own definition."
-  - "run_instructions_gap_count: the one gap found (evaluation step assumes prior conversation records that the procedure never instructs the reader to create) does not make any command error or crash — it silently produces an empty result. The schema counts this the same as a hard failure (a command that cannot be carried out as written), but the two are different reader experiences and the field cannot distinguish them."
-  - "A code comment in src/germany_decoded/db/init.py:6 names a different sentence-embedding model than the one actually loaded in src/germany_decoded/embeddings.py:4. This is a code-comment-vs-code discrepancy, not a documentation-vs-code one, so it does not fit document_code_conflicts as defined (that field's examples are all prose-document claims contradicted by code). General software knowledge — that the model actually loaded is also known to produce 384-dimensional output, matching the committed VECTOR(384) column — was load-bearing in concluding this is a stale comment rather than a functional defect; I did not run anything to check it."
-  - "corpus_language: this repository ingests source documents in one language and answers exclusively in another, by design (the stated purpose is making one language's legal texts accessible to speakers of the other). I recorded the language of the ingested knowledge-base text, since 'corpus' reads most naturally as the ingested material rather than the interface. The field does not say which reading governs, and this repository is the sharpest case for the ambiguity: a criterion or reader could reasonably want either answer, and they differ here."
+- 'retrieval_eval_reproducible / headline_numbers_traceable interaction: the reported retrieval comparison has one arm that is fully committed-and-runnable and one arm that is only reconstructable by substituting a different, already-committed function into the same evaluation harness by hand. The current three-way enum has no value for ''reproducible for the shipped approach, merely traceable for the comparison baseline that justified the choice''; I recorded the whole-pipeline value as traceable_not_reproducible and used untraceable_number_count/headline_numbers_traceable to carry the finer distinction, but a reader relying on retrieval_eval_reproducible alone would not see that half of the pipeline is actually reproducible_as_committed.'
+- 'llm_eval_approaches_compared: this repository''s answer evaluation produces only a live database aggregate (visible in an admin view), never a static reported number in any committed document, unlike the retrieval-evaluation table. I counted the one existing judged configuration as 1, but the field''s phrase ''with reported numbers'' is ambiguous when the only aggregation is computed on demand from a database rather than committed as a document or results file. This same fact is why llm_eval_metric_at_ceiling is null here, consistent with that field''s own definition.'
+- 'run_instructions_gap_count: the one gap found (evaluation step assumes prior conversation records that the procedure never instructs the reader to create) does not make any command error or crash — it silently produces an empty result. The schema counts this the same as a hard failure (a command that cannot be carried out as written), but the two are different reader experiences and the field cannot distinguish them.'
+- A code comment in src/germany_decoded/db/init.py:6 names a different sentence-embedding model than the one actually loaded in src/germany_decoded/embeddings.py:4. This is a code-comment-vs-code discrepancy, not a documentation-vs-code one, so it does not fit document_code_conflicts as defined (that field's examples are all prose-document claims contradicted by code). General software knowledge — that the model actually loaded is also known to produce 384-dimensional output, matching the committed VECTOR(384) column — was load-bearing in concluding this is a stale comment rather than a functional defect; I did not run anything to check it.
+- 'corpus_language: this repository ingests source documents in one language and answers exclusively in another, by design (the stated purpose is making one language''s legal texts accessible to speakers of the other). I recorded the language of the ingested knowledge-base text, since ''corpus'' reads most naturally as the ingested material rather than the interface. The field does not say which reading governs, and this repository is the sharpest case for the ambiguity: a criterion or reader could reasonably want either answer, and they differ here.'

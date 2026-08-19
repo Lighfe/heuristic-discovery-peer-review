@@ -1,310 +1,421 @@
 schema_version: 1
 case_id: p14
-commit: "3652eb0d9245b237f1dcd392fba8965302a463ba"
+commit: 3652eb0d9245b237f1dcd392fba8965302a463ba
 extracted_by: agents/extractor/v2
-extracted_on: "2026-08-17"
-
+extracted_on: '2026-08-17'
 fields:
-
-  # --- A. System shape ---
   knowledge_base_present:
     value: present
-    evidence: ["corpus/sources/accessnow.yaml", "src/retrieval/embed.py"]
-    basis: "a committed corpus (corpus/sources/*.yaml, data/chunks built by ingestion) is embedded into a retrieval index"
+    evidence:
+    - corpus/sources/accessnow.yaml
+    - src/retrieval/embed.py
+    basis: a committed corpus (corpus/sources/*.yaml, data/chunks built by ingestion) is embedded into a retrieval index
   llm_in_flow:
     value: present
-    evidence: ["src/generation/generate.py:321-328"]
-    basis: "answer() makes an OpenAI chat.completions.create call on the request path"
+    evidence:
+    - src/generation/generate.py:321-328
+    basis: answer() makes an OpenAI chat.completions.create call on the request path
   retrieval_flow:
     value: kb_and_llm
-    evidence: ["src/generation/generate.py:301", "src/generation/generate.py:321-328"]
-    basis: "answer() calls search() against the knowledge base then calls the LLM with retrieved chunks"
+    evidence:
+    - src/generation/generate.py:301
+    - src/generation/generate.py:321-328
+    basis: answer() calls search() against the knowledge base then calls the LLM with retrieved chunks
   problem_statement:
     value: specific
-    evidence: ["README.md:12-18", "README.md:49-58"]
-    basis: "README states the question (cross-referencing censorship/digital-rights reporting across orgs) and the audience (researchers, journalists, civic-tech practitioners) in a named section"
-
-  # --- B. Interface ---
+    evidence:
+    - README.md:12-18
+    - README.md:49-58
+    basis: README states the question (cross-referencing censorship/digital-rights reporting across orgs) and the audience (researchers, journalists, civic-tech practitioners) in a named section
   interface_kind:
-    value: [web_ui]
-    evidence: ["src/interface/app.py:18-278"]
-    basis: "a Streamlit single-page app is the only user-facing interaction surface; generate.py/search.py __main__ blocks are labeled ad-hoc manual checks, not a designed interface"
+    value:
+    - web_ui
+    evidence:
+    - src/interface/app.py:18-278
+    basis: a Streamlit single-page app is the only user-facing interaction surface; generate.py/search.py __main__ blocks are labeled ad-hoc manual checks, not a designed interface
   interface_evidence_kind:
     value: code_and_recording
-    evidence: ["README.md:79-82"]
-    basis: "an embedded screen recording of the live app answering a real question is committed alongside the code"
-
-  # --- C. Ingestion ---
+    evidence:
+    - README.md:79-82
+    basis: an embedded screen recording of the live app answering a real question is committed alongside the code
   ingestion_kind:
     value: script_or_notebook
-    evidence: ["src/ingestion/pipeline.py:1-23"]
-    basis: "pipeline.py runs standalone stage scripts in sequence via subprocess; its own docstring states this is deliberately not an orchestration framework"
+    evidence:
+    - src/ingestion/pipeline.py:1-23
+    basis: pipeline.py runs standalone stage scripts in sequence via subprocess; its own docstring states this is deliberately not an orchestration framework
   ingestion_single_command:
     value: false
-    evidence: ["src/ingestion/pipeline.py:12-19", "src/ingestion/pipeline.py:33-37"]
-    basis: "pipeline.py stops after validate.py by design and requires a human semantic-review step (logged in corpus/acquisition-log.md) before metadata.py/chunk.py run, so no single command runs ingestion end to end"
+    evidence:
+    - src/ingestion/pipeline.py:12-19
+    - src/ingestion/pipeline.py:33-37
+    basis: pipeline.py stops after validate.py by design and requires a human semantic-review step (logged in corpus/acquisition-log.md) before metadata.py/chunk.py run, so no single command runs ingestion end to end
   ingestion_output_stated:
     value: true
-    evidence: ["README.md:119-121", "README.md:472"]
-    basis: "chunk count (3,783) and per-chunk metadata coverage are stated"
-
-  # --- D. Retrieval evaluation ---
+    evidence:
+    - README.md:119-121
+    - README.md:472
+    basis: chunk count (3,783) and per-chunk metadata coverage are stated
   retrieval_eval_present:
     value: true
-    evidence: ["src/retrieval/evaluate.py:1-30"]
-    basis: ""
+    evidence:
+    - src/retrieval/evaluate.py:1-30
+    basis: ''
   retrieval_eval_approaches_compared:
     value: 3
-    evidence: ["src/retrieval/evaluate.py:449-460"]
-    basis: "text, vector, and hybrid (RRF, swept over k) are each run and reported"
+    evidence:
+    - src/retrieval/evaluate.py:449-460
+    basis: text, vector, and hybrid (RRF, swept over k) are each run and reported
   retrieval_eval_set_committed:
     value: committed
-    evidence: ["data/eval/ground_truth.json", "data/eval/ground_truth_filtered.json"]
-    basis: ""
+    evidence:
+    - data/eval/ground_truth.json
+    - data/eval/ground_truth_filtered.json
+    basis: ''
   retrieval_eval_set_size:
     value: 101
-    evidence: ["data/eval/ground_truth_filtered.json"]
-    basis: "evaluate.py prefers ground_truth_filtered.json when present (149-question set mechanically filtered for circularity to 101), the file evaluate.py actually loads"
+    evidence:
+    - data/eval/ground_truth_filtered.json
+    basis: evaluate.py prefers ground_truth_filtered.json when present (149-question set mechanically filtered for circularity to 101), the file evaluate.py actually loads
   retrieval_eval_relevance_rule:
     value: passage_level
-    evidence: ["src/retrieval/evaluate.py:175-182"]
-    basis: "a hit is scored when a retrieved chunk_id equals the single labeled correct_chunk_id (one committed chunk, i.e. passage), not a document- or source-level match"
+    evidence:
+    - src/retrieval/evaluate.py:175-182
+    basis: a hit is scored when a retrieved chunk_id equals the single labeled correct_chunk_id (one committed chunk, i.e. passage), not a document- or source-level match
   retrieval_eval_config_matches_shipped:
     value: differs
-    evidence: ["src/generation/generate.py:298-301", "src/retrieval/evaluate.py:166-170"]
-    basis: "the shipped request path (generate.answer()) runs every query through rewrite_query() before search(); evaluate.py's hit_rate_and_mrr() feeds q['question'] to search() directly, with no rewrite step — top_k, method, and rrf_k default otherwise match"
+    evidence:
+    - src/generation/generate.py:298-301
+    - src/retrieval/evaluate.py:166-170
+    basis: the shipped request path (generate.answer()) runs every query through rewrite_query() before search(); evaluate.py's hit_rate_and_mrr() feeds q['question'] to search() directly, with no rewrite step — top_k, method, and rrf_k default otherwise match
   retrieval_eval_uncertainty_stated:
     value: true
-    evidence: ["src/retrieval/evaluate.py:78-124"]
-    basis: "95% bootstrap confidence intervals (2000 resamples) are computed and reported for Hit Rate and MRR"
+    evidence:
+    - src/retrieval/evaluate.py:78-124
+    basis: 95% bootstrap confidence intervals (2000 resamples) are computed and reported for Hit Rate and MRR
   retrieval_best_approach_shipped:
     value: mixed_result
-    evidence: ["README.md:99-110", "docs/retrieval-design.md"]
-    basis: "hybrid wins in aggregate and on two of three question categories but plain text search beats every hybrid configuration specifically on the multi_country slice, per the project's own reported numbers"
+    evidence:
+    - README.md:99-110
+    - docs/retrieval-design.md
+    basis: hybrid wins in aggregate and on two of three question categories but plain text search beats every hybrid configuration specifically on the multi_country slice, per the project's own reported numbers
   retrieval_eval_reproducible:
     value: traceable_not_reproducible
-    evidence: ["src/retrieval/evaluate.py", "data/eval/evaluation-report.md", ".gitignore:221-224"]
-    basis: "evaluate.py and the ground-truth set are committed and every step is inspectable, but data/chunks and data/index (needed to actually re-run search()) are gitignored, so the figures cannot be regenerated by running committed code alone"
-
-  # --- E. Answer evaluation ---
+    evidence:
+    - src/retrieval/evaluate.py
+    - data/eval/evaluation-report.md
+    - .gitignore:221-224
+    basis: evaluate.py and the ground-truth set are committed and every step is inspectable, but data/chunks and data/index (needed to actually re-run search()) are gitignored, so the figures cannot be regenerated by running committed code alone
   llm_eval_present:
     value: true
-    evidence: ["src/evaluation/judge.py:1-42", "src/evaluation/evaluate_generation.py:1-22"]
-    basis: ""
+    evidence:
+    - src/evaluation/judge.py:1-42
+    - src/evaluation/evaluate_generation.py:1-22
+    basis: ''
   llm_eval_approaches_compared:
     value: 2
-    evidence: ["src/evaluation/compare_prompts.py", "README.md:189-221"]
-    basis: "two system prompts (Prompt A, Prompt B) compared with reported citation-precision numbers"
+    evidence:
+    - src/evaluation/compare_prompts.py
+    - README.md:189-221
+    basis: two system prompts (Prompt A, Prompt B) compared with reported citation-precision numbers
   llm_eval_judge_kind:
     value: model_judge
-    evidence: ["src/evaluation/judge.py:60-61", "src/evaluation/judge.py:344-387"]
-    basis: ""
+    evidence:
+    - src/evaluation/judge.py:60-61
+    - src/evaluation/judge.py:344-387
+    basis: ''
   llm_eval_judge_spotchecked:
     value: false
-    evidence: ["data/eval/human_calibration_v2_verdicts.csv", "data/eval/judge_calibration_sample.csv", "data/eval/generation-evaluation-report.md"]
-    basis: "the committed human_verdict column in both the calibration verdicts CSV and the calibration sample CSV is empty for every row, and the committed generation-evaluation-report.md contains no Human-review scoring section (only written when --score-review runs against a filled-in sample) — no hand-checked sample with a reported result exists in the repository"
+    evidence:
+    - data/eval/human_calibration_v2_verdicts.csv
+    - data/eval/judge_calibration_sample.csv
+    - data/eval/generation-evaluation-report.md
+    basis: the committed human_verdict column in both the calibration verdicts CSV and the calibration sample CSV is empty for every row, and the committed generation-evaluation-report.md contains no Human-review scoring section (only written when --score-review runs against a filled-in sample) — no hand-checked sample with a reported result exists in the repository
   llm_eval_question_generator:
     value: other
-    evidence: ["src/retrieval/ground_truth.py:1-20", "data/eval/eval_supplement_questions.json", "src/evaluation/run_answers.py:55-91"]
-    basis: "the LLM-eval question set combines a committed, passage-tied generator's output (ground_truth.py, reused via ground_truth_filtered.json) with a hand-typed supplement (eval_supplement_questions.json, synthesis + refusal questions) that has no committed generator at all — the set is mixed-provenance, not uniformly one value"
+    evidence:
+    - src/retrieval/ground_truth.py:1-20
+    - data/eval/eval_supplement_questions.json
+    - src/evaluation/run_answers.py:55-91
+    basis: the LLM-eval question set combines a committed, passage-tied generator's output (ground_truth.py, reused via ground_truth_filtered.json) with a hand-typed supplement (eval_supplement_questions.json, synthesis + refusal questions) that has no committed generator at all — the set is mixed-provenance, not uniformly one value
   llm_eval_metric_at_ceiling:
     value: false
-    evidence: ["data/eval/generation-evaluation-report.md", "data/eval/prompt-comparison-report.md"]
-    basis: "reported claim-level citation precision (0.869 in the committed report; 0.893/0.869 in the prompt comparison) is a maximize-direction metric well below 95% of items at the maximum value"
+    evidence:
+    - data/eval/generation-evaluation-report.md
+    - data/eval/prompt-comparison-report.md
+    basis: reported claim-level citation precision (0.869 in the committed report; 0.893/0.869 in the prompt comparison) is a maximize-direction metric well below 95% of items at the maximum value
   llm_eval_role_overlap:
     value: same_model
-    evidence: ["data/eval/generation-evaluation-report.md:3", "src/evaluation/judge.py:60-61", "src/generation/generate.py:63", "src/retrieval/ground_truth.py:71-78"]
-    basis: "the committed run recorded the judge falling back to gpt-5.4-mini (fallback from gpt-5.4 used: True), the same model generate.py uses as the answer generator and ground_truth.py uses to generate the reused question subset"
+    evidence:
+    - data/eval/generation-evaluation-report.md:3
+    - src/evaluation/judge.py:60-61
+    - src/generation/generate.py:63
+    - src/retrieval/ground_truth.py:71-78
+    basis: 'the committed run recorded the judge falling back to gpt-5.4-mini (fallback from gpt-5.4 used: True), the same model generate.py uses as the answer generator and ground_truth.py uses to generate the reused question subset'
   llm_eval_config_matches_shipped:
     value: matches
-    evidence: ["src/evaluation/run_answers.py:41-42,110", "src/interface/app.py:25,112"]
-    basis: "run_answers.py calls generate.answer() unmodified, the same function the interface's request path calls"
+    evidence:
+    - src/evaluation/run_answers.py:41-42,110
+    - src/interface/app.py:25,112
+    basis: run_answers.py calls generate.answer() unmodified, the same function the interface's request path calls
   llm_eval_reproducible:
     value: traceable_not_reproducible
-    evidence: ["src/evaluation/evaluate_generation.py", ".gitignore:233-236"]
-    basis: "the judging pipeline is committed and inspectable, but generation_results.jsonl and judgments.jsonl (the actual per-claim inputs/outputs) are gitignored, so the reported figures cannot be regenerated by running committed code alone"
-
-  # --- F. Monitoring ---
+    evidence:
+    - src/evaluation/evaluate_generation.py
+    - .gitignore:233-236
+    basis: the judging pipeline is committed and inspectable, but generation_results.jsonl and judgments.jsonl (the actual per-claim inputs/outputs) are gitignored, so the reported figures cannot be regenerated by running committed code alone
   monitoring_kind:
     value: feedback_and_dashboard
-    evidence: ["src/interface/app.py:196-210", "grafana/dashboards/interactions.json"]
-    basis: ""
+    evidence:
+    - src/interface/app.py:196-210
+    - grafana/dashboards/interactions.json
+    basis: ''
   monitoring_dashboard_provenance:
     value: committed_definitions
-    evidence: ["grafana/dashboards/interactions.json", "grafana/provisioning/"]
-    basis: "panel definitions are committed JSON, not a stock tool's default UI"
+    evidence:
+    - grafana/dashboards/interactions.json
+    - grafana/provisioning/
+    basis: panel definitions are committed JSON, not a stock tool's default UI
   monitoring_instrumentation:
     value: logged
-    evidence: ["src/interface/app.py:139-163", "src/interface/db.py:34-64"]
-    basis: "every request writes one row to Postgres from the app code; no distributed tracing (e.g. OpenTelemetry) was found on the request path"
+    evidence:
+    - src/interface/app.py:139-163
+    - src/interface/db.py:34-64
+    basis: every request writes one row to Postgres from the app code; no distributed tracing (e.g. OpenTelemetry) was found on the request path
   monitoring_chart_count:
     value: 6
-    evidence: ["grafana/dashboards/interactions.json"]
-    basis: "counted panel objects in the committed dashboard JSON"
+    evidence:
+    - grafana/dashboards/interactions.json
+    basis: counted panel objects in the committed dashboard JSON
   monitoring_charts_bound_to_data:
     value: all
-    evidence: ["grafana/dashboards/interactions.json", "src/interface/db.py:34-64"]
-    basis: "all 6 panel queries reference columns (feedback, retrieval_ms/llm_ms, retrieved_scores, source_orgs, total_tokens/est_cost_usd, invalid_marker_count/unsupported_paragraph_count) that db.py's schema actually writes"
-
-  # --- G. Containerization and reproducibility ---
+    evidence:
+    - grafana/dashboards/interactions.json
+    - src/interface/db.py:34-64
+    basis: all 6 panel queries reference columns (feedback, retrieval_ms/llm_ms, retrieved_scores, source_orgs, total_tokens/est_cost_usd, invalid_marker_count/unsupported_paragraph_count) that db.py's schema actually writes
   containerization_kind:
     value: compose_full
-    evidence: ["docker-compose.yml:1-45"]
-    basis: "app, postgres, and grafana services are all defined and wired together, not only dependencies"
+    evidence:
+    - docker-compose.yml:1-45
+    basis: app, postgres, and grafana services are all defined and wired together, not only dependencies
   run_instructions:
     value: complete
-    evidence: ["README.md:282-324", "README.md:326-331"]
-    basis: "setup, required env var, and the run command are all stated"
+    evidence:
+    - README.md:282-324
+    - README.md:326-331
+    basis: setup, required env var, and the run command are all stated
   run_instructions_gap_count:
     value: 1
-    evidence: ["README.md:308-316", "src/ingestion/pipeline.py:33-37,57-72"]
-    basis: "the documented direct-script alternative to Docker (`python src/ingestion/pipeline.py` then `embed.py`) omits that pipeline.py stops after validate.py unless --all is passed, and --all itself assumes a manual human review step already logged in corpus/acquisition-log.md; embed.py needs data/chunks/, which only the post-review chunk.py stage produces"
+    evidence:
+    - README.md:308-316
+    - src/ingestion/pipeline.py:33-37,57-72
+    basis: the documented direct-script alternative to Docker (`python src/ingestion/pipeline.py` then `embed.py`) omits that pipeline.py stops after validate.py unless --all is passed, and --all itself assumes a manual human review step already logged in corpus/acquisition-log.md; embed.py needs data/chunks/, which only the post-review chunk.py stage produces
   dependency_versions_pinned:
     value: lockfile_committed
-    evidence: ["uv.lock"]
-    basis: "a uv lockfile is committed alongside pyproject.toml's lower-bound version specifiers"
+    evidence:
+    - uv.lock
+    basis: a uv lockfile is committed alongside pyproject.toml's lower-bound version specifiers
   data_accessible:
     value: automated_or_committed
-    evidence: ["src/ingestion/rehydrate.py", "scripts/build_release_artifact.py", "Dockerfile:33-40"]
-    basis: "a checksummed release artifact is fetched and verified automatically at build time, and rehydrate.py automates reconstructing the restricted-license portion with hash verification"
-
-  # --- H. Techniques ---
+    evidence:
+    - src/ingestion/rehydrate.py
+    - scripts/build_release_artifact.py
+    - Dockerfile:33-40
+    basis: a checksummed release artifact is fetched and verified automatically at build time, and rehydrate.py automates reconstructing the restricted-license portion with hash verification
   hybrid_search:
     present:
       value: true
-      evidence: ["src/retrieval/search.py:190-221"]
-      basis: "Reciprocal Rank Fusion combines text and vector search results"
+      evidence:
+      - src/retrieval/search.py:190-221
+      basis: Reciprocal Rank Fusion combines text and vector search results
     shipped_enabled:
       value: true
-      evidence: ["data/eval/default_method.json", "src/retrieval/search.py:253-309"]
-      basis: "method='hybrid' is the recorded default search() resolves to"
+      evidence:
+      - data/eval/default_method.json
+      - src/retrieval/search.py:253-309
+      basis: method='hybrid' is the recorded default search() resolves to
     evaluated:
       value: true
-      evidence: ["src/retrieval/evaluate.py:449-460", "data/eval/evaluation-report.md"]
-      basis: "Hit Rate/MRR reported for hybrid against text and vector alone, swept over rrf_k"
+      evidence:
+      - src/retrieval/evaluate.py:449-460
+      - data/eval/evaluation-report.md
+      basis: Hit Rate/MRR reported for hybrid against text and vector alone, swept over rrf_k
     measured_effect:
       value: improves
-      evidence: ["README.md:95-110"]
-      basis: "hybrid wins aggregate Hit Rate/MRR and two of three per-category slices over text/vector alone"
+      evidence:
+      - README.md:95-110
+      basis: hybrid wins aggregate Hit Rate/MRR and two of three per-category slices over text/vector alone
     decision_basis:
       value: measured
-      evidence: ["README.md:95-98", "README.md:529-536"]
-      basis: "hybrid is shipped because it wins on the project's own aggregate Hit Rate/MRR comparison, with the one known losing slice explicitly disclosed"
-    decision_axes: ["hit_rate", "mrr"]
+      evidence:
+      - README.md:95-98
+      - README.md:529-536
+      basis: hybrid is shipped because it wins on the project's own aggregate Hit Rate/MRR comparison, with the one known losing slice explicitly disclosed
+    decision_axes:
+      value:
+      - hit_rate
+      - mrr
+      evidence:
+      - README.md:95-98
+      - README.md:529-536
+      basis: 'Quantities named in this technique''s decision_basis justification: hit_rate, mrr.'
   reranking:
     present:
       value: true
-      evidence: ["src/retrieval/search.py:234-250"]
-      basis: "_boost_by_country re-ranks candidate results by query-detected country metadata"
+      evidence:
+      - src/retrieval/search.py:234-250
+      basis: _boost_by_country re-ranks candidate results by query-detected country metadata
     shipped_enabled:
       value: true
-      evidence: ["src/retrieval/search.py:259,290"]
-      basis: "boost_country=True is search()'s default"
+      evidence:
+      - src/retrieval/search.py:259,290
+      basis: boost_country=True is search()'s default
     evaluated:
       value: true
-      evidence: ["src/retrieval/evaluate.py:253-376", "data/eval/reranking-ablation-report.md"]
-      basis: "a three-arm ablation isolates the re-rank's own effect from candidate-pool expansion"
+      evidence:
+      - src/retrieval/evaluate.py:253-376
+      - data/eval/reranking-ablation-report.md
+      basis: a three-arm ablation isolates the re-rank's own effect from candidate-pool expansion
     measured_effect:
       value: improves
-      evidence: ["README.md:112-129"]
-      basis: "firing-subset Hit Rate 0.631->0.646, MRR 0.266->0.269, 3 wins/0 losses/62 ties per-question"
+      evidence:
+      - README.md:112-129
+      basis: firing-subset Hit Rate 0.631->0.646, MRR 0.266->0.269, 3 wins/0 losses/62 ties per-question
     decision_basis:
       value: measured
-      evidence: ["README.md:538-548"]
-      basis: "kept on because the isolated ablation shows a directionally consistent, no-regression improvement on the subset where it can act"
-    decision_axes: ["hit_rate", "mrr"]
+      evidence:
+      - README.md:538-548
+      basis: kept on because the isolated ablation shows a directionally consistent, no-regression improvement on the subset where it can act
+    decision_axes:
+      value:
+      - hit_rate
+      - mrr
+      evidence:
+      - README.md:538-548
+      basis: 'Quantities named in this technique''s decision_basis justification: hit_rate, mrr.'
   query_rewriting:
     present:
       value: true
-      evidence: ["src/generation/generate.py:215-241"]
-      basis: "rewrite_query() normalizes the user query before retrieval"
+      evidence:
+      - src/generation/generate.py:215-241
+      basis: rewrite_query() normalizes the user query before retrieval
     shipped_enabled:
       value: true
-      evidence: ["src/generation/generate.py:298"]
-      basis: "answer() calls rewrite_query() unconditionally before search()"
+      evidence:
+      - src/generation/generate.py:298
+      basis: answer() calls rewrite_query() unconditionally before search()
     evaluated:
       value: true
-      evidence: ["data/eval/query-rewriting-regression-report.md", "data/eval/query-rewriting-adversarial-report.md"]
-      basis: "raw-vs-rewritten Hit Rate/MRR reported on a 101-question regression set and a 40-question adversarial set"
+      evidence:
+      - data/eval/query-rewriting-regression-report.md
+      - data/eval/query-rewriting-adversarial-report.md
+      basis: raw-vs-rewritten Hit Rate/MRR reported on a 101-question regression set and a 40-question adversarial set
     measured_effect:
       value: mixed
-      evidence: ["data/eval/query-rewriting-regression-report.md:7-9", "data/eval/query-rewriting-adversarial-report.md:7-9"]
-      basis: "regression set point estimates are negative (Hit Rate -0.0099, MRR -0.0136, CIs overlapping raw); adversarial set point estimates are flat-to-positive (Hit Rate +0.0000, MRR +0.0153)"
+      evidence:
+      - data/eval/query-rewriting-regression-report.md:7-9
+      - data/eval/query-rewriting-adversarial-report.md:7-9
+      basis: regression set point estimates are negative (Hit Rate -0.0099, MRR -0.0136, CIs overlapping raw); adversarial set point estimates are flat-to-positive (Hit Rate +0.0000, MRR +0.0153)
     decision_basis:
       value: measured
-      evidence: ["docs/PROJECT_CONTINUITY.md:1069-1076"]
-      basis: "shipped after checking the regression-gate deltas were within the CI-overlap noise threshold set in advance, against the project's own two comparison reports"
-    decision_axes: ["hit_rate", "mrr"]
-
-  # --- I. Deployment and bonus ---
+      evidence:
+      - docs/PROJECT_CONTINUITY.md:1069-1076
+      basis: shipped after checking the regression-gate deltas were within the CI-overlap noise threshold set in advance, against the project's own two comparison reports
+    decision_axes:
+      value:
+      - hit_rate
+      - mrr
+      evidence:
+      - docs/PROJECT_CONTINUITY.md:1069-1076
+      basis: 'Quantities named in this technique''s decision_basis justification: hit_rate, mrr.'
   cloud_deployment:
     value: deployment_code_committed
-    evidence: ["deploy/gcp-deploy.sh", "Dockerfile.grafana.cloud", "src/interface/entrypoint.cloud.sh"]
-    basis: ""
-
-  # --- J. Documentation accuracy ---
+    evidence:
+    - deploy/gcp-deploy.sh
+    - Dockerfile.grafana.cloud
+    - src/interface/entrypoint.cloud.sh
+    basis: ''
   headline_numbers_traceable:
     value: some_traceable
-    evidence: ["data/eval/generation-evaluation-report.md", "README.md:144-156"]
-    basis: "some figures (e.g. corpus chunk count, evaluation-report.md's Hit Rate/MRR table) match a committed artifact directly producing them; the headline citation-precision figures (0.879 v1, 0.946 v2) do not match the one committed report that could substantiate them, which shows 0.869 over 496 supported+partial+unsupported claims rather than 481"
+    evidence:
+    - data/eval/generation-evaluation-report.md
+    - README.md:144-156
+    basis: some figures (e.g. corpus chunk count, evaluation-report.md's Hit Rate/MRR table) match a committed artifact directly producing them; the headline citation-precision figures (0.879 v1, 0.946 v2) do not match the one committed report that could substantiate them, which shows 0.869 over 496 supported+partial+unsupported claims rather than 481
   untraceable_number_count:
     value: 4
-    evidence: ["README.md:145-146,158-160", "data/eval/generation-evaluation-report.md:9"]
-    basis: "0.946 (v2 headline precision), 0.879 (v1 original precision), 28.6% (AI-reviewer raw agreement), and its 45/63 disagreement count are each cited only in prose and attributed to the gitignored reports.md — no committed artifact reproduces any of the four"
+    evidence:
+    - README.md:145-146,158-160
+    - data/eval/generation-evaluation-report.md:9
+    basis: 0.946 (v2 headline precision), 0.879 (v1 original precision), 28.6% (AI-reviewer raw agreement), and its 45/63 disagreement count are each cited only in prose and attributed to the gitignored reports.md — no committed artifact reproduces any of the four
   document_number_conflicts:
     value: 1
-    evidence: ["README.md:136-138", "data/eval/generation-evaluation-report.md:9"]
-    basis: "README states 481 claims were judged; the committed generation-evaluation-report.md's own aggregate row sums to 496 claims (supported=431+partial=47+unsupported=18)"
+    evidence:
+    - README.md:136-138
+    - data/eval/generation-evaluation-report.md:9
+    basis: README states 481 claims were judged; the committed generation-evaluation-report.md's own aggregate row sums to 496 claims (supported=431+partial=47+unsupported=18)
   document_code_conflicts:
     value: 0
     evidence: []
-    basis: "no committed claim was found to be contradicted by what the code actually does, within the time available to check"
+    basis: no committed claim was found to be contradicted by what the code actually does, within the time available to check
   broken_reference_count:
     value: 2
-    evidence: ["README.md:153,167,220-221", ".gitignore:290-292"]
-    basis: "reports.md (cited ~40+ times as primary evidence for headline numbers) and decisionlog.md (cited repeatedly) are both referenced across README/docs/ADRs but neither exists in the repository; reports.md's absence is explained by an explicit .gitignore entry and comment, decisionlog.md's is not"
+    evidence:
+    - README.md:153,167,220-221
+    - .gitignore:290-292
+    basis: reports.md (cited ~40+ times as primary evidence for headline numbers) and decisionlog.md (cited repeatedly) are both referenced across README/docs/ADRs but neither exists in the repository; reports.md's absence is explained by an explicit .gitignore entry and comment, decisionlog.md's is not
   limitations_section:
     value: includes_structural
-    evidence: ["README.md:618", "README.md:104-110"]
-    basis: "the multi_country retrieval gap is disclosed as a structural property of the RRF mechanism/measurement, not only scope or hardware"
+    evidence:
+    - README.md:618
+    - README.md:104-110
+    basis: the multi_country retrieval gap is disclosed as a structural property of the RRF mechanism/measurement, not only scope or hardware
   artifact_reference_strength:
     value: all_referenced
-    evidence: ["README.md:93,131-132,262-266,489-511"]
-    basis: "the fixed checklist artifacts (evaluation script, evaluation question set, monitoring dashboard definition, ingestion entry point, deployment configuration) are each named by repo-relative path in code spans or the project-structure tree, not necessarily as markdown hyperlinks"
+    evidence:
+    - README.md:93,131-132,262-266,489-511
+    basis: the fixed checklist artifacts (evaluation script, evaluation question set, monitoring dashboard definition, ingestion entry point, deployment configuration) are each named by repo-relative path in code spans or the project-structure tree, not necessarily as markdown hyperlinks
   artifacts_unreferenced_count:
     value: 0
-    evidence: ["README.md:93,131-132,262-266,489-511"]
-    basis: "every artifact on the fixed checklist that the project has is named somewhere in the documentation"
-
-  # --- K. Descriptive ---
+    evidence:
+    - README.md:93,131-132,262-266,489-511
+    basis: every artifact on the fixed checklist that the project has is named somewhere in the documentation
   corpus_language:
     value: en
-    evidence: ["docs/adr/0001-english-only-corpus-disclosure.md"]
-    basis: ""
+    evidence:
+    - docs/adr/0001-english-only-corpus-disclosure.md
+    basis: ''
   corpus_domain:
-    value: "internet censorship and digital rights reporting in East Africa"
-    evidence: ["README.md:12-18"]
-    basis: ""
+    value: internet censorship and digital rights reporting in East Africa
+    evidence:
+    - README.md:12-18
+    basis: ''
   interface_framework:
     value: streamlit
-    evidence: ["src/interface/app.py:18"]
-    basis: ""
+    evidence:
+    - src/interface/app.py:18
+    basis: ''
   vector_store:
     value: in_memory
-    evidence: ["README.md:470-474", "src/retrieval/search.py:50-51"]
-    basis: "a plain numpy array persisted to disk via minsearch.VectorSearch, not a vector database"
+    evidence:
+    - README.md:470-474
+    - src/retrieval/search.py:50-51
+    basis: a plain numpy array persisted to disk via minsearch.VectorSearch, not a vector database
   llm_provider:
     value: openai
-    evidence: ["src/generation/generate.py:24,63"]
-    basis: ""
+    evidence:
+    - src/generation/generate.py:24,63
+    basis: ''
   repo_file_count:
     value: 166
-    evidence: ["<repo>"]
-    basis: "git ls-files | wc -l at the pinned commit"
-
+    evidence:
+    - <repo>
+    basis: git ls-files | wc -l at the pinned commit
+  project_name:
+    value: Project Xi
+    evidence: []
+    basis: Synthetic label, assigned by tools/assign_project_names.py from case_id. Not derived from the repository and carries no real information about it.
 extraction_notes:
-  - "llm_eval_question_generator has no enum value for a mixed-provenance question set (part committed-generator-tied-to-passage, part hand-typed with no generator trace). Recorded as `other`; this looks like a real schema gap given run_answers.py explicitly documents combining a generated set with a hand-authored supplement."
-  - "The repository references two files, reports.md and decisionlog.md, dozens of times as the primary evidentiary backing for several headline claims (0.946/0.879 citation precision, the AI-reviewer cross-check numbers). reports.md's non-committal is explained by an explicit, commented .gitignore entry ('local-only orchestration file, never committed'); decisionlog.md is mentioned in a nearby comment but has no .gitignore entry of its own and was not found anywhere in the repository. Both are, from a reader-of-the-repo's standpoint, unreachable regardless of the difference in disclosure."
-  - "The one committed generation-phase evaluation report (data/eval/generation-evaluation-report.md, 496 claims, precision 0.869) does not match either headline number the README reports (481 claims; 0.879 v1 or 0.946 v2). The evaluate_generation.py `--judge-version` flag's own code comment describes exactly this kind of stale/mismatched-rubric artifact as a known past failure mode, which is consistent with what's committed here, but I could not confirm from the repository alone whether this specific file is that stale artifact or a different partial run."
-  - "For H group query_rewriting, ADR-0017 was written and the ship decision was made using significance thresholds framed as CI-overlap-is-noise; I recorded measured_effect as `mixed` because the two committed reports disagree in point-estimate direction (regression set negative, adversarial set positive), even though the project's own text calls the result a 'genuine near-null.' A criterion reading measured_effect alone would not see the 'near-null, not just direction-disagreeing' framing."
-  - "Did not read any file outside agents/extractor/v2/prompt.md, cases/schema.md, and clones/p14/ for this extraction."
+- llm_eval_question_generator has no enum value for a mixed-provenance question set (part committed-generator-tied-to-passage, part hand-typed with no generator trace). Recorded as `other`; this looks like a real schema gap given run_answers.py explicitly documents combining a generated set with a hand-authored supplement.
+- The repository references two files, reports.md and decisionlog.md, dozens of times as the primary evidentiary backing for several headline claims (0.946/0.879 citation precision, the AI-reviewer cross-check numbers). reports.md's non-committal is explained by an explicit, commented .gitignore entry ('local-only orchestration file, never committed'); decisionlog.md is mentioned in a nearby comment but has no .gitignore entry of its own and was not found anywhere in the repository. Both are, from a reader-of-the-repo's standpoint, unreachable regardless of the difference in disclosure.
+- The one committed generation-phase evaluation report (data/eval/generation-evaluation-report.md, 496 claims, precision 0.869) does not match either headline number the README reports (481 claims; 0.879 v1 or 0.946 v2). The evaluate_generation.py `--judge-version` flag's own code comment describes exactly this kind of stale/mismatched-rubric artifact as a known past failure mode, which is consistent with what's committed here, but I could not confirm from the repository alone whether this specific file is that stale artifact or a different partial run.
+- For H group query_rewriting, ADR-0017 was written and the ship decision was made using significance thresholds framed as CI-overlap-is-noise; I recorded measured_effect as `mixed` because the two committed reports disagree in point-estimate direction (regression set negative, adversarial set positive), even though the project's own text calls the result a 'genuine near-null.' A criterion reading measured_effect alone would not see the 'near-null, not just direction-disagreeing' framing.
+- Did not read any file outside agents/extractor/v2/prompt.md, cases/schema.md, and clones/p14/ for this extraction.

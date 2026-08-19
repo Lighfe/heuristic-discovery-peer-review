@@ -113,6 +113,66 @@ true` sub-case still has only one real base (p13) — thin, not zero.
 Resolves item 3k; the final buildable/not-buildable list is produced at
 step 5, not here.
 
+**circular-eval-p13-sufficient** — Owner decision at step 5: p13 alone is
+sufficient for `circular-eval`'s spot-checked sub-case (`p13-t01`); no
+constructed second base is added now. This was flagged as a genuinely open
+question by `constructed-base-policy`, not decided by default — a
+constructed base can be added later, at owner request, if red-teaming
+shows this sub-case needs more coverage.
+
+**decision-axes-nesting-fixed** — Found during M2 step 5 (2026-08-17),
+while searching for a real base for a conditional twin: `decision_axes`
+was stored as a bare list instead of the nested `{value, evidence, basis}`
+shape on 13 of 23 records (5, 8, 12, 14-23), across one or more technique
+blocks each — the same defect step 3 already found and fixed for
+`present`/`shipped_enabled`/`evaluated`/`measured_effect`/`decision_basis`,
+but on the one sub-field that fix's worked example did not make salient
+enough, apparently because it is a `list_str` rather than a scalar leaf.
+Fixed structurally (`tools/fix_decision_axes_nesting.py`, no
+re-extraction — no new fact is read, only re-nested), borrowing
+`decision_basis`'s evidence since `decision_axes` names a facet of the
+same justification. All 17 twins built so far were regenerated against
+the corrected bases; scorer and test suite reconfirmed clean. `cases/schema.md`'s
+group-H worked example should probably show `decision_axes` nested too,
+not just the scalar sub-fields — not changed here, flagged for whoever
+next touches that section.
+
+**project-name-field-added** — `project_name` (group K, descriptive)
+added at M2 step 5, owner-approved: a synthetic label so the
+cosmetic-rename no-change kind has a field to mutate (`p01-t07`). Never
+extracted, never invented per-repo by the extractor — a real-per-repo
+value would risk leaking the actual project or repo name, breaking
+anonymity. Assigned by a fixed deterministic mapping instead
+(`tools/assign_project_names.py`: p01 → `Project Alpha` … p23 →
+`Project Psi`, Greek alphabet order, one letter spare). Owner note: a
+`corpus_domain` value making a record identifiable to someone who already
+knows the project is accepted (insider recognition is not the anonymity
+this project promises); `project_name` does not change that — it adds a
+field for the twin catalogue, not a stronger anonymity guarantee than
+`corpus_domain` already has.
+
+**dataset-domain-swap-p17-verified** — The dataset-domain-swap no-change
+kind, blocked since M1 (`basis-descriptive-leak-tighten-not-retrofit`),
+is buildable on p17 (`p17-t01`): every scoreable field's `basis` was read
+in full, not keyword-matched, and none names the corpus subject or an
+audience. A keyword grep alone gives false clears — it read p11 as clean
+when `problem_statement` there names "patients seeking medical advice"
+without using any word a domain grep would catch. `problem_statement`
+remains the recurring leak point across the corpus, consistent with
+`cases/schema.md`'s own note that it is the weakest field. v0 scores
+`p17`/`p17-t01` identically (19/19), as required.
+
+**claim-without-artifact-p04-entailment** — `p04-t01`'s
+`headline_numbers_traceable` change is entailed by its
+`untraceable_number_count` change (`APPROVED_ENTAILMENTS`, owner-added).
+Same shape as item 3e (`retrieval_best_approach_shipped`) — one fact, two
+stored representations — but not the same excuse: unlike `mixed_result`,
+`headline_numbers_traceable` carries no contested interpretation, and
+normalising it at score time would need a new "total headline number
+count" field the schema does not have, not a drop-in derivation from
+existing fields. A scoped entailment was cheaper than that redesign right
+now; the redesign stays open if a third field shows the same defect.
+
 ## Loop protocol
 
 **reviewer-independence** — Each reviewer call is stateless, scores one case,
@@ -400,12 +460,21 @@ to `cases/schema.md` group G; v0 is unchanged (`v0-literal-no-inferences`).
 Resolves item 3b.
 
 **basis-descriptive-leak-tighten-not-retrofit** — Scoreable-field `basis`
-text embedding descriptive facts (audience, domain, vendor) blocks two of
-three no-change twin kinds; fixed going forward only (`agents/extractor/v2`
-rule: scoreable `basis` states only the scored fact), not retrofitted
-across the 13 already-written records. Tech-swap already satisfies G1's
-no-change half; dataset-domain-swap and cosmetic-rename stay flagged as
-not-yet-buildable. Resolves item 3c.
+text embedding descriptive facts (audience, domain, vendor) blocked two of
+three no-change twin kinds at M1; fixed going forward only
+(`agents/extractor/v2` rule: scoreable `basis` states only the scored
+fact), not deliberately retrofitted across already-written records.
+Resolves item 3c. **Update (step 5):** step 3's re-extraction of all 22
+records under the tightened rule was a side effect of the broader schema
+closure, not a targeted retrofit of this rule specifically — but it means
+some records that were leaky at M1 no longer are. Checked directly, not
+assumed: p01's current record (schema_version 1, extractor v2) passes a
+full field-by-field leak check, and dataset-domain-swap is now buildable
+(`dataset-domain-swap-p17-verified`, built on p17). The earlier "p01
+leaks" claim was true of the v1 extraction only and does not hold for the
+current file; do not carry it forward without re-checking. Cosmetic-rename
+stays blocked — not on this rule, but because no field exists to hold a
+project-name-like string at all (see `project-name-field-added`).
 
 **decision-basis-three-way** — `decision_documented: bool` (group H) is
 replaced by `decision_basis: none \| argued \| measured`, distinguishing no

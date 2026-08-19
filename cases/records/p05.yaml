@@ -1,355 +1,420 @@
 schema_version: 1
 case_id: p05
-commit: "254c54af37eccf28a904db4a1fe00a163ae0c776"
+commit: 254c54af37eccf28a904db4a1fe00a163ae0c776
 extracted_by: agents/extractor/v2
-extracted_on: "2026-08-14"
-
+extracted_on: '2026-08-14'
 fields:
-  # A. System shape
   knowledge_base_present:
     value: present
-    evidence: ["src/index.py:82-99", "src/rag_helper_project.py:48-50"]
-    basis: "the request path retrieves records from an indexed data store before an answer is produced"
-
+    evidence:
+    - src/index.py:82-99
+    - src/rag_helper_project.py:48-50
+    basis: the request path retrieves records from an indexed data store before an answer is produced
   llm_in_flow:
     value: present
-    evidence: ["src/rag_helper_project.py:76-86"]
-    basis: "the request path calls a hosted LLM client to produce the answer text"
-
+    evidence:
+    - src/rag_helper_project.py:76-86
+    basis: the request path calls a hosted LLM client to produce the answer text
   retrieval_flow:
     value: kb_and_llm
-    evidence: ["src/app.py:35-42", "src/rag_helper_project.py:88-98"]
-    basis: "the handler invoked on each user question both queries the data store and calls the LLM client before returning"
-
+    evidence:
+    - src/app.py:35-42
+    - src/rag_helper_project.py:88-98
+    basis: the handler invoked on each user question both queries the data store and calls the LLM client before returning
   problem_statement:
     value: specific
-    evidence: ["README.md:3-11"]
-    basis: "a named section states the subject the system addresses and a named section states an intended audience for it"
-
-  # B. Interface
+    evidence:
+    - README.md:3-11
+    basis: a named section states the subject the system addresses and a named section states an intended audience for it
   interface_kind:
-    value: [web_ui, script_or_notebook]
-    evidence: ["src/app.py:9-28", "src/rag_helper_project.py:104-112"]
-    basis: "one module renders a full-page interactive UI (title, input box, buttons, sidebar); a second module exposes a directly-runnable entry point that takes a query and prints an answer with no UI"
-
+    value:
+    - web_ui
+    - script_or_notebook
+    evidence:
+    - src/app.py:9-28
+    - src/rag_helper_project.py:104-112
+    basis: one module renders a full-page interactive UI (title, input box, buttons, sidebar); a second module exposes a directly-runnable entry point that takes a query and prints an answer with no UI
   interface_evidence_kind:
     value: code_only
-    evidence: ["README.md"]
-    basis: "no image or recording link appears anywhere in the documentation"
-
-  # C. Ingestion
+    evidence:
+    - README.md
+    basis: no image or recording link appears anywhere in the documentation
   ingestion_kind:
     value: script_or_notebook
-    evidence: ["src/data_ingestion.py:132-149", "test_data_ingestion.ipynb:cell0,cell12,cell15,cell16"]
-    basis: "ingestion is implemented as a plain script with a main() entry point, exercised interactively from a notebook"
-
+    evidence:
+    - src/data_ingestion.py:132-149
+    - test_data_ingestion.ipynb:cell0,cell12,cell15,cell16
+    basis: ingestion is implemented as a plain script with a main() entry point, exercised interactively from a notebook
   ingestion_single_command:
     value: false
-    evidence: ["README.md:127-149", "src/db_init.py", "src/data_ingestion.py:132-149"]
-    basis: "the documentation's two run commands only start the UI and the dashboard; no command that populates the data store end to end, including schema setup, is documented anywhere"
-
+    evidence:
+    - README.md:127-149
+    - src/db_init.py
+    - src/data_ingestion.py:132-149
+    basis: the documentation's two run commands only start the UI and the dashboard; no command that populates the data store end to end, including schema setup, is documented anywhere
   ingestion_output_stated:
     value: true
-    evidence: ["test_data_ingestion.ipynb:cell17,cell18"]
-    basis: "a stored notebook cell output states a total ingested row count and a per-category row-count breakdown"
-
-  # D. Retrieval evaluation
+    evidence:
+    - test_data_ingestion.ipynb:cell17,cell18
+    basis: a stored notebook cell output states a total ingested row count and a per-category row-count breakdown
   retrieval_eval_present:
     value: false
-    evidence: ["test_retriviel.ipynb:cell7,cell8"]
-    basis: "the one retrieval-testing notebook prints raw per-method results for a single query with no ground truth and no computed score; no other file in the repository evaluates retrieval"
-
+    evidence:
+    - test_retriviel.ipynb:cell7,cell8
+    basis: the one retrieval-testing notebook prints raw per-method results for a single query with no ground truth and no computed score; no other file in the repository evaluates retrieval
   retrieval_eval_approaches_compared:
     value: 0
-    evidence: ["test_retriviel.ipynb:cell7,cell8"]
-    basis: "no approach comparison produced a reported number"
-
+    evidence:
+    - test_retriviel.ipynb:cell7,cell8
+    basis: no approach comparison produced a reported number
   retrieval_eval_set_committed:
     value: absent
-    evidence: ["test_retriviel.ipynb", "test_data_ingestion.ipynb"]
-    basis: "no evaluation question/expected-answer set file exists anywhere in the tracked tree; the only committed data record is a single raw source document"
-
+    evidence:
+    - test_retriviel.ipynb
+    - test_data_ingestion.ipynb
+    basis: no evaluation question/expected-answer set file exists anywhere in the tracked tree; the only committed data record is a single raw source document
   retrieval_eval_set_size:
     value: null
-    evidence: ["test_retriviel.ipynb", "test_data_ingestion.ipynb"]
-    basis: "no evaluation set exists, so there is no size to state"
-
+    evidence:
+    - test_retriviel.ipynb
+    - test_data_ingestion.ipynb
+    basis: no evaluation set exists, so there is no size to state
   retrieval_eval_relevance_rule:
     value: none
-    evidence: ["test_retriviel.ipynb"]
-    basis: "no scoring function exists that counts a retrieval as a hit or miss"
-
+    evidence:
+    - test_retriviel.ipynb
+    basis: no scoring function exists that counts a retrieval as a hit or miss
   retrieval_eval_config_matches_shipped:
     value: undeterminable
-    evidence: ["test_retriviel.ipynb"]
-    basis: "there is no evaluation configuration to compare against the shipped request path"
-
+    evidence:
+    - test_retriviel.ipynb
+    basis: there is no evaluation configuration to compare against the shipped request path
   retrieval_eval_uncertainty_stated:
     value: false
-    evidence: ["test_retriviel.ipynb"]
-    basis: "no interval, variance or uncertainty statement appears anywhere related to retrieval"
-
+    evidence:
+    - test_retriviel.ipynb
+    basis: no interval, variance or uncertainty statement appears anywhere related to retrieval
   retrieval_best_approach_shipped:
     value: undeterminable
-    evidence: ["test_retriviel.ipynb", "src/index.py:116-121"]
-    basis: "no evaluation exists to establish which retrieval approach performs best, so the shipped choice cannot be checked against a measured result"
-
+    evidence:
+    - test_retriviel.ipynb
+    - src/index.py:116-121
+    basis: no evaluation exists to establish which retrieval approach performs best, so the shipped choice cannot be checked against a measured result
   retrieval_eval_reproducible:
     value: neither
-    evidence: ["test_retriviel.ipynb"]
-    basis: "no retrieval-evaluation pipeline exists to be reproducible or traceable"
-
-  # E. Answer evaluation
+    evidence:
+    - test_retriviel.ipynb
+    basis: no retrieval-evaluation pipeline exists to be reproducible or traceable
   llm_eval_present:
     value: false
-    evidence: ["README.md", "src/app.py", "test_retriviel.ipynb", "test_data_ingestion.ipynb"]
-    basis: "no script, notebook or documentation compares distinct prompts or models with a reported number for answer quality; the only per-answer signal collected is a binary user reaction, recorded but never aggregated into a comparison"
-
+    evidence:
+    - README.md
+    - src/app.py
+    - test_retriviel.ipynb
+    - test_data_ingestion.ipynb
+    basis: no script, notebook or documentation compares distinct prompts or models with a reported number for answer quality; the only per-answer signal collected is a binary user reaction, recorded but never aggregated into a comparison
   llm_eval_approaches_compared:
     value: 0
-    evidence: ["README.md", "src/rag_helper_project.py"]
-    basis: "only one prompt/model configuration exists in the repository and no comparison is reported"
-
+    evidence:
+    - README.md
+    - src/rag_helper_project.py
+    basis: only one prompt/model configuration exists in the repository and no comparison is reported
   llm_eval_judge_kind:
     value: none
-    evidence: ["README.md", "src/app.py"]
-    basis: "no automated judge, human-rating protocol, or offline metric computation exists for answer quality"
-
+    evidence:
+    - README.md
+    - src/app.py
+    basis: no automated judge, human-rating protocol, or offline metric computation exists for answer quality
   llm_eval_judge_spotchecked:
     value: false
-    evidence: ["README.md"]
-    basis: "there is no judge output to spot-check"
-
+    evidence:
+    - README.md
+    basis: there is no judge output to spot-check
   llm_eval_question_generator:
     value: none_committed
-    evidence: ["README.md", "test_data_ingestion.ipynb", "test_retriviel.ipynb"]
-    basis: "no committed code generates evaluation questions; none exist to generate"
-
+    evidence:
+    - README.md
+    - test_data_ingestion.ipynb
+    - test_retriviel.ipynb
+    basis: no committed code generates evaluation questions; none exist to generate
   llm_eval_metric_at_ceiling:
     value: null
-    evidence: ["README.md", "test_retriviel.ipynb", "test_data_ingestion.ipynb"]
-    basis: "no answer-quality evaluation of any kind is committed, so there is no aggregate metric to check for ceiling behavior"
-
+    evidence:
+    - README.md
+    - test_retriviel.ipynb
+    - test_data_ingestion.ipynb
+    basis: no answer-quality evaluation of any kind is committed, so there is no aggregate metric to check for ceiling behavior
   llm_eval_role_overlap:
     value: undeterminable
-    evidence: ["README.md"]
-    basis: "no evaluation exists that assigns generator, system-under-comparison and judge roles, so there is nothing to compare for overlap"
-
+    evidence:
+    - README.md
+    basis: no evaluation exists that assigns generator, system-under-comparison and judge roles, so there is nothing to compare for overlap
   llm_eval_config_matches_shipped:
     value: undeterminable
-    evidence: ["README.md"]
-    basis: "there is no evaluation configuration to compare against the shipped request path"
-
+    evidence:
+    - README.md
+    basis: there is no evaluation configuration to compare against the shipped request path
   llm_eval_reproducible:
     value: neither
-    evidence: ["README.md"]
-    basis: "no answer-evaluation pipeline exists to be reproducible or traceable"
-
-  # F. Monitoring
+    evidence:
+    - README.md
+    basis: no answer-evaluation pipeline exists to be reproducible or traceable
   monitoring_kind:
     value: feedback_and_dashboard
-    evidence: ["src/app.py:73-90", "src/dashboard.py:1-47"]
-    basis: "the UI records an explicit per-answer user reaction on the request path, and a separate module renders summary counts and charts over stored interaction records"
-
+    evidence:
+    - src/app.py:73-90
+    - src/dashboard.py:1-47
+    basis: the UI records an explicit per-answer user reaction on the request path, and a separate module renders summary counts and charts over stored interaction records
   monitoring_dashboard_provenance:
     value: committed_definitions
-    evidence: ["src/dashboard.py:1-47"]
-    basis: "the module rendering summary metrics and charts is committed source code that defines each panel itself, not a pre-built third-party UI"
-
+    evidence:
+    - src/dashboard.py:1-47
+    basis: the module rendering summary metrics and charts is committed source code that defines each panel itself, not a pre-built third-party UI
   monitoring_instrumentation:
     value: logged
-    evidence: ["src/app.py:41", "src/db_save.py:15-49"]
-    basis: "a record-writing call runs on the request path after each generated answer; no distributed-tracing or span library is used anywhere in the repository"
-
+    evidence:
+    - src/app.py:41
+    - src/db_save.py:15-49
+    basis: a record-writing call runs on the request path after each generated answer; no distributed-tracing or span library is used anywhere in the repository
   monitoring_chart_count:
     value: 11
-    evidence: ["src/dashboard.py:12-44"]
-    basis: "counted distinct summary-metric, line-chart, and table panel calls in the dashboard module: 7 metric tiles, 3 charts, 1 table"
-
+    evidence:
+    - src/dashboard.py:12-44
+    basis: 'counted distinct summary-metric, line-chart, and table panel calls in the dashboard module: 7 metric tiles, 3 charts, 1 table'
   monitoring_charts_bound_to_data:
     value: all
-    evidence: ["src/dashboard.py:1-47", "src/db_query.py:42-95", "src/db_init.py:11-25"]
-    basis: "every column referenced by the dashboard module's queries (via the query-layer module) exists in the schema created by the initialization script"
-
-  # G. Containerization and reproducibility
+    evidence:
+    - src/dashboard.py:1-47
+    - src/db_query.py:42-95
+    - src/db_init.py:11-25
+    basis: every column referenced by the dashboard module's queries (via the query-layer module) exists in the schema created by the initialization script
   containerization_kind:
     value: none
-    evidence: ["<repo>"]
-    basis: "no container or compose definition file exists anywhere in the tracked tree"
-
+    evidence:
+    - <repo>
+    basis: no container or compose definition file exists anywhere in the tracked tree
   run_instructions:
     value: partial
-    evidence: ["README.md:127-149"]
-    basis: "setup, dependency installation and the run commands are stated; configuration (which environment variables are needed, and how the data store is prepared) is not"
-
+    evidence:
+    - README.md:127-149
+    basis: setup, dependency installation and the run commands are stated; configuration (which environment variables are needed, and how the data store is prepared) is not
   run_instructions_gap_count:
     value: 6
-    evidence: ["README.md:127-149", "src/db_init.py", "src/data_ingestion.py:132-149", "requirements.txt:2", "src/rag_helper_project.py:5-8", "src/app.py:4-5,41", "src/rag_helper_project.py:34-98", "src/rag_helper_project.py:12-14", "src/db_init.py:7-9", "src/data_ingestion.py:21"]
-    basis: "six gaps found on a desk walk-through: (1) no documented step creates the database schema the application depends on; (2) no documented step populates the data store queried at request time; (3) a pinned dependency's comment names it as the client for the hosted LLM used elsewhere, but the code's own import statements for that LLM reference a different, unpinned package; (4) the interface module contains two import statements assuming different import roots for sibling modules in one run, and only one can resolve given how a directly-run script's own directory, not the invoking directory, is placed on the import path; (5) the interface module's per-question save call passes an attribute of the RAG object that the RAG class never defines or sets anywhere, so the call would fail on every use of the primary interaction; (6) the documentation instructs setting 'the required environment variables' without naming any of the three variables that code run by the two documented commands actually reads from the process environment"
-
+    evidence:
+    - README.md:127-149
+    - src/db_init.py
+    - src/data_ingestion.py:132-149
+    - requirements.txt:2
+    - src/rag_helper_project.py:5-8
+    - src/app.py:4-5,41
+    - src/rag_helper_project.py:34-98
+    - src/rag_helper_project.py:12-14
+    - src/db_init.py:7-9
+    - src/data_ingestion.py:21
+    basis: 'six gaps found on a desk walk-through: (1) no documented step creates the database schema the application depends on; (2) no documented step populates the data store queried at request time; (3) a pinned dependency''s comment names it as the client for the hosted LLM used elsewhere, but the code''s own import statements for that LLM reference a different, unpinned package; (4) the interface module contains two import statements assuming different import roots for sibling modules in one run, and only one can resolve given how a directly-run script''s own directory, not the invoking directory, is placed on the import path; (5) the interface module''s per-question save call passes an attribute of the RAG object that the RAG class never defines or sets anywhere, so the call would fail on every use of the primary interaction; (6) the documentation instructs setting ''the required environment variables'' without naming any of the three variables that code run by the two documented commands actually reads from the process environment'
   dependency_versions_pinned:
     value: exact_pins
-    evidence: ["requirements.txt"]
-    basis: "nearly every dependency is pinned with an exact version specifier; one dependency line is duplicated, with the second occurrence unpinned and redundant with the exact pin already present above it"
-
+    evidence:
+    - requirements.txt
+    basis: nearly every dependency is pinned with an exact version specifier; one dependency line is duplicated, with the second occurrence unpinned and redundant with the exact pin already present above it
   data_accessible:
     value: manual_steps
-    evidence: ["data/transcripts/AAPL_2026Q3.json", "src/data_ingestion.py:20-46", "test_data_ingestion.ipynb:cell16"]
-    basis: "one of five source records referenced by a notebook run is committed; the rest require fetching from an external, key-gated source with no key or cached copy in the repository, and no single documented command performs that fetch"
-
-  # H. Techniques
+    evidence:
+    - data/transcripts/AAPL_2026Q3.json
+    - src/data_ingestion.py:20-46
+    - test_data_ingestion.ipynb:cell16
+    basis: one of five source records referenced by a notebook run is committed; the rest require fetching from an external, key-gated source with no key or cached copy in the repository, and no single documented command performs that fetch
   hybrid_search:
     present:
       value: true
-      evidence: ["src/index.py:53-121"]
-      basis: "keyword search and vector search are both implemented and fused into one ranked result"
+      evidence:
+      - src/index.py:53-121
+      basis: keyword search and vector search are both implemented and fused into one ranked result
     shipped_enabled:
       value: true
-      evidence: ["src/rag_helper_project.py:48-50", "src/index.py:116-121"]
-      basis: "the search method on the request path calls the fused search function, not either component alone"
+      evidence:
+      - src/rag_helper_project.py:48-50
+      - src/index.py:116-121
+      basis: the search method on the request path calls the fused search function, not either component alone
     evaluated:
       value: false
-      evidence: ["test_retriviel.ipynb"]
-      basis: "no reported number compares this technique against an alternative"
+      evidence:
+      - test_retriviel.ipynb
+      basis: no reported number compares this technique against an alternative
     measured_effect:
       value: not_measured
-      evidence: ["test_retriviel.ipynb"]
-      basis: "no measurement of this technique's effect is reported anywhere"
+      evidence:
+      - test_retriviel.ipynb
+      basis: no measurement of this technique's effect is reported anywhere
     decision_basis:
       value: none
-      evidence: ["README.md"]
-      basis: "no ship or do-not-ship reasoning for this technique is stated anywhere in the documentation"
-    decision_axes: []
+      evidence:
+      - README.md
+      basis: no ship or do-not-ship reasoning for this technique is stated anywhere in the documentation
+    decision_axes:
+      value: []
+      evidence:
+      - README.md
+      basis: No measured quantities named alongside this technique's decision_basis.
   reranking:
     present:
       value: false
-      evidence: ["<repo>"]
-      basis: "no reranking implementation exists anywhere in the source tree"
+      evidence:
+      - <repo>
+      basis: no reranking implementation exists anywhere in the source tree
     shipped_enabled:
       value: false
-      evidence: ["<repo>"]
-      basis: "not present, so not active on the request path"
+      evidence:
+      - <repo>
+      basis: not present, so not active on the request path
     evaluated:
       value: false
-      evidence: ["<repo>"]
-      basis: "not present, so not evaluated"
+      evidence:
+      - <repo>
+      basis: not present, so not evaluated
     measured_effect:
       value: not_measured
-      evidence: ["<repo>"]
-      basis: "not present, so no effect is reported"
+      evidence:
+      - <repo>
+      basis: not present, so no effect is reported
     decision_basis:
       value: none
-      evidence: ["README.md"]
-      basis: "no ship or do-not-ship reasoning for this technique is stated anywhere in the documentation"
-    decision_axes: []
+      evidence:
+      - README.md
+      basis: no ship or do-not-ship reasoning for this technique is stated anywhere in the documentation
+    decision_axes:
+      value: []
+      evidence:
+      - README.md
+      basis: No measured quantities named alongside this technique's decision_basis.
   query_rewriting:
     present:
       value: false
-      evidence: ["src/index.py:43-51"]
-      basis: "the only query transformation present strips stopwords and reformats the query for the keyword-search operator; it does not reformulate the question itself"
+      evidence:
+      - src/index.py:43-51
+      basis: the only query transformation present strips stopwords and reformats the query for the keyword-search operator; it does not reformulate the question itself
     shipped_enabled:
       value: false
-      evidence: ["src/index.py:43-51"]
-      basis: "not present as a rewriting technique, so not active on the request path"
+      evidence:
+      - src/index.py:43-51
+      basis: not present as a rewriting technique, so not active on the request path
     evaluated:
       value: false
-      evidence: ["<repo>"]
-      basis: "not present, so not evaluated"
+      evidence:
+      - <repo>
+      basis: not present, so not evaluated
     measured_effect:
       value: not_measured
-      evidence: ["<repo>"]
-      basis: "not present, so no effect is reported"
+      evidence:
+      - <repo>
+      basis: not present, so no effect is reported
     decision_basis:
       value: none
-      evidence: ["README.md"]
-      basis: "no ship or do-not-ship reasoning for this technique is stated anywhere in the documentation"
-    decision_axes: []
-
-  # I. Deployment and bonus
+      evidence:
+      - README.md
+      basis: no ship or do-not-ship reasoning for this technique is stated anywhere in the documentation
+    decision_axes:
+      value: []
+      evidence:
+      - README.md
+      basis: No measured quantities named alongside this technique's decision_basis.
   cloud_deployment:
     value: none
-    evidence: ["<repo>"]
-    basis: "no deployment configuration, infrastructure-as-code, or cloud deployment documentation exists anywhere in the repository"
-
-  # J. Documentation accuracy
+    evidence:
+    - <repo>
+    basis: no deployment configuration, infrastructure-as-code, or cloud deployment documentation exists anywhere in the repository
   headline_numbers_traceable:
     value: no_numbers
-    evidence: ["README.md"]
-    basis: "no evaluation or performance figures are reported anywhere in the documentation"
-
+    evidence:
+    - README.md
+    basis: no evaluation or performance figures are reported anywhere in the documentation
   untraceable_number_count:
     value: 0
-    evidence: ["README.md"]
-    basis: "no figures are reported, so none are untraceable"
-
+    evidence:
+    - README.md
+    basis: no figures are reported, so none are untraceable
   document_number_conflicts:
     value: 0
-    evidence: ["README.md"]
-    basis: "only one documentation file exists and it reports no figures, so no figures can disagree"
-
+    evidence:
+    - README.md
+    basis: only one documentation file exists and it reports no figures, so no figures can disagree
   document_code_conflicts:
     value: 2
-    evidence: ["test_data_ingestion.ipynb:cell6", "src/data_ingestion.py:82", "requirements.txt:2", "src/rag_helper_project.py:5-8"]
-    basis: "two conflicts: (1) a code comment in an ingestion notebook cell states an expected numeric dimensionality for generated vectors that contradicts both the model actually invoked two lines above it and the cell's own stored output; (2) a pinned-dependency comment names a package as the client for the hosted LLM used elsewhere, but the code's import statements for that LLM reference a different package than the one pinned"
-
+    evidence:
+    - test_data_ingestion.ipynb:cell6
+    - src/data_ingestion.py:82
+    - requirements.txt:2
+    - src/rag_helper_project.py:5-8
+    basis: 'two conflicts: (1) a code comment in an ingestion notebook cell states an expected numeric dimensionality for generated vectors that contradicts both the model actually invoked two lines above it and the cell''s own stored output; (2) a pinned-dependency comment names a package as the client for the hosted LLM used elsewhere, but the code''s import statements for that LLM reference a different package than the one pinned'
   broken_reference_count:
     value: 4
-    evidence: ["README.md:27-37", "<repo>"]
-    basis: "the documented project-structure listing names four paths under one directory that do not exist there: one subdirectory and two files with no corresponding tracked path anywhere, and one directory documented one level deeper than its actual tracked location"
-
+    evidence:
+    - README.md:27-37
+    - <repo>
+    basis: 'the documented project-structure listing names four paths under one directory that do not exist there: one subdirectory and two files with no corresponding tracked path anywhere, and one directory documented one level deeper than its actual tracked location'
   limitations_section:
     value: includes_structural
-    evidence: ["README.md:151-160"]
-    basis: "one named limitation is 'limited evaluation data', which concerns the adequacy of the project's own measurement rather than only hardware, scope or budget"
-
+    evidence:
+    - README.md:151-160
+    basis: one named limitation is 'limited evaluation data', which concerns the adequacy of the project's own measurement rather than only hardware, scope or budget
   artifact_reference_strength:
     value: partially_referenced
-    evidence: ["README.md:145-149", "src/data_ingestion.py"]
-    basis: "of two present checklist-relevant artifacts, one (a monitoring dashboard module) is named as part of a documented run command; the other (the ingestion entry point) is named nowhere in the documentation"
-
+    evidence:
+    - README.md:145-149
+    - src/data_ingestion.py
+    basis: of two present checklist-relevant artifacts, one (a monitoring dashboard module) is named as part of a documented run command; the other (the ingestion entry point) is named nowhere in the documentation
   artifacts_unreferenced_count:
     value: 1
-    evidence: ["src/data_ingestion.py", "README.md"]
-    basis: "the ingestion entry-point script is not named anywhere in the documentation: not in the structure listing, not in installation, not in usage"
-
-  # K. Descriptive
+    evidence:
+    - src/data_ingestion.py
+    - README.md
+    basis: 'the ingestion entry-point script is not named anywhere in the documentation: not in the structure listing, not in installation, not in usage'
   corpus_language:
     value: en
-    evidence: ["nnn", "data/transcripts/AAPL_2026Q3.json"]
-    basis: "the committed source transcript content is in English"
-
+    evidence:
+    - nnn
+    - data/transcripts/AAPL_2026Q3.json
+    basis: the committed source transcript content is in English
   corpus_domain:
-    value: "earnings call transcripts"
-    evidence: ["README.md:3-11"]
-    basis: "the documentation states the system indexes and answers questions about earnings call transcripts"
-
+    value: earnings call transcripts
+    evidence:
+    - README.md:3-11
+    basis: the documentation states the system indexes and answers questions about earnings call transcripts
   interface_framework:
     value: streamlit
-    evidence: ["src/app.py:1,9", "requirements.txt:6"]
-    basis: "the UI module is built on this web-app framework"
-
+    evidence:
+    - src/app.py:1,9
+    - requirements.txt:6
+    basis: the UI module is built on this web-app framework
   vector_store:
     value: pgvector
-    evidence: ["src/db_init.py:1-25", "src/index.py:82-99", "requirements.txt:17"]
-    basis: "vector search runs against this Postgres vector extension"
-
+    evidence:
+    - src/db_init.py:1-25
+    - src/index.py:82-99
+    - requirements.txt:17
+    basis: vector search runs against this Postgres vector extension
   llm_provider:
     value: gemini
-    evidence: ["src/rag_helper_project.py:12-16,38", "src/db_save.py:37"]
-    basis: "the LLM client and default model name both identify this provider"
-
+    evidence:
+    - src/rag_helper_project.py:12-16,38
+    - src/db_save.py:37
+    basis: the LLM client and default model name both identify this provider
   repo_file_count:
     value: 26
-    evidence: ["<repo>"]
-    basis: "git ls-files | wc -l at the pinned commit"
-
+    evidence:
+    - <repo>
+    basis: git ls-files | wc -l at the pinned commit
+  project_name:
+    value: Project Epsilon
+    evidence: []
+    basis: Synthetic label, assigned by tools/assign_project_names.py from case_id. Not derived from the repository and carries no real information about it.
 extraction_notes:
-  - "LICENSE:3 contains a person-identifying name in its copyright line; not reproduced in this record per the anonymity rule. Flagging for owner review, the same way a person-bearing file path would be flagged."
-  - "A stored Jupyter notebook output (test_data_ingestion.ipynb, cell 6) contains a local filesystem path that appears to embed the same person-identifying string as LICENSE:3, inside a library warning captured when the cell was originally run. Not reproduced here for the same reason. This is a second, independent leak surface the anonymity rule as written does not name (it only discusses file paths and contributor names, not incidentally-captured cell output), worth a schema-adjacent process note: notebook outputs can carry local-machine paths that leak identity even when the code itself is clean."
-  - "With retrieval_eval_present and llm_eval_present both false, several downstream enum fields (retrieval_eval_config_matches_shipped, retrieval_best_approach_shipped, llm_eval_role_overlap, llm_eval_config_matches_shipped) have no value that means 'the question does not apply because the evaluation this field examines does not exist' — only undeterminable, which normally means 'evidence is absent or contradictory.' Recorded as undeterminable here, but that is doing two different jobs across the corpus and a reader cannot tell which from the value alone. monitoring_charts_bound_to_data already has a not_applicable value for a structurally similar situation; groups D and E do not."
-  - "interface_kind boundary judgment: rag_helper_project.py's `if __name__ == '__main__'` block is a genuinely working script-style interaction (reads a query from an environment variable, prints the answer) but reads as debug/dev scaffolding rather than a documented user-facing interface — the README's own Interface section describes only the web UI. Included as script_or_notebook per the instruction to record every interface the repo actually offers; flagging because the schema does not distinguish a documented interface from code that happens to function as one."
-  - "query_rewriting boundary judgment: index.py's normalize_for_text_search() strips stopwords and reformats the query into the keyword-search operator's syntax. Recorded as NOT the query_rewriting technique (present: false) because it is search-syntax normalization for one retrieval branch, not a reformulation of the question itself. The schema does not state where this boundary falls, and a different extractor could reasonably read it the other way."
-  - "run_instructions_gap_count item 4 (the interface module's two import statements assuming different import roots) rests on general knowledge of how a directly-run Python script's own directory, rather than the invoking working directory, is placed at the front of the import path — this determines which of the two imports would resolve. This is ordinary language-mechanics knowledge, not domain knowledge, and is load-bearing for that value per the extractor prompt's rule on general programming knowledge; stated explicitly here rather than left implicit."
-  - "document_code_conflicts item 2 and run_instructions_gap_count item 3 both rest on knowing that the package named in the pinned dependency and the package actually imported by the code that calls the same hosted LLM are two distinct, differently-named PyPI packages with different import paths, not two names for the same thing. This is ordinary package-naming knowledge, load-bearing for both values, stated here per the same rule."
-  - "broken_reference_count's fourth item (a documented data directory one level deeper than its actual tracked location) is a softer case than the other three: a reader following the documented path literally finds nothing, but the actually-existing directory one level up has the same name and an attentive reader would likely find it by inference. Counted as broken because the check is what the documented path itself resolves to, not what a reader could work out; flagging the softness rather than silently rounding it away."
-  - "Two files in the tracked tree are macOS filesystem metadata (.DS_Store, at repo root and under src/) with no bearing on any field above; noted only so their presence in repo_file_count's denominator is not mistaken for an omission."
+- LICENSE:3 contains a person-identifying name in its copyright line; not reproduced in this record per the anonymity rule. Flagging for owner review, the same way a person-bearing file path would be flagged.
+- 'A stored Jupyter notebook output (test_data_ingestion.ipynb, cell 6) contains a local filesystem path that appears to embed the same person-identifying string as LICENSE:3, inside a library warning captured when the cell was originally run. Not reproduced here for the same reason. This is a second, independent leak surface the anonymity rule as written does not name (it only discusses file paths and contributor names, not incidentally-captured cell output), worth a schema-adjacent process note: notebook outputs can carry local-machine paths that leak identity even when the code itself is clean.'
+- With retrieval_eval_present and llm_eval_present both false, several downstream enum fields (retrieval_eval_config_matches_shipped, retrieval_best_approach_shipped, llm_eval_role_overlap, llm_eval_config_matches_shipped) have no value that means 'the question does not apply because the evaluation this field examines does not exist' — only undeterminable, which normally means 'evidence is absent or contradictory.' Recorded as undeterminable here, but that is doing two different jobs across the corpus and a reader cannot tell which from the value alone. monitoring_charts_bound_to_data already has a not_applicable value for a structurally similar situation; groups D and E do not.
+- 'interface_kind boundary judgment: rag_helper_project.py''s `if __name__ == ''__main__''` block is a genuinely working script-style interaction (reads a query from an environment variable, prints the answer) but reads as debug/dev scaffolding rather than a documented user-facing interface — the README''s own Interface section describes only the web UI. Included as script_or_notebook per the instruction to record every interface the repo actually offers; flagging because the schema does not distinguish a documented interface from code that happens to function as one.'
+- 'query_rewriting boundary judgment: index.py''s normalize_for_text_search() strips stopwords and reformats the query into the keyword-search operator''s syntax. Recorded as NOT the query_rewriting technique (present: false) because it is search-syntax normalization for one retrieval branch, not a reformulation of the question itself. The schema does not state where this boundary falls, and a different extractor could reasonably read it the other way.'
+- run_instructions_gap_count item 4 (the interface module's two import statements assuming different import roots) rests on general knowledge of how a directly-run Python script's own directory, rather than the invoking working directory, is placed at the front of the import path — this determines which of the two imports would resolve. This is ordinary language-mechanics knowledge, not domain knowledge, and is load-bearing for that value per the extractor prompt's rule on general programming knowledge; stated explicitly here rather than left implicit.
+- document_code_conflicts item 2 and run_instructions_gap_count item 3 both rest on knowing that the package named in the pinned dependency and the package actually imported by the code that calls the same hosted LLM are two distinct, differently-named PyPI packages with different import paths, not two names for the same thing. This is ordinary package-naming knowledge, load-bearing for both values, stated here per the same rule.
+- 'broken_reference_count''s fourth item (a documented data directory one level deeper than its actual tracked location) is a softer case than the other three: a reader following the documented path literally finds nothing, but the actually-existing directory one level up has the same name and an attentive reader would likely find it by inference. Counted as broken because the check is what the documented path itself resolves to, not what a reader could work out; flagging the softness rather than silently rounding it away.'
+- Two files in the tracked tree are macOS filesystem metadata (.DS_Store, at repo root and under src/) with no bearing on any field above; noted only so their presence in repo_file_count's denominator is not mistaken for an omission.

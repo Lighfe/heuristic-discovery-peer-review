@@ -707,6 +707,7 @@ not, and only the former is admissible (decision
 | `vector_store` | string | e.g. `qdrant`, `elasticsearch`, `in_memory` |
 | `llm_provider` | string | e.g. `openai`, `ollama` |
 | `repo_file_count` | int | tracked files at the pinned commit |
+| `project_name` | string | synthetic label, e.g. `Project Alpha` — see below (M2) |
 
 **`corpus_language` is constrained (M2).** M1 returned `pt` from one
 extraction and `portuguese` from another for the same fact — both correct,
@@ -731,6 +732,23 @@ noise, and G1's no-change half exists to catch precisely that.
 Note the asymmetry, deliberate and stated: `interface_framework` is
 descriptive while `interface_kind` is scoreable. *Whether* a project has a
 web interface is creditable; *which framework* built it is not.
+
+**`project_name` is synthetic and is never extracted (M2).** Every other
+field in this schema is a fact read off the repository. This one is not:
+it exists only so the cosmetic-rename no-change kind has a field to
+mutate — the catalogue names cosmetic renames as a required no-change
+type, and until this field existed no field held anything like a project
+or brand name at all. **The extractor never touches this field and must
+not invent one per repository.** A value assigned per-repo by a model
+risks leaking a real project or repo name into the record, which
+`agents/extractor`'s anonymity rule exists to prevent. Instead,
+`project_name` is assigned by a fixed, deterministic mapping from
+`case_id` (`tools/assign_project_names.py`): p01 → `Project Alpha`, p02 →
+`Project Beta`, and so on through the Greek alphabet. `evidence: []` and
+`basis` states plainly that the value is synthetic, not derived from the
+repository — this is not the `undeterminable`/`other` distinction, which
+is about facts the schema failed to settle; here there is no fact to
+settle at all.
 
 ---
 

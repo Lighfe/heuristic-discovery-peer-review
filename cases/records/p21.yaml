@@ -1,312 +1,389 @@
 schema_version: 1
 case_id: p21
-commit: "e1c25379fd09ce8e0b846b1368110f50a26e083e"
+commit: e1c25379fd09ce8e0b846b1368110f50a26e083e
 extracted_by: agents/extractor/v2
-extracted_on: "2026-08-17"
-
+extracted_on: '2026-08-17'
 fields:
-
-  # A. System shape
   knowledge_base_present:
     value: present
-    evidence: ["data/studygrid_faq.json", "retriever.py:44-55"]
-    basis: "a committed FAQ dataset is loaded into a persistent vector index"
+    evidence:
+    - data/studygrid_faq.json
+    - retriever.py:44-55
+    basis: a committed FAQ dataset is loaded into a persistent vector index
   llm_in_flow:
     value: present
-    evidence: ["agent.py:90-97"]
-    basis: "the request path calls an LLM (Groq chat.completions.create)"
+    evidence:
+    - agent.py:90-97
+    basis: the request path calls an LLM (Groq chat.completions.create)
   retrieval_flow:
     value: kb_and_llm
-    evidence: ["agent.py:24-87", "search.py:1-15", "retriever.py:57-63"]
-    basis: "the request handler (agent.chat) both invokes the search tool against the vector index and calls the LLM"
+    evidence:
+    - agent.py:24-87
+    - search.py:1-15
+    - retriever.py:57-63
+    basis: the request handler (agent.chat) both invokes the search tool against the vector index and calls the LLM
   problem_statement:
     value: specific
-    evidence: ["README.md:47-58"]
-    basis: "a named 'Problem Statement' section states the question answered (how StudyGrid features work) and the audience (StudyGrid users)"
-
-  # B. Interface
+    evidence:
+    - README.md:47-58
+    basis: a named 'Problem Statement' section states the question answered (how StudyGrid features work) and the audience (StudyGrid users)
   interface_kind:
-    value: [cli, web_ui]
-    evidence: ["main.py:1-21", "monitoring/app.py:1-97"]
-    basis: "an interactive terminal loop (main.py) and a Streamlit chat page (monitoring/app.py) are both committed"
+    value:
+    - cli
+    - web_ui
+    evidence:
+    - main.py:1-21
+    - monitoring/app.py:1-97
+    basis: an interactive terminal loop (main.py) and a Streamlit chat page (monitoring/app.py) are both committed
   interface_evidence_kind:
     value: code_only
-    evidence: ["README.md:30-34", "README.md:444-454"]
-    basis: "README references screenshots (images/chat-ui.png, images/dashboard-*.png) but no images/ directory or image file is tracked in the repository"
-
-  # C. Ingestion
+    evidence:
+    - README.md:30-34
+    - README.md:444-454
+    basis: README references screenshots (images/chat-ui.png, images/dashboard-*.png) but no images/ directory or image file is tracked in the repository
   ingestion_kind:
     value: script_or_notebook
-    evidence: ["ingest.py:1-6"]
-    basis: "a standalone ingest.py is the documented ingestion entry point"
+    evidence:
+    - ingest.py:1-6
+    basis: a standalone ingest.py is the documented ingestion entry point
   ingestion_single_command:
     value: true
-    evidence: ["README.md:549-557"]
-    basis: "one documented command, `uv run python ingest.py`, is presented as running ingestion end to end"
+    evidence:
+    - README.md:549-557
+    basis: one documented command, `uv run python ingest.py`, is presented as running ingestion end to end
   ingestion_output_stated:
     value: true
-    evidence: ["README.md:300-306"]
-    basis: "document count (34 FAQ documents) is stated"
-
-  # D. Retrieval evaluation
+    evidence:
+    - README.md:300-306
+    basis: document count (34 FAQ documents) is stated
   retrieval_eval_present:
     value: true
-    evidence: ["evaluation/01_ground_truth_and_search_eval.ipynb:cell36,cell37,cell38"]
-    basis: "a relevance computation (document-id match) is defined and run over a sample of the ground-truth set"
+    evidence:
+    - evaluation/01_ground_truth_and_search_eval.ipynb:cell36,cell37,cell38
+    basis: a relevance computation (document-id match) is defined and run over a sample of the ground-truth set
   retrieval_eval_approaches_compared:
     value: 1
-    evidence: ["README.md:312-332"]
-    basis: "one retrieval strategy (the shipped vector search) has reported numbers; no alternative strategy is reported alongside it for comparison"
+    evidence:
+    - README.md:312-332
+    basis: one retrieval strategy (the shipped vector search) has reported numbers; no alternative strategy is reported alongside it for comparison
   retrieval_eval_set_committed:
     value: committed
-    evidence: ["data/ground_truth.csv"]
-    basis: "170 rows committed"
+    evidence:
+    - data/ground_truth.csv
+    basis: 170 rows committed
   retrieval_eval_set_size:
     value: 170
-    evidence: ["data/ground_truth.csv"]
-    basis: "wc -l data/ground_truth.csv is 171 (1 header + 170 rows)"
+    evidence:
+    - data/ground_truth.csv
+    basis: wc -l data/ground_truth.csv is 171 (1 header + 170 rows)
   retrieval_eval_relevance_rule:
     value: document_level
-    evidence: ["evaluation/01_ground_truth_and_search_eval.ipynb:cell36"]
-    basis: "a retrieved result counts as a hit when its 'id' equals the ground-truth question's source FAQ document id"
+    evidence:
+    - evaluation/01_ground_truth_and_search_eval.ipynb:cell36
+    basis: a retrieved result counts as a hit when its 'id' equals the ground-truth question's source FAQ document id
   retrieval_eval_config_matches_shipped:
     value: matches
-    evidence: ["evaluation/01_ground_truth_and_search_eval.ipynb:cell32,cell33", "config.py:19-23", "search.py:12-15", "retriever.py:57-63"]
-    basis: "the notebook builds Retriever with the same defaults as config.py and calls search with num_results=5, the same default search.py's SearchTool uses on the request path"
+    evidence:
+    - evaluation/01_ground_truth_and_search_eval.ipynb:cell32,cell33
+    - config.py:19-23
+    - search.py:12-15
+    - retriever.py:57-63
+    basis: the notebook builds Retriever with the same defaults as config.py and calls search with num_results=5, the same default search.py's SearchTool uses on the request path
   retrieval_eval_uncertainty_stated:
     value: false
-    evidence: ["README.md:325-332"]
-    basis: "only point values (97.1%, 0.889) are reported, no interval or variance"
+    evidence:
+    - README.md:325-332
+    basis: only point values (97.1%, 0.889) are reported, no interval or variance
   retrieval_best_approach_shipped:
     value: undeterminable
-    evidence: ["retriever.py:33-49", "README.md:336-344"]
-    basis: "only one retrieval configuration has reported evaluation numbers; the documented LSH-to-IVF index-mode change is argued in prose and code comments but no before/after numeric comparison is reported, so which of two approaches is 'best' cannot be read off reported numbers"
+    evidence:
+    - retriever.py:33-49
+    - README.md:336-344
+    basis: only one retrieval configuration has reported evaluation numbers; the documented LSH-to-IVF index-mode change is argued in prose and code comments but no before/after numeric comparison is reported, so which of two approaches is 'best' cannot be read off reported numbers
   retrieval_eval_reproducible:
     value: neither
-    evidence: ["evaluation/01_ground_truth_and_search_eval.ipynb"]
-    basis: "no cell in the committed notebook computes hit rate or MRR at all (no such function exists), so the README's reported retrieval figures cannot be regenerated, or even traced, from committed code"
-
-  # E. Answer evaluation
+    evidence:
+    - evaluation/01_ground_truth_and_search_eval.ipynb
+    basis: no cell in the committed notebook computes hit rate or MRR at all (no such function exists), so the README's reported retrieval figures cannot be regenerated, or even traced, from committed code
   llm_eval_present:
     value: true
-    evidence: ["monitoring/judge.py:10-66", "evaluation/02_rag_evaluation.ipynb"]
-    basis: "a model-judge (evaluate_relevance) exists and classifies answer relevance, and a notebook generates agent answers over the full ground-truth set for evaluation"
+    evidence:
+    - monitoring/judge.py:10-66
+    - evaluation/02_rag_evaluation.ipynb
+    basis: a model-judge (evaluate_relevance) exists and classifies answer relevance, and a notebook generates agent answers over the full ground-truth set for evaluation
   llm_eval_approaches_compared:
     value: 0
-    evidence: ["evaluation/02_rag_evaluation.ipynb"]
-    basis: "one prompt/model combination is exercised and no comparison with reported numbers between approaches is completed"
+    evidence:
+    - evaluation/02_rag_evaluation.ipynb
+    basis: one prompt/model combination is exercised and no comparison with reported numbers between approaches is completed
   llm_eval_judge_kind:
     value: model_judge
-    evidence: ["monitoring/judge.py:10-24"]
-    basis: "a structured-output LLM classifies each answer into RELEVANT/PARTLY_RELEVANT/NON_RELEVANT"
+    evidence:
+    - monitoring/judge.py:10-24
+    basis: a structured-output LLM classifies each answer into RELEVANT/PARTLY_RELEVANT/NON_RELEVANT
   llm_eval_judge_spotchecked:
     value: false
     evidence: []
-    basis: "no committed artifact shows a sample of judge verdicts checked by hand with a reported result"
+    basis: no committed artifact shows a sample of judge verdicts checked by hand with a reported result
   llm_eval_question_generator:
     value: generator_ties_question_to_passage
-    evidence: ["evaluation/01_ground_truth_and_search_eval.ipynb:cell17"]
-    basis: "generate_ground_truth records {question, document: doc['id']} for every generated question, tying each question to its source FAQ document"
+    evidence:
+    - evaluation/01_ground_truth_and_search_eval.ipynb:cell17
+    basis: 'generate_ground_truth records {question, document: doc[''id'']} for every generated question, tying each question to its source FAQ document'
   llm_eval_metric_at_ceiling:
     value: null
     evidence: []
-    basis: "no aggregate answer-quality metric is committed anywhere (evaluation/02_rag_evaluation.ipynb never invokes the judge or computes a rate), so there is nothing to check for ceiling behavior"
+    basis: no aggregate answer-quality metric is committed anywhere (evaluation/02_rag_evaluation.ipynb never invokes the judge or computes a rate), so there is nothing to check for ceiling behavior
   llm_eval_role_overlap:
     value: same_model
-    evidence: ["evaluation/evaluation_utils.py:53-67,74", "evaluation/01_ground_truth_and_search_eval.ipynb:cell17", "monitoring/judge.py:39-49,58-63", "config.py:25-28"]
-    basis: "the question generator (default model of generate_structured_with_retry, used by generate_ground_truth), the answer generator (agent model in config.py), and the judge (evaluate_relevance, same default model) all resolve to the identical model string"
+    evidence:
+    - evaluation/evaluation_utils.py:53-67,74
+    - evaluation/01_ground_truth_and_search_eval.ipynb:cell17
+    - monitoring/judge.py:39-49,58-63
+    - config.py:25-28
+    basis: the question generator (default model of generate_structured_with_retry, used by generate_ground_truth), the answer generator (agent model in config.py), and the judge (evaluate_relevance, same default model) all resolve to the identical model string
   llm_eval_config_matches_shipped:
     value: matches
-    evidence: ["evaluation/02_rag_evaluation.ipynb:cell2", "config.py:12-28"]
-    basis: "the notebook constructs GridMindAgent with the same client base_url and default model as config.py builds the shipped agent with"
+    evidence:
+    - evaluation/02_rag_evaluation.ipynb:cell2
+    - config.py:12-28
+    basis: the notebook constructs GridMindAgent with the same client base_url and default model as config.py builds the shipped agent with
   llm_eval_reproducible:
     value: neither
-    evidence: ["evaluation/02_rag_evaluation.ipynb:cell11,cell12,cell13,cell14"]
-    basis: "93 of 170 generation calls raised errors when the notebook was run, and the two cells that would explain or total the outcome (cell13, cell14) show no execution count, so the run's own result is not fully inspectable from the committed notebook"
-
-  # F. Monitoring
+    evidence:
+    - evaluation/02_rag_evaluation.ipynb:cell11,cell12,cell13,cell14
+    basis: 93 of 170 generation calls raised errors when the notebook was run, and the two cells that would explain or total the outcome (cell13, cell14) show no execution count, so the run's own result is not fully inspectable from the committed notebook
   monitoring_kind:
     value: feedback_and_dashboard
-    evidence: ["monitoring/app.py:33-42", "monitoring/dashboard.py:1-75"]
-    basis: "thumbs up/down feedback capture and a Streamlit analytics dashboard are both committed"
+    evidence:
+    - monitoring/app.py:33-42
+    - monitoring/dashboard.py:1-75
+    basis: thumbs up/down feedback capture and a Streamlit analytics dashboard are both committed
   monitoring_dashboard_provenance:
     value: committed_definitions
-    evidence: ["monitoring/dashboard.py:22-75"]
-    basis: "every panel is a Streamlit call in committed code reading from committed queries, not a stock observability UI"
+    evidence:
+    - monitoring/dashboard.py:22-75
+    basis: every panel is a Streamlit call in committed code reading from committed queries, not a stock observability UI
   monitoring_instrumentation:
     value: traced_on_request_path
-    evidence: ["monitoring/metrics.py:37-84", "monitoring/app.py:62-89"]
-    basis: "GridMindAgentWithMetrics records llm-call and token metrics during agent.chat(), and monitoring/app.py saves them to the database on the live serving path"
+    evidence:
+    - monitoring/metrics.py:37-84
+    - monitoring/app.py:62-89
+    basis: GridMindAgentWithMetrics records llm-call and token metrics during agent.chat(), and monitoring/app.py saves them to the database on the live serving path
   monitoring_chart_count:
     value: 11
-    evidence: ["monitoring/dashboard.py:27-32,39-46,63-74"]
-    basis: "count of committed st.metric/st.line_chart/st.bar_chart panel calls: 5 top-row metrics, 3 charts (cost, response time, llm calls), 1 relevance bar chart, 2 feedback metrics"
+    evidence:
+    - monitoring/dashboard.py:27-32,39-46,63-74
+    basis: 'count of committed st.metric/st.line_chart/st.bar_chart panel calls: 5 top-row metrics, 3 charts (cost, response time, llm calls), 1 relevance bar chart, 2 feedback metrics'
   monitoring_charts_bound_to_data:
     value: all
-    evidence: ["monitoring/dashboard.py:14-20,25", "monitoring/db_query.py:23-124", "monitoring/db_init.py:37-56"]
-    basis: "every panel reads a db_query.py function whose SQL selects columns that exist in the tables created by db_init.py"
-
-  # G. Containerization and reproducibility
+    evidence:
+    - monitoring/dashboard.py:14-20,25
+    - monitoring/db_query.py:23-124
+    - monitoring/db_init.py:37-56
+    basis: every panel reads a db_query.py function whose SQL selects columns that exist in the tables created by db_init.py
   containerization_kind:
     value: none
     evidence: []
-    basis: "no Dockerfile or compose file is committed; only a docker run command appears in README prose"
+    basis: no Dockerfile or compose file is committed; only a docker run command appears in README prose
   run_instructions:
     value: complete
-    evidence: ["README.md:496-627"]
-    basis: "setup, dependencies, environment variables, and run commands for every component are all stated"
+    evidence:
+    - README.md:496-627
+    basis: setup, dependencies, environment variables, and run commands for every component are all stated
   run_instructions_gap_count:
     value: 2
-    evidence: ["ingest.py:1-6", "README.md:549-557", "README.md:561-571", "README.md:575-597", "monitoring/app.py:76"]
-    basis: "(1) the documented `uv run python ingest.py` step has no __main__ block and performs no action, so it does not build the persistent index it claims to; (2) 'Run the Chat Application' documents `streamlit run monitoring/app.py` before the Postgres setup in 'Run the Monitoring Dashboard', but app.py calls save_conversation() unconditionally on every message and fails without Postgres already running"
+    evidence:
+    - ingest.py:1-6
+    - README.md:549-557
+    - README.md:561-571
+    - README.md:575-597
+    - monitoring/app.py:76
+    basis: (1) the documented `uv run python ingest.py` step has no __main__ block and performs no action, so it does not build the persistent index it claims to; (2) 'Run the Chat Application' documents `streamlit run monitoring/app.py` before the Postgres setup in 'Run the Monitoring Dashboard', but app.py calls save_conversation() unconditionally on every message and fails without Postgres already running
   dependency_versions_pinned:
     value: lockfile_committed
-    evidence: ["uv.lock", "pyproject.toml:7-21"]
-    basis: "pyproject.toml states only lower bounds, but a uv.lock is committed"
+    evidence:
+    - uv.lock
+    - pyproject.toml:7-21
+    basis: pyproject.toml states only lower bounds, but a uv.lock is committed
   data_accessible:
     value: automated_or_committed
-    evidence: ["data/studygrid_faq.json"]
-    basis: "the source dataset is committed directly in the repository"
-
-  # H. Techniques
+    evidence:
+    - data/studygrid_faq.json
+    basis: the source dataset is committed directly in the repository
   hybrid_search:
     present:
       value: false
-      evidence: ["retriever.py:1-66", "search.py:1-15"]
-      basis: "retrieval is single-strategy dense vector search; no keyword/BM25 combination is implemented"
+      evidence:
+      - retriever.py:1-66
+      - search.py:1-15
+      basis: retrieval is single-strategy dense vector search; no keyword/BM25 combination is implemented
     shipped_enabled:
       value: false
       evidence: []
-      basis: "not implemented, so nothing is enabled on the request path"
+      basis: not implemented, so nothing is enabled on the request path
     evaluated:
       value: false
       evidence: []
-      basis: "not implemented, so no effect is measured"
+      basis: not implemented, so no effect is measured
     measured_effect:
       value: not_measured
       evidence: []
-      basis: "not implemented"
+      basis: not implemented
     decision_basis:
       value: none
       evidence: []
-      basis: "no ship/do-not-ship reasoning about hybrid search is stated, because it is not implemented"
-    decision_axes: []
-
+      basis: no ship/do-not-ship reasoning about hybrid search is stated, because it is not implemented
+    decision_axes:
+      value: []
+      evidence: []
+      basis: No measured quantities named alongside this technique's decision_basis.
   reranking:
     present:
       value: false
-      evidence: ["retriever.py:1-66", "context.py:1-19"]
-      basis: "search results are passed to context construction with no reranking step"
+      evidence:
+      - retriever.py:1-66
+      - context.py:1-19
+      basis: search results are passed to context construction with no reranking step
     shipped_enabled:
       value: false
       evidence: []
-      basis: "not implemented"
+      basis: not implemented
     evaluated:
       value: false
       evidence: []
-      basis: "not implemented"
+      basis: not implemented
     measured_effect:
       value: not_measured
       evidence: []
-      basis: "not implemented"
+      basis: not implemented
     decision_basis:
       value: none
       evidence: []
-      basis: "no ship/do-not-ship reasoning about reranking is stated, because it is not implemented"
-    decision_axes: []
-
+      basis: no ship/do-not-ship reasoning about reranking is stated, because it is not implemented
+    decision_axes:
+      value: []
+      evidence: []
+      basis: No measured quantities named alongside this technique's decision_basis.
   query_rewriting:
     present:
       value: false
-      evidence: ["agent.py:1-97", "tools.py:1-26"]
-      basis: "the agent passes the model's query argument straight to search with no rewriting step"
+      evidence:
+      - agent.py:1-97
+      - tools.py:1-26
+      basis: the agent passes the model's query argument straight to search with no rewriting step
     shipped_enabled:
       value: false
       evidence: []
-      basis: "not implemented"
+      basis: not implemented
     evaluated:
       value: false
       evidence: []
-      basis: "not implemented"
+      basis: not implemented
     measured_effect:
       value: not_measured
       evidence: []
-      basis: "not implemented"
+      basis: not implemented
     decision_basis:
       value: none
       evidence: []
-      basis: "no ship/do-not-ship reasoning about query rewriting is stated, because it is not implemented"
-    decision_axes: []
-
-  # I. Deployment and bonus
+      basis: no ship/do-not-ship reasoning about query rewriting is stated, because it is not implemented
+    decision_axes:
+      value: []
+      evidence: []
+      basis: No measured quantities named alongside this technique's decision_basis.
   cloud_deployment:
     value: none
-    evidence: ["README.md:649-659"]
-    basis: "'Docker Compose deployment' and 'Production deployment' are listed under Future Improvements, i.e. not present"
-
-  # J. Documentation accuracy
+    evidence:
+    - README.md:649-659
+    basis: '''Docker Compose deployment'' and ''Production deployment'' are listed under Future Improvements, i.e. not present'
   headline_numbers_traceable:
     value: some_traceable
-    evidence: ["data/ground_truth.csv", "data/studygrid_faq.json", "evaluation/01_ground_truth_and_search_eval.ipynb"]
-    basis: "the dataset-size figures (34 documents, 170 questions, 5 per document) are traceable to committed files; the Hit Rate (97.1%) and MRR (0.889) figures are not, since no committed code computes either metric"
+    evidence:
+    - data/ground_truth.csv
+    - data/studygrid_faq.json
+    - evaluation/01_ground_truth_and_search_eval.ipynb
+    basis: the dataset-size figures (34 documents, 170 questions, 5 per document) are traceable to committed files; the Hit Rate (97.1%) and MRR (0.889) figures are not, since no committed code computes either metric
   untraceable_number_count:
     value: 2
-    evidence: ["README.md:329-330"]
-    basis: "two individual figures (Hit Rate 97.1%, MRR 0.889) have no committed artifact able to produce them"
+    evidence:
+    - README.md:329-330
+    basis: two individual figures (Hit Rate 97.1%, MRR 0.889) have no committed artifact able to produce them
   document_number_conflicts:
     value: 0
     evidence: []
-    basis: "no two committed documents state disagreeing figures for the same quantity"
+    basis: no two committed documents state disagreeing figures for the same quantity
   document_code_conflicts:
     value: 2
-    evidence: ["README.md:549-557", "ingest.py:1-6", "evaluation/01_ground_truth_and_search_eval.ipynb:cell0,cell8,cell9"]
-    basis: "(1) README claims `uv run python ingest.py` builds the persistent index, but ingest.py has no executable entry point; (2) the notebook's own markdown cells claim to use 'a plain OpenAI client' separate from the app's Groq client, but the code cell configures the same GROQ_API_KEY and Groq base_url the production app uses"
+    evidence:
+    - README.md:549-557
+    - ingest.py:1-6
+    - evaluation/01_ground_truth_and_search_eval.ipynb:cell0,cell8,cell9
+    basis: (1) README claims `uv run python ingest.py` builds the persistent index, but ingest.py has no executable entry point; (2) the notebook's own markdown cells claim to use 'a plain OpenAI client' separate from the app's Groq client, but the code cell configures the same GROQ_API_KEY and Groq base_url the production app uses
   broken_reference_count:
     value: 4
-    evidence: ["README.md:33", "README.md:445", "README.md:449", "README.md:453"]
-    basis: "four <img> paths under images/ are referenced and no images/ directory or image file is tracked in the repository"
+    evidence:
+    - README.md:33
+    - README.md:445
+    - README.md:449
+    - README.md:453
+    basis: four <img> paths under images/ are referenced and no images/ directory or image file is tracked in the repository
   limitations_section:
     value: includes_structural
-    evidence: ["README.md:424"]
-    basis: "the LLM-as-a-Judge section states the judge runs synchronously on every response, adding latency and cost, and names sampling/async execution as the fix — a stated limitation of the system's own method, though not under a heading named Limitations"
+    evidence:
+    - README.md:424
+    basis: the LLM-as-a-Judge section states the judge runs synchronously on every response, adding latency and cost, and names sampling/async execution as the fix — a stated limitation of the system's own method, though not under a heading named Limitations
   artifact_reference_strength:
     value: partially_referenced
-    evidence: ["README.md:607-625"]
-    basis: "data/ground_truth.csv, the committed evaluation question set, is named nowhere in the documentation by path"
+    evidence:
+    - README.md:607-625
+    basis: data/ground_truth.csv, the committed evaluation question set, is named nowhere in the documentation by path
   artifacts_unreferenced_count:
     value: 1
-    evidence: ["data/ground_truth.csv"]
-    basis: "over the fixed checklist (eval script/notebook, eval question set, monitoring dashboard definition, ingestion entry point; deployment configuration excluded as not present), only the eval question set is unreferenced"
-
-  # K. Descriptive
+    evidence:
+    - data/ground_truth.csv
+    basis: over the fixed checklist (eval script/notebook, eval question set, monitoring dashboard definition, ingestion entry point; deployment configuration excluded as not present), only the eval question set is unreferenced
   corpus_language:
     value: en
-    evidence: ["data/studygrid_faq.json", "retriever.py:9-13"]
-    basis: "the shipped dataset (studygrid_faq.json) is English; retriever.py's own comment states the embedding model is English-only for this dataset"
+    evidence:
+    - data/studygrid_faq.json
+    - retriever.py:9-13
+    basis: the shipped dataset (studygrid_faq.json) is English; retriever.py's own comment states the embedding model is English-only for this dataset
   corpus_domain:
-    value: "study/collaboration app FAQ support"
-    evidence: ["README.md:150-165"]
+    value: study/collaboration app FAQ support
+    evidence:
+    - README.md:150-165
     basis: null
   interface_framework:
     value: streamlit
-    evidence: ["monitoring/app.py:12", "pyproject.toml:19"]
+    evidence:
+    - monitoring/app.py:12
+    - pyproject.toml:19
     basis: null
   vector_store:
     value: sqlitesearch
-    evidence: ["retriever.py:5,44-49"]
+    evidence:
+    - retriever.py:5,44-49
     basis: null
   llm_provider:
     value: groq
-    evidence: ["config.py:12-15", "evaluation/01_ground_truth_and_search_eval.ipynb:cell9", "monitoring/judge.py:45-48"]
+    evidence:
+    - config.py:12-15
+    - evaluation/01_ground_truth_and_search_eval.ipynb:cell9
+    - monitoring/judge.py:45-48
     basis: null
   repo_file_count:
     value: 34
-    evidence: ["<repo>"]
-    basis: "git ls-files | wc -l at the pinned commit"
-
+    evidence:
+    - <repo>
+    basis: git ls-files | wc -l at the pinned commit
+  project_name:
+    value: Project Phi
+    evidence: []
+    basis: Synthetic label, assigned by tools/assign_project_names.py from case_id. Not derived from the repository and carries no real information about it.
 extraction_notes:
-  - "llm_eval_present is a judgment call the schema does not disambiguate: this repository has a working model-judge (monitoring/judge.py) but it is wired only into the live per-conversation monitoring path (monitoring/app.py), never into an offline batch run against the committed ground-truth set with a reported aggregate. evaluation/02_rag_evaluation.ipynb generates agent answers for all 170 ground-truth questions but never calls the judge or computes any metric. Recorded present=true because the judging mechanism and an answer-generation pass over the eval set both exist, but this is a genuinely different shape of 'answer evaluation' than p01/p02 and the schema has no field to say so directly."
-  - "The notebook's own markdown documentation (evaluation/01_ground_truth_and_search_eval.ipynb, cells 0 and 8) claims ground-truth generation uses 'a plain OpenAI client, separate from the Groq client the app uses' — but the code cell immediately below configures GROQ_API_KEY and Groq's base_url, identical to the production client. This directly undermines the intended separation between question-generator and answer-generator/judge that llm_eval_role_overlap exists to check, and is itself a document/code conflict (recorded in document_code_conflicts) that a reader following only the markdown would miss."
-  - "ingest.py is committed and documented as the ingestion entry point but contains only a load_faq_data() function with no __main__ block; running it as documented does nothing. The actual index build happens as a side effect of the first Retriever() instantiation (in retriever.py, triggered by config.py). This makes group C's ingestion_single_command (a command is documented) and group G's run_instructions_gap_count (the documented command doesn't work) both true of the same fact from two different angles — the schema has no field connecting them."
-  - "data/studygrid_faq_bilingual.json (33 entries) and data/studygrid_faq.json (34 entries, the shipped default) differ in document count; the bilingual file is only read by the legacy/unused notebooks/legacy_rag_notebook.ipynb, not by the shipped ingestion path. Noted for context; no scoreable field reads this."
-  - "The repository contains an empty tracked path .agents/skills/developing-with-streamlit (0 bytes, no files under it) — not investigated further as it carries no evidentiary content for any field."
+- 'llm_eval_present is a judgment call the schema does not disambiguate: this repository has a working model-judge (monitoring/judge.py) but it is wired only into the live per-conversation monitoring path (monitoring/app.py), never into an offline batch run against the committed ground-truth set with a reported aggregate. evaluation/02_rag_evaluation.ipynb generates agent answers for all 170 ground-truth questions but never calls the judge or computes any metric. Recorded present=true because the judging mechanism and an answer-generation pass over the eval set both exist, but this is a genuinely different shape of ''answer evaluation'' than p01/p02 and the schema has no field to say so directly.'
+- The notebook's own markdown documentation (evaluation/01_ground_truth_and_search_eval.ipynb, cells 0 and 8) claims ground-truth generation uses 'a plain OpenAI client, separate from the Groq client the app uses' — but the code cell immediately below configures GROQ_API_KEY and Groq's base_url, identical to the production client. This directly undermines the intended separation between question-generator and answer-generator/judge that llm_eval_role_overlap exists to check, and is itself a document/code conflict (recorded in document_code_conflicts) that a reader following only the markdown would miss.
+- ingest.py is committed and documented as the ingestion entry point but contains only a load_faq_data() function with no __main__ block; running it as documented does nothing. The actual index build happens as a side effect of the first Retriever() instantiation (in retriever.py, triggered by config.py). This makes group C's ingestion_single_command (a command is documented) and group G's run_instructions_gap_count (the documented command doesn't work) both true of the same fact from two different angles — the schema has no field connecting them.
+- data/studygrid_faq_bilingual.json (33 entries) and data/studygrid_faq.json (34 entries, the shipped default) differ in document count; the bilingual file is only read by the legacy/unused notebooks/legacy_rag_notebook.ipynb, not by the shipped ingestion path. Noted for context; no scoreable field reads this.
+- The repository contains an empty tracked path .agents/skills/developing-with-streamlit (0 bytes, no files under it) — not investigated further as it carries no evidentiary content for any field.

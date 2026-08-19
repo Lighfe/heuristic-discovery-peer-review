@@ -1,310 +1,380 @@
 schema_version: 1
 case_id: p16
-commit: "95ae2b59810d1b9ef6765d9b1ec7b7bb4da8cb45"
+commit: 95ae2b59810d1b9ef6765d9b1ec7b7bb4da8cb45
 extracted_by: agents/extractor/v2
-extracted_on: "2026-08-17"
-
+extracted_on: '2026-08-17'
 fields:
-  # A. System shape
   knowledge_base_present:
     value: present
-    evidence: ["data/data.csv", "src/ingest.py:96-103"]
-    basis: "591-row corpus is indexed via minsearch.Index in build_index()"
+    evidence:
+    - data/data.csv
+    - src/ingest.py:96-103
+    basis: 591-row corpus is indexed via minsearch.Index in build_index()
   llm_in_flow:
     value: present
-    evidence: ["src/rag.py:89-107"]
-    basis: "answer_question() calls an LLM chat-completions endpoint to synthesize the answer"
+    evidence:
+    - src/rag.py:89-107
+    basis: answer_question() calls an LLM chat-completions endpoint to synthesize the answer
   retrieval_flow:
     value: kb_and_llm
-    evidence: ["src/rag.py:43-54", "src/rag.py:89-108"]
-    basis: "answer_question() calls retrieve() against the minsearch index, then calls the LLM with the retrieved context"
+    evidence:
+    - src/rag.py:43-54
+    - src/rag.py:89-108
+    basis: answer_question() calls retrieve() against the minsearch index, then calls the LLM with the retrieved context
   problem_statement:
     value: specific
-    evidence: ["README.md:13-33"]
-    basis: "'Problem description' names the question answered (literature Q&A over wearable cardiac-signal research) and the audience ('a researcher, clinician, or student')"
-
-  # B. Interface
+    evidence:
+    - README.md:13-33
+    basis: '''Problem description'' names the question answered (literature Q&A over wearable cardiac-signal research) and the audience (''a researcher, clinician, or student'')'
   interface_kind:
-    value: [web_ui]
-    evidence: ["app.py:1-238", "README.md:11"]
-    basis: "app.py is a Streamlit application; it is the only documented way to interact with the system"
+    value:
+    - web_ui
+    evidence:
+    - app.py:1-238
+    - README.md:11
+    basis: app.py is a Streamlit application; it is the only documented way to interact with the system
   interface_evidence_kind:
     value: code_and_screenshot
-    evidence: ["docs/app.png", "README.md:11"]
-    basis: "README embeds a screenshot of the running web app; no recording is present"
-
-  # C. Ingestion
+    evidence:
+    - docs/app.png
+    - README.md:11
+    basis: README embeds a screenshot of the running web app; no recording is present
   ingestion_kind:
     value: script_or_notebook
-    evidence: ["src/ingest.py:106-110"]
-    basis: "ingestion runs as a standalone script (`__main__` block fetches and writes data/data.csv)"
+    evidence:
+    - src/ingest.py:106-110
+    basis: ingestion runs as a standalone script (`__main__` block fetches and writes data/data.csv)
   ingestion_single_command:
     value: true
-    evidence: ["README.md:108-109"]
-    basis: "documented as one command, though the command's stated path is wrong (see run_instructions_gap_count)"
+    evidence:
+    - README.md:108-109
+    basis: documented as one command, though the command's stated path is wrong (see run_instructions_gap_count)
   ingestion_output_stated:
     value: true
-    evidence: ["README.md:37-38", "notebooks/notebook.ipynb:cell4"]
-    basis: "README and notebook both state 591 committed records"
-
-  # D. Retrieval evaluation
+    evidence:
+    - README.md:37-38
+    - notebooks/notebook.ipynb:cell4
+    basis: README and notebook both state 591 committed records
   retrieval_eval_present:
     value: true
-    evidence: ["notebooks/notebook.ipynb:cell30-cell36", "README.md:143-183"]
-    basis: "a retrieval evaluation section reports hit rate and MRR for multiple strategies"
+    evidence:
+    - notebooks/notebook.ipynb:cell30-cell36
+    - README.md:143-183
+    basis: a retrieval evaluation section reports hit rate and MRR for multiple strategies
   retrieval_eval_approaches_compared:
     value: 6
-    evidence: ["README.md:157-164", "notebooks/notebook.ipynb:cell33,cell34"]
-    basis: "6 rows reported with numbers: text(title=1,abs=1), text(title=0.5,abs=1), text tuned, vector-MiniLM, vector-gte-base, hybrid-RRF; only 5 of the 6 have corresponding notebook code (see extraction_notes)"
+    evidence:
+    - README.md:157-164
+    - notebooks/notebook.ipynb:cell33,cell34
+    basis: '6 rows reported with numbers: text(title=1,abs=1), text(title=0.5,abs=1), text tuned, vector-MiniLM, vector-gte-base, hybrid-RRF; only 5 of the 6 have corresponding notebook code (see extraction_notes)'
   retrieval_eval_set_committed:
     value: committed
-    evidence: ["data/ground_truth_dataset_5_doc.csv"]
-    basis: "the ground-truth question set used by the evaluation is committed"
+    evidence:
+    - data/ground_truth_dataset_5_doc.csv
+    basis: the ground-truth question set used by the evaluation is committed
   retrieval_eval_set_size:
     value: 2955
-    evidence: ["data/ground_truth_dataset_5_doc.csv", "notebooks/notebook.ipynb:cell31"]
-    basis: "2955 data rows in the committed CSV; notebook prints the same count after loading it"
+    evidence:
+    - data/ground_truth_dataset_5_doc.csv
+    - notebooks/notebook.ipynb:cell31
+    basis: 2955 data rows in the committed CSV; notebook prints the same count after loading it
   retrieval_eval_relevance_rule:
     value: document_level
-    evidence: ["src/evaluation_utils.py:120-127"]
-    basis: "compute_relevance() scores a hit as int(d['id'] == doc_id) — whether the source document appears among results, not a passage-level match"
+    evidence:
+    - src/evaluation_utils.py:120-127
+    basis: compute_relevance() scores a hit as int(d['id'] == doc_id) — whether the source document appears among results, not a passage-level match
   retrieval_eval_config_matches_shipped:
     value: differs
-    evidence: ["notebooks/notebook.ipynb:cell32,cell33", "src/rag.py:43-54"]
-    basis: "evaluation methods search at depth k=10 throughout; the shipped retrieve() defaults to limit=5 (UI slider range 3-10). Boost weights for the shipped configuration (title=0.5, abstract=1.0) do match one evaluated row, but depth differs"
+    evidence:
+    - notebooks/notebook.ipynb:cell32,cell33
+    - src/rag.py:43-54
+    basis: evaluation methods search at depth k=10 throughout; the shipped retrieve() defaults to limit=5 (UI slider range 3-10). Boost weights for the shipped configuration (title=0.5, abstract=1.0) do match one evaluated row, but depth differs
   retrieval_eval_uncertainty_stated:
     value: true
-    evidence: ["README.md:164"]
-    basis: "the hybrid-RRF row is reported as a range (0.835-0.839 hit rate, 0.607-0.624 MRR) rather than a point estimate"
+    evidence:
+    - README.md:164
+    basis: the hybrid-RRF row is reported as a range (0.835-0.839 hit rate, 0.607-0.624 MRR) rather than a point estimate
   retrieval_best_approach_shipped:
-    value: "no"
-    evidence: ["notebooks/notebook.ipynb:cell34", "src/rag.py:53"]
-    basis: "tuned boost search (title=0.08, abstract=0.6) reports the best hit rate (0.867); the shipped retrieve() uses boost_dict={'title':0.5,'abstract':1.0} (hit rate 0.847), not the tuned result"
+    value: 'no'
+    evidence:
+    - notebooks/notebook.ipynb:cell34
+    - src/rag.py:53
+    basis: tuned boost search (title=0.08, abstract=0.6) reports the best hit rate (0.867); the shipped retrieve() uses boost_dict={'title':0.5,'abstract':1.0} (hit rate 0.847), not the tuned result
   retrieval_eval_reproducible:
     value: traceable_not_reproducible
-    evidence: ["notebooks/notebook.ipynb:cell9", "src/download.py", ".gitignore:12", "README.md:94-101"]
-    basis: "the vector/hybrid rows require an Embedder() over ONNX model files fetched by src/download.py into a models/ directory that is gitignored and never populated by any documented step; every step is still inspectable in committed code, so the pipeline is traceable but not runnable as committed"
-
-  # E. Answer evaluation
+    evidence:
+    - notebooks/notebook.ipynb:cell9
+    - src/download.py
+    - .gitignore:12
+    - README.md:94-101
+    basis: the vector/hybrid rows require an Embedder() over ONNX model files fetched by src/download.py into a models/ directory that is gitignored and never populated by any documented step; every step is still inspectable in committed code, so the pipeline is traceable but not runnable as committed
   llm_eval_present:
     value: true
-    evidence: ["notebooks/notebook.ipynb:cell37-cell39"]
-    basis: "an LLM-as-a-judge section rates a sample of RAG answers"
+    evidence:
+    - notebooks/notebook.ipynb:cell37-cell39
+    basis: an LLM-as-a-judge section rates a sample of RAG answers
   llm_eval_approaches_compared:
     value: 1
-    evidence: ["notebooks/notebook.ipynb:cell39"]
-    basis: "one system (the shipped rag() pipeline, one model) is judged; no alternative prompts or models are compared"
+    evidence:
+    - notebooks/notebook.ipynb:cell39
+    basis: one system (the shipped rag() pipeline, one model) is judged; no alternative prompts or models are compared
   llm_eval_judge_kind:
     value: model_judge
-    evidence: ["notebooks/notebook.ipynb:cell38"]
-    basis: "judge_answer() makes a second LLM call returning a Relevance verdict"
+    evidence:
+    - notebooks/notebook.ipynb:cell38
+    basis: judge_answer() makes a second LLM call returning a Relevance verdict
   llm_eval_judge_spotchecked:
     value: false
     evidence: []
-    basis: "no cell or document reports a manual check of judge verdicts"
+    basis: no cell or document reports a manual check of judge verdicts
   llm_eval_question_generator:
     value: generator_ties_question_to_passage
-    evidence: ["notebooks/notebook.ipynb:cell23"]
-    basis: "generate_ground_truth(doc) ties each generated question to the single source document it was generated from"
+    evidence:
+    - notebooks/notebook.ipynb:cell23
+    basis: generate_ground_truth(doc) ties each generated question to the single source document it was generated from
   llm_eval_metric_at_ceiling:
     value: false
-    evidence: ["notebooks/notebook.ipynb:cell39"]
-    basis: "reported RELEVANT share is 84.0%, direction-maximum but below the 95% ceiling threshold"
+    evidence:
+    - notebooks/notebook.ipynb:cell39
+    basis: reported RELEVANT share is 84.0%, direction-maximum but below the 95% ceiling threshold
   llm_eval_role_overlap:
     value: same_model
-    evidence: ["src/evaluation_utils.py:18", "notebooks/notebook.ipynb:cell23,cell38,cell39"]
-    basis: "question generation, answer generation (rag()), and judging all default to the same model (gpt-oss-120b); none of the three calls passes a different model"
+    evidence:
+    - src/evaluation_utils.py:18
+    - notebooks/notebook.ipynb:cell23,cell38,cell39
+    basis: question generation, answer generation (rag()), and judging all default to the same model (gpt-oss-120b); none of the three calls passes a different model
   llm_eval_config_matches_shipped:
     value: differs
-    evidence: ["notebooks/notebook.ipynb:cell7,cell14", "src/rag.py:43-54"]
-    basis: "the notebook's rag() searches via cell 7's search() (boost_dict={'title':2.0,'abstract':1.0}, num_results=10); the shipped retrieve() uses boost_dict={'title':0.5,'abstract':1.0} with a default limit of 5"
+    evidence:
+    - notebooks/notebook.ipynb:cell7,cell14
+    - src/rag.py:43-54
+    basis: the notebook's rag() searches via cell 7's search() (boost_dict={'title':2.0,'abstract':1.0}, num_results=10); the shipped retrieve() uses boost_dict={'title':0.5,'abstract':1.0} with a default limit of 5
   llm_eval_reproducible:
     value: reproducible_as_committed
-    evidence: ["notebooks/notebook.ipynb:cell7,cell31,cell38,cell39"]
-    basis: "the judge pipeline depends only on the committed minsearch Index (cell 7) and the committed ground-truth CSV (cell 31), not on the gitignored embedding model; running the cells as committed (with an API key) would reproduce it"
-
-  # F. Monitoring
+    evidence:
+    - notebooks/notebook.ipynb:cell7,cell31,cell38,cell39
+    basis: the judge pipeline depends only on the committed minsearch Index (cell 7) and the committed ground-truth CSV (cell 31), not on the gitignored embedding model; running the cells as committed (with an API key) would reproduce it
   monitoring_kind:
     value: none
-    evidence: ["README.md:198-203"]
-    basis: "README states monitoring is 'Not implemented in this version'"
+    evidence:
+    - README.md:198-203
+    basis: README states monitoring is 'Not implemented in this version'
   monitoring_dashboard_provenance:
     value: none
-    evidence: ["README.md:198-203"]
-    basis: "no dashboard of any kind is present"
+    evidence:
+    - README.md:198-203
+    basis: no dashboard of any kind is present
   monitoring_instrumentation:
     value: none
-    evidence: ["app.py:213-217"]
-    basis: "the 'Helpful' feedback button only sets in-memory Streamlit session state; nothing is logged or persisted"
+    evidence:
+    - app.py:213-217
+    basis: the 'Helpful' feedback button only sets in-memory Streamlit session state; nothing is logged or persisted
   monitoring_chart_count:
     value: null
     evidence: []
-    basis: "not applicable — no dashboard is defined"
+    basis: not applicable — no dashboard is defined
   monitoring_charts_bound_to_data:
     value: not_applicable
     evidence: []
-    basis: "no dashboard exists to check"
-
-  # G. Containerization and reproducibility
+    basis: no dashboard exists to check
   containerization_kind:
     value: compose_full
-    evidence: ["docker-compose.yml", "Dockerfile"]
-    basis: "a docker-compose.yml builds and runs the single app service; the application has no external service dependencies to separately stand up"
+    evidence:
+    - docker-compose.yml
+    - Dockerfile
+    basis: a docker-compose.yml builds and runs the single app service; the application has no external service dependencies to separately stand up
   run_instructions:
     value: complete
-    evidence: ["README.md:43-101"]
-    basis: "setup, dependency install, required env vars, and run commands are all named, for both Docker and local uv paths"
+    evidence:
+    - README.md:43-101
+    basis: setup, dependency install, required env vars, and run commands are all named, for both Docker and local uv paths
   run_instructions_gap_count:
     value: 2
-    evidence: ["README.md:108-109", "README.md:37-38", "notebooks/notebook.ipynb:cell9", "src/download.py"]
-    basis: "(1) the documented ingestion command 'uv run python ingest.py' (and the earlier 'see ingest.py' reference) names a file that does not exist at that path — the script is at src/ingest.py; (2) the notebook's vector-search cell requires ONNX model files fetched by src/download.py into a gitignored models/ directory, and no run-instruction step tells the reader to run it"
+    evidence:
+    - README.md:108-109
+    - README.md:37-38
+    - notebooks/notebook.ipynb:cell9
+    - src/download.py
+    basis: (1) the documented ingestion command 'uv run python ingest.py' (and the earlier 'see ingest.py' reference) names a file that does not exist at that path — the script is at src/ingest.py; (2) the notebook's vector-search cell requires ONNX model files fetched by src/download.py into a gitignored models/ directory, and no run-instruction step tells the reader to run it
   dependency_versions_pinned:
     value: lockfile_committed
-    evidence: ["pyproject.toml:7-19", "uv.lock"]
-    basis: "pyproject.toml states only lower bounds (>=); a uv.lock resolving exact versions is committed"
+    evidence:
+    - pyproject.toml:7-19
+    - uv.lock
+    basis: pyproject.toml states only lower bounds (>=); a uv.lock resolving exact versions is committed
   data_accessible:
     value: automated_or_committed
-    evidence: ["data/data.csv"]
-    basis: "the corpus is committed directly and is also re-fetchable via a script"
-
-  # H. Techniques
+    evidence:
+    - data/data.csv
+    basis: the corpus is committed directly and is also re-fetchable via a script
   hybrid_search:
     present:
       value: true
-      evidence: ["notebooks/notebook.ipynb:cell32"]
-      basis: "Reciprocal Rank Fusion (rrf()) combines the text and vector result lists"
+      evidence:
+      - notebooks/notebook.ipynb:cell32
+      basis: Reciprocal Rank Fusion (rrf()) combines the text and vector result lists
     shipped_enabled:
       value: false
-      evidence: ["src/rag.py:43-54"]
-      basis: "the shipped retrieve() calls only the text index; no fusion or vector step is on the request path"
+      evidence:
+      - src/rag.py:43-54
+      basis: the shipped retrieve() calls only the text index; no fusion or vector step is on the request path
     evaluated:
       value: true
-      evidence: ["notebooks/notebook.ipynb:cell33,cell35", "README.md:164"]
-      basis: "hit rate and MRR are computed for hybrid RRF, including a parameter sweep over rrf_k"
+      evidence:
+      - notebooks/notebook.ipynb:cell33,cell35
+      - README.md:164
+      basis: hit rate and MRR are computed for hybrid RRF, including a parameter sweep over rrf_k
     measured_effect:
       value: hurts
-      evidence: ["notebooks/notebook.ipynb:cell33", "README.md:164,168-177"]
-      basis: "hybrid hit rate/MRR (0.835/0.607) is lower than the best text-only configuration (0.867 tuned, 0.847 shipped) on both reported metrics"
+      evidence:
+      - notebooks/notebook.ipynb:cell33
+      - README.md:164,168-177
+      basis: hybrid hit rate/MRR (0.835/0.607) is lower than the best text-only configuration (0.867 tuned, 0.847 shipped) on both reported metrics
     decision_basis:
       value: measured
-      evidence: ["README.md:181-183"]
-      basis: "the decision to use text-only retrieval cites the project's own hit-rate/MRR comparison across text, vector, and hybrid"
-    decision_axes: ["hit_rate", "mrr"]
+      evidence:
+      - README.md:181-183
+      basis: the decision to use text-only retrieval cites the project's own hit-rate/MRR comparison across text, vector, and hybrid
+    decision_axes:
+      value:
+      - hit_rate
+      - mrr
+      evidence:
+      - README.md:181-183
+      basis: 'Quantities named in this technique''s decision_basis justification: hit_rate, mrr.'
   reranking:
     present:
       value: false
       evidence: []
-      basis: "no reranking code or reference found anywhere in the repository"
+      basis: no reranking code or reference found anywhere in the repository
     shipped_enabled:
       value: false
       evidence: []
-      basis: "not present, so not enabled"
+      basis: not present, so not enabled
     evaluated:
       value: false
       evidence: []
-      basis: "not present, so not evaluated"
+      basis: not present, so not evaluated
     measured_effect:
       value: not_measured
       evidence: []
-      basis: "not present"
+      basis: not present
     decision_basis:
       value: none
       evidence: []
-      basis: "no reranking ship/do-not-ship reasoning is stated"
-    decision_axes: []
+      basis: no reranking ship/do-not-ship reasoning is stated
+    decision_axes:
+      value: []
+      evidence: []
+      basis: No measured quantities named alongside this technique's decision_basis.
   query_rewriting:
     present:
       value: false
       evidence: []
-      basis: "no query rewriting or expansion code or reference found anywhere in the repository"
+      basis: no query rewriting or expansion code or reference found anywhere in the repository
     shipped_enabled:
       value: false
       evidence: []
-      basis: "not present, so not enabled"
+      basis: not present, so not enabled
     evaluated:
       value: false
       evidence: []
-      basis: "not present, so not evaluated"
+      basis: not present, so not evaluated
     measured_effect:
       value: not_measured
       evidence: []
-      basis: "not present"
+      basis: not present
     decision_basis:
       value: none
       evidence: []
-      basis: "no query-rewriting ship/do-not-ship reasoning is stated"
-    decision_axes: []
-
-  # I. Deployment and bonus
+      basis: no query-rewriting ship/do-not-ship reasoning is stated
+    decision_axes:
+      value: []
+      evidence: []
+      basis: No measured quantities named alongside this technique's decision_basis.
   cloud_deployment:
     value: none
     evidence: []
-    basis: "no cloud deployment documentation or configuration found; only local Docker/compose"
-
-  # J. Documentation accuracy
+    basis: no cloud deployment documentation or configuration found; only local Docker/compose
   headline_numbers_traceable:
     value: some_traceable
-    evidence: ["README.md:157-164", "notebooks/notebook.ipynb:cell33,cell34"]
-    basis: "5 of 6 reported retrieval-evaluation rows have corresponding notebook code; the gte-base vector row has no committed code producing it"
+    evidence:
+    - README.md:157-164
+    - notebooks/notebook.ipynb:cell33,cell34
+    basis: 5 of 6 reported retrieval-evaluation rows have corresponding notebook code; the gte-base vector row has no committed code producing it
   untraceable_number_count:
     value: 2
-    evidence: ["README.md:162"]
-    basis: "the gte-base vector row's two figures (hit rate 0.692, MRR 0.556) have no committed artifact able to produce them"
+    evidence:
+    - README.md:162
+    basis: the gte-base vector row's two figures (hit rate 0.692, MRR 0.556) have no committed artifact able to produce them
   document_number_conflicts:
     value: 0
     evidence: []
-    basis: "no two committed documents report disagreeing figures (README.md is the only prose document)"
+    basis: no two committed documents report disagreeing figures (README.md is the only prose document)
   document_code_conflicts:
     value: 0
     evidence: []
-    basis: "no reported figure was found that committed code affirmatively contradicts (as opposed to simply not producing); a related generator/artifact mismatch is recorded in extraction_notes instead"
+    basis: no reported figure was found that committed code affirmatively contradicts (as opposed to simply not producing); a related generator/artifact mismatch is recorded in extraction_notes instead
   broken_reference_count:
     value: 1
-    evidence: ["README.md:38", "README.md:108-109"]
-    basis: "README twice names a root-level 'ingest.py' that does not exist; the script is at src/ingest.py"
+    evidence:
+    - README.md:38
+    - README.md:108-109
+    basis: README twice names a root-level 'ingest.py' that does not exist; the script is at src/ingest.py
   limitations_section:
     value: absent
     evidence: []
-    basis: "no section or heading discussing limitations was found"
+    basis: no section or heading discussing limitations was found
   artifact_reference_strength:
     value: all_referenced
-    evidence: ["README.md:37-38", "README.md:99-101", "README.md:146-147", "README.md:67-79"]
-    basis: "every present checklist artifact (evaluation notebook, evaluation question set, ingestion entry point, deployment config) is named by path or command somewhere in the README, but none via a markdown hyperlink"
+    evidence:
+    - README.md:37-38
+    - README.md:99-101
+    - README.md:146-147
+    - README.md:67-79
+    basis: every present checklist artifact (evaluation notebook, evaluation question set, ingestion entry point, deployment config) is named by path or command somewhere in the README, but none via a markdown hyperlink
   artifacts_unreferenced_count:
     value: 0
     evidence: []
-    basis: "of the checklist artifacts present (notebook, question set, ingestion entry point, deployment config; no monitoring dashboard exists), none are named nowhere"
-
-  # K. Descriptive
+    basis: of the checklist artifacts present (notebook, question set, ingestion entry point, deployment config; no monitoring dashboard exists), none are named nowhere
   corpus_language:
     value: en
-    evidence: ["README.md"]
+    evidence:
+    - README.md
     basis: null
   corpus_domain:
-    value: "wearable cardiac-signal research literature (HRV/PPG/smartwatch monitoring)"
-    evidence: ["README.md:13-33"]
+    value: wearable cardiac-signal research literature (HRV/PPG/smartwatch monitoring)
+    evidence:
+    - README.md:13-33
     basis: null
   interface_framework:
     value: streamlit
-    evidence: ["app.py:3"]
+    evidence:
+    - app.py:3
     basis: null
   vector_store:
     value: in_memory
-    evidence: ["notebooks/notebook.ipynb:cell32"]
+    evidence:
+    - notebooks/notebook.ipynb:cell32
     basis: null
   llm_provider:
     value: cerebras
-    evidence: ["src/rag.py:14,71-86"]
+    evidence:
+    - src/rag.py:14,71-86
     basis: null
   repo_file_count:
     value: 21
-    evidence: ["<repo>"]
-    basis: "git ls-files | wc -l at the pinned commit"
-
+    evidence:
+    - <repo>
+    basis: git ls-files | wc -l at the pinned commit
+  project_name:
+    value: Project Pi
+    evidence: []
+    basis: Synthetic label, assigned by tools/assign_project_names.py from case_id. Not derived from the repository and carries no real information about it.
 extraction_notes:
-  - "retrieval_eval_relevance_rule: the schema's source_level vs document_level distinction is ambiguous for this repository. Each corpus record is a whole paper abstract (no distinct notion of 'source' separate from 'document'), and the vector-search chunks still carry the parent document's id for matching. I read the check as document_level; a reader who considers 'document' and 'source' identical here might instead read it as source_level."
-  - "retrieval_eval_approaches_compared / headline_numbers_traceable: README's retrieval table reports a second embedding model (gte-base, Xenova/gte-base) with hit rate 0.692 / MRR 0.556, but no cell in notebooks/notebook.ipynb runs or references gte-base anywhere — only the MiniLM embedder (src/embedder.py, models/Xenova/all-MiniLM-L6-v2) is instantiated. The README's hybrid row is also reported as a range (0.835-0.839 hit rate) whose upper bound is not reproduced by any committed cell (committed hybrid cell output is the single value 0.835); it may derive from a gte-base-based hybrid run, but this is not stated and I did not count it as an additional untraceable figure given that ambiguity."
-  - "A generator/artifact mismatch that did not fit any J field cleanly: notebooks/notebook.ipynb:cell17's data_gen_instructions2 prompt asks for 'exactly 2 distinct questions' per document, but the ground-truth file actually used by the evaluation (data/ground_truth_dataset_5_doc.csv) has 2955 rows over 591 documents — exactly 5 per document, not 2. A second, unused file (data/ground_truth_dataset_2_doc.csv, also committed) does have a 2-per-document density consistent with the visible prompt. Since only one version of the generator prompt is committed, and the actual generation call in cell 28/29 that would have produced the 5-per-document file is commented out, the pipeline that produced the file actually used by the evaluation is not reconstructable from what's committed. This is a fact about provenance/reproducibility, not a claim-vs-code contradiction as document_code_conflicts is defined, and not a two-document disagreement as document_number_conflicts is defined — the schema has no field for 'committed artifact whose own generation process cannot be traced to the code that would produce it.'"
-  - "interface_kind: the notebook (notebooks/notebook.ipynb:cell14-15) also exposes a callable rag(query) that returns an answer, functionally a second way to query the system, but the README frames the notebook exclusively as an 'optional' evaluation/exploration artifact, never as a usage interface. I did not include script_or_notebook in interface_kind on that basis, but the distinction between 'the notebook happens to expose a query function' and 'the notebook is documented as an interface' is not something the schema's enum can express."
-  - "containerization_kind: compose_full vs compose_dependencies_only is ambiguous when the application itself has no external service dependencies (this repo's retrieval index is in-memory, no separate DB/vector-store container). docker-compose.yml here only wraps the single app container. I chose compose_full since one compose command is sufficient to run the complete, working system, but the definitions as written assume a project with external dependencies to distinguish the two values."
-  - "This extraction did not read any file outside clones/p16, cases/schema.md, and agents/extractor/v2/prompt.md, and did not execute, install, or invoke any interpreter or package manager belonging to the target repository."
+- 'retrieval_eval_relevance_rule: the schema''s source_level vs document_level distinction is ambiguous for this repository. Each corpus record is a whole paper abstract (no distinct notion of ''source'' separate from ''document''), and the vector-search chunks still carry the parent document''s id for matching. I read the check as document_level; a reader who considers ''document'' and ''source'' identical here might instead read it as source_level.'
+- 'retrieval_eval_approaches_compared / headline_numbers_traceable: README''s retrieval table reports a second embedding model (gte-base, Xenova/gte-base) with hit rate 0.692 / MRR 0.556, but no cell in notebooks/notebook.ipynb runs or references gte-base anywhere — only the MiniLM embedder (src/embedder.py, models/Xenova/all-MiniLM-L6-v2) is instantiated. The README''s hybrid row is also reported as a range (0.835-0.839 hit rate) whose upper bound is not reproduced by any committed cell (committed hybrid cell output is the single value 0.835); it may derive from a gte-base-based hybrid run, but this is not stated and I did not count it as an additional untraceable figure given that ambiguity.'
+- 'A generator/artifact mismatch that did not fit any J field cleanly: notebooks/notebook.ipynb:cell17''s data_gen_instructions2 prompt asks for ''exactly 2 distinct questions'' per document, but the ground-truth file actually used by the evaluation (data/ground_truth_dataset_5_doc.csv) has 2955 rows over 591 documents — exactly 5 per document, not 2. A second, unused file (data/ground_truth_dataset_2_doc.csv, also committed) does have a 2-per-document density consistent with the visible prompt. Since only one version of the generator prompt is committed, and the actual generation call in cell 28/29 that would have produced the 5-per-document file is commented out, the pipeline that produced the file actually used by the evaluation is not reconstructable from what''s committed. This is a fact about provenance/reproducibility, not a claim-vs-code contradiction as document_code_conflicts is defined, and not a two-document disagreement as document_number_conflicts is defined — the schema has no field for ''committed artifact whose own generation process cannot be traced to the code that would produce it.'''
+- 'interface_kind: the notebook (notebooks/notebook.ipynb:cell14-15) also exposes a callable rag(query) that returns an answer, functionally a second way to query the system, but the README frames the notebook exclusively as an ''optional'' evaluation/exploration artifact, never as a usage interface. I did not include script_or_notebook in interface_kind on that basis, but the distinction between ''the notebook happens to expose a query function'' and ''the notebook is documented as an interface'' is not something the schema''s enum can express.'
+- 'containerization_kind: compose_full vs compose_dependencies_only is ambiguous when the application itself has no external service dependencies (this repo''s retrieval index is in-memory, no separate DB/vector-store container). docker-compose.yml here only wraps the single app container. I chose compose_full since one compose command is sufficient to run the complete, working system, but the definitions as written assume a project with external dependencies to distinguish the two values.'
+- This extraction did not read any file outside clones/p16, cases/schema.md, and agents/extractor/v2/prompt.md, and did not execute, install, or invoke any interpreter or package manager belonging to the target repository.

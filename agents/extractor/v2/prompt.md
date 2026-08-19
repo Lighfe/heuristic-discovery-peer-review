@@ -139,6 +139,15 @@ Those notes are the point of extracting a second repository. The schema is
 built from the first one and will fit it too well; what it fails to say
 about the second is the finding.
 
+## `project_name` is not yours to fill in
+
+Every other field is a fact you read off the repository. `project_name`
+is not: it is a synthetic label assigned by a separate, deterministic tool
+(`tools/assign_project_names.py`), never invented per repository. Do not
+guess a name, do not shorten or rephrase the real project's name, and do
+not leave this field for later by inventing a placeholder. Leave it out of
+the record entirely — the assignment tool adds it in a separate pass.
+
 ## Output
 
 Write `cases/records/<case_id>.yaml` in the shape given by
