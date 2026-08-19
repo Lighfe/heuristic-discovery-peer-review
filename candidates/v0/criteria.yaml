@@ -36,6 +36,13 @@
 #   {field: {in: [a, b]}}         membership
 #   {field: {">=": 5}}            numeric comparison; null never satisfies one
 #   several keys in one `when`    all must hold (AND)
+#   list-valued field (e.g. `interface_kind`, schema M2)   both `value` and
+#     `{in: [...]}` above match if ANY element of the record's list matches -
+#     a project with two interfaces satisfies a condition either one alone
+#     would satisfy. Implemented in candidates/v0/score.py's `satisfies()`,
+#     not visible from this file alone; flagged by the M2 step-7 independent
+#     fidelity diff as undocumented here, fixed by adding this line
+#     (`runs/2026-08-18-m2-v0-fidelity-diff/`).
 
 schema_version: 0
 candidate: v0
@@ -203,7 +210,7 @@ criteria:
     guidance_verbatim: |
       * Ingestion pipeline
          * 0 points: No ingestion
-         * 1 point: Semi-automated ingestion of the dataset into the knowledge base, e.g., with a Jupyter notebook or a Python script
+         * 1 point: Semi-automated ingestion of the dataset into the knowledge base, e.g., with a Jupyter notebook or a Python script 
          * 2 points: Automated ingestion with a special tool (e.g., Kestra, dlt, Airflow, Prefect)
     max_points: 2
     reads: [ingestion_kind]
@@ -289,9 +296,6 @@ criteria:
       - points: 0
         text: "No instructions on how to run the code, the data is missing, or it's unclear how to access it"
         when: {run_instructions: none}
-      - points: 0
-        text: "... the data is missing, or it's unclear how to access it"
-        when: {data_accessible: missing}
       - points: 2
         text: "Instructions are clear, the dataset is accessible, it's easy to run the code, and it works. The versions for all dependencies are specified."
         when:
@@ -301,6 +305,9 @@ criteria:
       - points: 1
         text: "Some instructions are provided but are incomplete, OR instructions are clear and complete, the code works, but the data is missing"
         when: {run_instructions: {in: [partial, complete]}}
+      - points: 0
+        text: "... the data is missing, or it's unclear how to access it"
+        when: {data_accessible: missing}
     fallback: 1
     unmappable:
       - clause: "it's easy to run the code, and it works"
@@ -313,21 +320,73 @@ criteria:
           enum, which is faithful: the criterion as written asks a reviewer
           for a judgment the record cannot supply, and inventing a mapping to
           the gap count would be an improvement, not a transcription.
+    interpretation: >
+      THE GUIDANCE CONTRADICTS ITSELF ON "COMPLETE INSTRUCTIONS, MISSING
+      DATA", found by the M2 step-7 independent fidelity diff
+      (`runs/2026-08-18-m2-v0-fidelity-diff/`). The 0-point clause says
+      "the data is missing" with no exception. The 1-point clause names an
+      exception for the identical fact: "instructions are clear and
+      complete, the code works, but the data is missing." Both clauses are
+      textually supported for the same record; the guidance does not say
+      which wins.
+
+      v0 resolves this in favour of the 1-point clause: a named, specific
+      carve-out beats an unqualified general clause, the same precedence
+      this file already uses for `retrieval_evaluation`'s `mixed_result`
+      reading. Rejected: keeping the data-missing 0-point tier in force
+      regardless of instruction quality, which would make the 1-point
+      clause's own stated exception impossible to ever reach.
+
+      Consequence, stated rather than left for a reader to puzzle out:
+      `run_instructions` has exactly three values (`none`, `partial`,
+      `complete`). `none` is claimed by the first tier; `partial` and
+      `complete` are both now claimed unconditionally by the 1-point tier
+      above, per the guidance's own "some instructions... incomplete"
+      disjunct, which carries no data condition either. Between them these
+      two tiers cover the entire value space, so the `data_accessible:
+      missing` 0-point tier below can never fire for any record, valid or
+      malformed. It is retained, not deleted, so the guidance's own
+      0-point clause stays visible in the transcription and the fact that
+      it is now unreachable is documented rather than silent - the same
+      treatment this file gives `retrieval_evaluation`'s fallback tier.
+
+      Corpus impact, checked directly against all 22 records at fix time:
+      p08 (`run_instructions: complete`, `data_accessible: missing`) moves
+      from 0 to 1. No record held `run_instructions: partial` with
+      `data_accessible: missing`, so the second-order case this fix also
+      covers has no current corpus impact, only a correctness one.
 
   - id: best_practice_hybrid_search
     guidance_lines: "145"
     guidance_verbatim: |
           * [ ] Hybrid search: combining both text and vector search (at least evaluating it) (1 point)
     max_points: 1
-    reads: [hybrid_search.present]
+    reads: [hybrid_search.evaluated]
     tiers:
       - points: 1
         text: "Hybrid search: combining both text and vector search (at least evaluating it)"
-        when: {hybrid_search.present: true}
+        when: {hybrid_search.evaluated: true}
       - points: 0
-        text: "not present"
-        when: {hybrid_search.present: false}
+        text: "not evaluated"
+        when: {hybrid_search.evaluated: false}
     fallback: 0
+    interpretation: >
+      READS `evaluated`, NOT `present` (fixed by the M2 step-7 independent
+      fidelity diff, `runs/2026-08-18-m2-v0-fidelity-diff/`). The
+      guidance's parenthetical "(at least evaluating it)" makes evaluation
+      the qualifying action, not mere implementation - `cases/schema.md`
+      group H draws exactly this line between `present` and `evaluated`.
+      The original transcription read `present`, which the very next
+      criterion's own `interpretation` block contradicts: it explicitly
+      contrasts reranking's bare checkbox against hybrid search's
+      evaluation-qualified one, showing the distinction was recognized but
+      not applied here. Not a disclosed judgment call originally - a
+      transcription slip, corrected once found.
+
+      Corpus impact, checked directly against all 22 records at fix time:
+      p05, p07, and p17 each hold `hybrid_search.present: true,
+      evaluated: false` and each lose the 1 point they previously scored
+      under the `present`-based reading.
 
   - id: best_practice_reranking
     guidance_lines: "146"

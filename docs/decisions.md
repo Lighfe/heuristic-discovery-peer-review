@@ -120,6 +120,45 @@ question by `constructed-base-policy`, not decided by default — a
 constructed base can be added later, at owner request, if red-teaming
 shows this sub-case needs more coverage.
 
+**v0-fidelity-diff-fixes** — M2 step 7's independent fidelity diff ran in
+a technically-isolated scratch directory (owner decision, 2026-08-18: only
+the 3 permitted files present on disk, not just instructed-not-to-read;
+verified afterward via full transcript audit, zero reads outside it, zero
+CLAUDE.md injection marker). Found and fixed, owner-approved per fix:
+`reproducibility`'s tier order let `data_accessible: missing` override
+the guidance's own named 1-point exception for "complete instructions,
+missing data" — reordered and documented as a disclosed interpretation,
+since the guidance genuinely contradicts itself here (unqualified 0-point
+clause vs. a named carve-out for the same fact), resolved in favour of the
+specific clause. `best_practice_hybrid_search` read `hybrid_search.present`
+instead of `.evaluated`, contradicting both the guidance's "(at least
+evaluating it)" qualifier and the file's own stated reasoning on the
+sibling `reranking` criterion — fixed to read `evaluated`. Corpus impact,
+verified: p08 +1, p05/p07/p17 −1 each; **p05 crosses the pass threshold,
+11→10, no longer certifies.** This lands before step 9 measures v0's real
+certification rate r₀, which is the correct order. One item found stays
+open: `data_accessible: manual_steps` has no defining prose anywhere in
+`cases/schema.md`, so whether it means "unclear how to access" (the
+guidance's third 0-point disjunct, currently unmapped) can't be decided
+yet — needs a schema definition, not a `criteria.yaml` fix. Full report:
+`runs/2026-08-18-m2-v0-fidelity-diff/report.md`.
+
+**spot-check-complete** — M2 step 6's spot-check ran per `spot-check-medium`:
+8 fields × 20 non-owner-reviewed records, each checked by its own isolated
+subagent against schema + record + repo clone only. Result: 159/160 field
+checks agree outright, 1 (p08's `document_code_conflicts`) is a defensible
+grouping-judgment call, not a wrong fact. Note-level: 13 of 20 records had
+nothing found; 4 of 20 had a finding that matters (p05, p08, p09, p14 —
+mostly understated/missed anonymity-leak extent inside the source clone,
+never the committed record); 3 of 20 had a minor observation explicitly
+confirmed not to change any field's value (p16, p18, p21). An earlier
+draft of this entry and the report itself both stated "17 of 20 clean,"
+which did not match the findings listed — corrected in both places, not
+just here. Anonymity checked explicitly on every record (not assumed): 10
+of 20 source repos leak a real identity somewhere in the clone, 0 of 20
+records leak it into the committed file — grepped, not inferred. Full
+report: `runs/2026-08-17-m2-extraction-spot-check/report.md`.
+
 **decision-axes-nesting-fixed** — Found during M2 step 5 (2026-08-17),
 while searching for a real base for a conditional twin: `decision_axes`
 was stored as a bare list instead of the nested `{value, evidence, basis}`
