@@ -85,6 +85,24 @@ def parse_scores(text: str) -> dict | None:
     return data
 
 
+def per_criterion_points(samples: list[dict]) -> dict[str, list[int]]:
+    """Points each parsed sample awarded, grouped by criterion id.
+
+    A criterion id missing from a given sample's `criteria` list (the model
+    dropped it, or listed a points value that isn't an int) is simply
+    absent from that criterion's list here — lists can be shorter than
+    `len(samples)`, never padded with a guessed value.
+    """
+    by_criterion: dict[str, list[int]] = {}
+    for sample in samples:
+        for c in sample["criteria"]:
+            cid = c.get("id")
+            points = c.get("points")
+            if isinstance(cid, str) and isinstance(points, int):
+                by_criterion.setdefault(cid, []).append(points)
+    return by_criterion
+
+
 def summarise(cases, candidate, specs, responses) -> dict:
     """Per-case self-consistency, plus the executable layer for comparison."""
     by_case: dict[str, list[dict]] = {name: [] for name in cases}
@@ -111,12 +129,26 @@ def summarise(cases, candidate, specs, responses) -> dict:
             if isinstance(s.get("total"), int) and s["total"] != t
         )
         executable = score(cases[name], candidate).total
+        # Per-criterion points across samples (M2 step 9 follow-up): a total
+        # can hide disagreement when two criteria move in opposite
+        # directions and cancel out. Stored per case so a future pass can
+        # ask "which criterion is hard to judge", not only "which repo".
+        by_criterion = per_criterion_points(good)
+        per_criterion = {
+            cid: {
+                "points": pts,
+                "identical": len(set(pts)) == 1 if pts else None,
+                "spread": (max(pts) - min(pts)) if pts else None,
+            }
+            for cid, pts in sorted(by_criterion.items())
+        }
         out[name] = {
             "samples_requested": len(samples),
             "samples_parsed": len(good),
             "samples_unparseable": len(samples) - len(good),
             "totals": totals,
             "reported_total_mismatches": reported_total_mismatches,
+            "per_criterion": per_criterion,
             "identical": len(set(totals)) == 1 if totals else None,
             "spread": (max(totals) - min(totals)) if totals else None,
             "median": statistics.median(totals) if totals else None,

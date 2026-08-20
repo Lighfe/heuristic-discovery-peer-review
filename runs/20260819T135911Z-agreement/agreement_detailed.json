@@ -1,0 +1,5903 @@
+{
+  "baseline": true,
+  "bonus_excluded": [
+    "bonus_cloud_deployment",
+    "bonus_discretionary"
+  ],
+  "case_level": {
+    "buckets": {
+      "0/3": 1,
+      "2/3": 25,
+      "3/3": 15
+    },
+    "exact_match_pct": 0.3659,
+    "n_cases": 41,
+    "weighted_score": 0.7726
+  },
+  "non_bonus_max_total": 21,
+  "per_case": {
+    "p01": {
+      "executable_layer_total_excluding_bonus": 19,
+      "identical": false,
+      "median": 18,
+      "per_criterion": {
+        "best_practice_hybrid_search": {
+          "identical": true,
+          "points": [
+            1,
+            1,
+            1
+          ],
+          "spread": 0
+        },
+        "best_practice_query_rewriting": {
+          "identical": true,
+          "points": [
+            1,
+            1,
+            1
+          ],
+          "spread": 0
+        },
+        "best_practice_reranking": {
+          "identical": true,
+          "points": [
+            1,
+            1,
+            1
+          ],
+          "spread": 0
+        },
+        "bonus_cloud_deployment": {
+          "identical": true,
+          "points": [
+            2,
+            2,
+            2
+          ],
+          "spread": 0
+        },
+        "bonus_discretionary": {
+          "identical": false,
+          "points": [
+            0,
+            3,
+            0
+          ],
+          "spread": 3
+        },
+        "containerization": {
+          "identical": true,
+          "points": [
+            2,
+            2,
+            2
+          ],
+          "spread": 0
+        },
+        "ingestion_pipeline": {
+          "identical": true,
+          "points": [
+            1,
+            1,
+            1
+          ],
+          "spread": 0
+        },
+        "interface": {
+          "identical": true,
+          "points": [
+            2,
+            2,
+            2
+          ],
+          "spread": 0
+        },
+        "llm_evaluation": {
+          "identical": true,
+          "points": [
+            1,
+            1,
+            1
+          ],
+          "spread": 0
+        },
+        "monitoring": {
+          "identical": true,
+          "points": [
+            2,
+            2,
+            2
+          ],
+          "spread": 0
+        },
+        "problem_description": {
+          "identical": true,
+          "points": [
+            2,
+            2,
+            2
+          ],
+          "spread": 0
+        },
+        "reproducibility": {
+          "identical": false,
+          "points": [
+            1,
+            2,
+            1
+          ],
+          "spread": 1
+        },
+        "retrieval_evaluation": {
+          "identical": true,
+          "points": [
+            2,
+            2,
+            2
+          ],
+          "spread": 0
+        },
+        "retrieval_flow": {
+          "identical": true,
+          "points": [
+            2,
+            2,
+            2
+          ],
+          "spread": 0
+        }
+      },
+      "samples_parsed": 3,
+      "samples_unparseable": 0,
+      "spread": 1,
+      "totals_excluding_bonus": [
+        18,
+        19,
+        18
+      ]
+    },
+    "p01-t01": {
+      "executable_layer_total_excluding_bonus": 18,
+      "identical": false,
+      "median": 18,
+      "per_criterion": {
+        "best_practice_hybrid_search": {
+          "identical": true,
+          "points": [
+            1,
+            1,
+            1
+          ],
+          "spread": 0
+        },
+        "best_practice_query_rewriting": {
+          "identical": true,
+          "points": [
+            1,
+            1,
+            1
+          ],
+          "spread": 0
+        },
+        "best_practice_reranking": {
+          "identical": true,
+          "points": [
+            1,
+            1,
+            1
+          ],
+          "spread": 0
+        },
+        "bonus_cloud_deployment": {
+          "identical": true,
+          "points": [
+            2,
+            2,
+            2
+          ],
+          "spread": 0
+        },
+        "bonus_discretionary": {
+          "identical": true,
+          "points": [
+            0,
+            0,
+            0
+          ],
+          "spread": 0
+        },
+        "containerization": {
+          "identical": true,
+          "points": [
+            2,
+            2,
+            2
+          ],
+          "spread": 0
+        },
+        "ingestion_pipeline": {
+          "identical": true,
+          "points": [
+            1,
+            1,
+            1
+          ],
+          "spread": 0
+        },
+        "interface": {
+          "identical": true,
+          "points": [
+            2,
+            2,
+            2
+          ],
+          "spread": 0
+        },
+        "llm_evaluation": {
+          "identical": true,
+          "points": [
+            1,
+            1,
+            1
+          ],
+          "spread": 0
+        },
+        "monitoring": {
+          "identical": true,
+          "points": [
+            2,
+            2,
+            2
+          ],
+          "spread": 0
+        },
+        "problem_description": {
+          "identical": true,
+          "points": [
+            2,
+            2,
+            2
+          ],
+          "spread": 0
+        },
+        "reproducibility": {
+          "identical": false,
+          "points": [
+            1,
+            1,
+            2
+          ],
+          "spread": 1
+        },
+        "retrieval_evaluation": {
+          "identical": true,
+          "points": [
+            2,
+            2,
+            2
+          ],
+          "spread": 0
+        },
+        "retrieval_flow": {
+          "identical": true,
+          "points": [
+            2,
+            2,
+            2
+          ],
+          "spread": 0
+        }
+      },
+      "samples_parsed": 3,
+      "samples_unparseable": 0,
+      "spread": 1,
+      "totals_excluding_bonus": [
+        18,
+        18,
+        19
+      ]
+    },
+    "p01-t02": {
+      "executable_layer_total_excluding_bonus": 19,
+      "identical": false,
+      "median": 19,
+      "per_criterion": {
+        "best_practice_hybrid_search": {
+          "identical": true,
+          "points": [
+            1,
+            1,
+            1
+          ],
+          "spread": 0
+        },
+        "best_practice_query_rewriting": {
+          "identical": true,
+          "points": [
+            1,
+            1,
+            1
+          ],
+          "spread": 0
+        },
+        "best_practice_reranking": {
+          "identical": true,
+          "points": [
+            1,
+            1,
+            1
+          ],
+          "spread": 0
+        },
+        "bonus_cloud_deployment": {
+          "identical": true,
+          "points": [
+            2,
+            2,
+            2
+          ],
+          "spread": 0
+        },
+        "bonus_discretionary": {
+          "identical": true,
+          "points": [
+            0,
+            0,
+            0
+          ],
+          "spread": 0
+        },
+        "containerization": {
+          "identical": true,
+          "points": [
+            2,
+            2,
+            2
+          ],
+          "spread": 0
+        },
+        "ingestion_pipeline": {
+          "identical": true,
+          "points": [
+            1,
+            1,
+            1
+          ],
+          "spread": 0
+        },
+        "interface": {
+          "identical": true,
+          "points": [
+            2,
+            2,
+            2
+          ],
+          "spread": 0
+        },
+        "llm_evaluation": {
+          "identical": true,
+          "points": [
+            1,
+            1,
+            1
+          ],
+          "spread": 0
+        },
+        "monitoring": {
+          "identical": true,
+          "points": [
+            2,
+            2,
+            2
+          ],
+          "spread": 0
+        },
+        "problem_description": {
+          "identical": true,
+          "points": [
+            2,
+            2,
+            2
+          ],
+          "spread": 0
+        },
+        "reproducibility": {
+          "identical": false,
+          "points": [
+            2,
+            2,
+            1
+          ],
+          "spread": 1
+        },
+        "retrieval_evaluation": {
+          "identical": true,
+          "points": [
+            2,
+            2,
+            2
+          ],
+          "spread": 0
+        },
+        "retrieval_flow": {
+          "identical": true,
+          "points": [
+            2,
+            2,
+            2
+          ],
+          "spread": 0
+        }
+      },
+      "samples_parsed": 3,
+      "samples_unparseable": 0,
+      "spread": 1,
+      "totals_excluding_bonus": [
+        19,
+        19,
+        18
+      ]
+    },
+    "p01-t03": {
+      "executable_layer_total_excluding_bonus": 19,
+      "identical": false,
+      "median": 19,
+      "per_criterion": {
+        "best_practice_hybrid_search": {
+          "identical": true,
+          "points": [
+            1,
+            1,
+            1
+          ],
+          "spread": 0
+        },
+        "best_practice_query_rewriting": {
+          "identical": true,
+          "points": [
+            1,
+            1,
+            1
+          ],
+          "spread": 0
+        },
+        "best_practice_reranking": {
+          "identical": true,
+          "points": [
+            1,
+            1,
+            1
+          ],
+          "spread": 0
+        },
+        "bonus_cloud_deployment": {
+          "identical": true,
+          "points": [
+            2,
+            2,
+            2
+          ],
+          "spread": 0
+        },
+        "bonus_discretionary": {
+          "identical": true,
+          "points": [
+            0,
+            0,
+            0
+          ],
+          "spread": 0
+        },
+        "containerization": {
+          "identical": true,
+          "points": [
+            2,
+            2,
+            2
+          ],
+          "spread": 0
+        },
+        "ingestion_pipeline": {
+          "identical": true,
+          "points": [
+            1,
+            1,
+            1
+          ],
+          "spread": 0
+        },
+        "interface": {
+          "identical": true,
+          "points": [
+            2,
+            2,
+            2
+          ],
+          "spread": 0
+        },
+        "llm_evaluation": {
+          "identical": true,
+          "points": [
+            1,
+            1,
+            1
+          ],
+          "spread": 0
+        },
+        "monitoring": {
+          "identical": true,
+          "points": [
+            2,
+            2,
+            2
+          ],
+          "spread": 0
+        },
+        "problem_description": {
+          "identical": true,
+          "points": [
+            2,
+            2,
+            2
+          ],
+          "spread": 0
+        },
+        "reproducibility": {
+          "identical": false,
+          "points": [
+            1,
+            2,
+            2
+          ],
+          "spread": 1
+        },
+        "retrieval_evaluation": {
+          "identical": true,
+          "points": [
+            2,
+            2,
+            2
+          ],
+          "spread": 0
+        },
+        "retrieval_flow": {
+          "identical": true,
+          "points": [
+            2,
+            2,
+            2
+          ],
+          "spread": 0
+        }
+      },
+      "samples_parsed": 3,
+      "samples_unparseable": 0,
+      "spread": 1,
+      "totals_excluding_bonus": [
+        18,
+        19,
+        19
+      ]
+    },
+    "p01-t04": {
+      "executable_layer_total_excluding_bonus": 19,
+      "identical": false,
+      "median": 17,
+      "per_criterion": {
+        "best_practice_hybrid_search": {
+          "identical": true,
+          "points": [
+            1,
+            1,
+            1
+          ],
+          "spread": 0
+        },
+        "best_practice_query_rewriting": {
+          "identical": true,
+          "points": [
+            1,
+            1,
+            1
+          ],
+          "spread": 0
+        },
+        "best_practice_reranking": {
+          "identical": true,
+          "points": [
+            1,
+            1,
+            1
+          ],
+          "spread": 0
+        },
+        "bonus_cloud_deployment": {
+          "identical": true,
+          "points": [
+            2,
+            2,
+            2
+          ],
+          "spread": 0
+        },
+        "bonus_discretionary": {
+          "identical": true,
+          "points": [
+            0,
+            0,
+            0
+          ],
+          "spread": 0
+        },
+        "containerization": {
+          "identical": true,
+          "points": [
+            2,
+            2,
+            2
+          ],
+          "spread": 0
+        },
+        "ingestion_pipeline": {
+          "identical": true,
+          "points": [
+            1,
+            1,
+            1
+          ],
+          "spread": 0
+        },
+        "interface": {
+          "identical": true,
+          "points": [
+            2,
+            2,
+            2
+          ],
+          "spread": 0
+        },
+        "llm_evaluation": {
+          "identical": true,
+          "points": [
+            1,
+            1,
+            1
+          ],
+          "spread": 0
+        },
+        "monitoring": {
+          "identical": true,
+          "points": [
+            1,
+            1,
+            1
+          ],
+          "spread": 0
+        },
+        "problem_description": {
+          "identical": true,
+          "points": [
+            2,
+            2,
+            2
+          ],
+          "spread": 0
+        },
+        "reproducibility": {
+          "identical": false,
+          "points": [
+            2,
+            1,
+            1
+          ],
+          "spread": 1
+        },
+        "retrieval_evaluation": {
+          "identical": true,
+          "points": [
+            2,
+            2,
+            2
+          ],
+          "spread": 0
+        },
+        "retrieval_flow": {
+          "identical": true,
+          "points": [
+            2,
+            2,
+            2
+          ],
+          "spread": 0
+        }
+      },
+      "samples_parsed": 3,
+      "samples_unparseable": 0,
+      "spread": 1,
+      "totals_excluding_bonus": [
+        18,
+        17,
+        17
+      ]
+    },
+    "p01-t05": {
+      "executable_layer_total_excluding_bonus": 19,
+      "identical": true,
+      "median": 19,
+      "per_criterion": {
+        "best_practice_hybrid_search": {
+          "identical": true,
+          "points": [
+            1,
+            1,
+            1
+          ],
+          "spread": 0
+        },
+        "best_practice_query_rewriting": {
+          "identical": true,
+          "points": [
+            1,
+            1,
+            1
+          ],
+          "spread": 0
+        },
+        "best_practice_reranking": {
+          "identical": true,
+          "points": [
+            1,
+            1,
+            1
+          ],
+          "spread": 0
+        },
+        "bonus_cloud_deployment": {
+          "identical": true,
+          "points": [
+            2,
+            2,
+            2
+          ],
+          "spread": 0
+        },
+        "bonus_discretionary": {
+          "identical": false,
+          "points": [
+            0,
+            0,
+            3
+          ],
+          "spread": 3
+        },
+        "containerization": {
+          "identical": true,
+          "points": [
+            2,
+            2,
+            2
+          ],
+          "spread": 0
+        },
+        "ingestion_pipeline": {
+          "identical": true,
+          "points": [
+            1,
+            1,
+            1
+          ],
+          "spread": 0
+        },
+        "interface": {
+          "identical": true,
+          "points": [
+            2,
+            2,
+            2
+          ],
+          "spread": 0
+        },
+        "llm_evaluation": {
+          "identical": true,
+          "points": [
+            1,
+            1,
+            1
+          ],
+          "spread": 0
+        },
+        "monitoring": {
+          "identical": true,
+          "points": [
+            2,
+            2,
+            2
+          ],
+          "spread": 0
+        },
+        "problem_description": {
+          "identical": true,
+          "points": [
+            2,
+            2,
+            2
+          ],
+          "spread": 0
+        },
+        "reproducibility": {
+          "identical": true,
+          "points": [
+            2,
+            2,
+            2
+          ],
+          "spread": 0
+        },
+        "retrieval_evaluation": {
+          "identical": true,
+          "points": [
+            2,
+            2,
+            2
+          ],
+          "spread": 0
+        },
+        "retrieval_flow": {
+          "identical": true,
+          "points": [
+            2,
+            2,
+            2
+          ],
+          "spread": 0
+        }
+      },
+      "samples_parsed": 3,
+      "samples_unparseable": 0,
+      "spread": 0,
+      "totals_excluding_bonus": [
+        19,
+        19,
+        19
+      ]
+    },
+    "p01-t06": {
+      "executable_layer_total_excluding_bonus": 19,
+      "identical": false,
+      "median": 18,
+      "per_criterion": {
+        "best_practice_hybrid_search": {
+          "identical": true,
+          "points": [
+            1,
+            1,
+            1
+          ],
+          "spread": 0
+        },
+        "best_practice_query_rewriting": {
+          "identical": true,
+          "points": [
+            1,
+            1,
+            1
+          ],
+          "spread": 0
+        },
+        "best_practice_reranking": {
+          "identical": true,
+          "points": [
+            1,
+            1,
+            1
+          ],
+          "spread": 0
+        },
+        "bonus_cloud_deployment": {
+          "identical": true,
+          "points": [
+            2,
+            2,
+            2
+          ],
+          "spread": 0
+        },
+        "bonus_discretionary": {
+          "identical": true,
+          "points": [
+            0,
+            0,
+            0
+          ],
+          "spread": 0
+        },
+        "containerization": {
+          "identical": true,
+          "points": [
+            2,
+            2,
+            2
+          ],
+          "spread": 0
+        },
+        "ingestion_pipeline": {
+          "identical": true,
+          "points": [
+            1,
+            1,
+            1
+          ],
+          "spread": 0
+        },
+        "interface": {
+          "identical": true,
+          "points": [
+            2,
+            2,
+            2
+          ],
+          "spread": 0
+        },
+        "llm_evaluation": {
+          "identical": true,
+          "points": [
+            1,
+            1,
+            1
+          ],
+          "spread": 0
+        },
+        "monitoring": {
+          "identical": true,
+          "points": [
+            2,
+            2,
+            2
+          ],
+          "spread": 0
+        },
+        "problem_description": {
+          "identical": true,
+          "points": [
+            2,
+            2,
+            2
+          ],
+          "spread": 0
+        },
+        "reproducibility": {
+          "identical": false,
+          "points": [
+            1,
+            2,
+            1
+          ],
+          "spread": 1
+        },
+        "retrieval_evaluation": {
+          "identical": true,
+          "points": [
+            2,
+            2,
+            2
+          ],
+          "spread": 0
+        },
+        "retrieval_flow": {
+          "identical": true,
+          "points": [
+            2,
+            2,
+            2
+          ],
+          "spread": 0
+        }
+      },
+      "samples_parsed": 3,
+      "samples_unparseable": 0,
+      "spread": 1,
+      "totals_excluding_bonus": [
+        18,
+        19,
+        18
+      ]
+    },
+    "p01-t07": {
+      "executable_layer_total_excluding_bonus": 19,
+      "identical": false,
+      "median": 19,
+      "per_criterion": {
+        "best_practice_hybrid_search": {
+          "identical": true,
+          "points": [
+            1,
+            1,
+            1
+          ],
+          "spread": 0
+        },
+        "best_practice_query_rewriting": {
+          "identical": true,
+          "points": [
+            1,
+            1,
+            1
+          ],
+          "spread": 0
+        },
+        "best_practice_reranking": {
+          "identical": true,
+          "points": [
+            1,
+            1,
+            1
+          ],
+          "spread": 0
+        },
+        "bonus_cloud_deployment": {
+          "identical": true,
+          "points": [
+            2,
+            2,
+            2
+          ],
+          "spread": 0
+        },
+        "bonus_discretionary": {
+          "identical": true,
+          "points": [
+            0,
+            0,
+            0
+          ],
+          "spread": 0
+        },
+        "containerization": {
+          "identical": true,
+          "points": [
+            2,
+            2,
+            2
+          ],
+          "spread": 0
+        },
+        "ingestion_pipeline": {
+          "identical": true,
+          "points": [
+            1,
+            1,
+            1
+          ],
+          "spread": 0
+        },
+        "interface": {
+          "identical": true,
+          "points": [
+            2,
+            2,
+            2
+          ],
+          "spread": 0
+        },
+        "llm_evaluation": {
+          "identical": true,
+          "points": [
+            1,
+            1,
+            1
+          ],
+          "spread": 0
+        },
+        "monitoring": {
+          "identical": true,
+          "points": [
+            2,
+            2,
+            2
+          ],
+          "spread": 0
+        },
+        "problem_description": {
+          "identical": true,
+          "points": [
+            2,
+            2,
+            2
+          ],
+          "spread": 0
+        },
+        "reproducibility": {
+          "identical": false,
+          "points": [
+            1,
+            2,
+            2
+          ],
+          "spread": 1
+        },
+        "retrieval_evaluation": {
+          "identical": true,
+          "points": [
+            2,
+            2,
+            2
+          ],
+          "spread": 0
+        },
+        "retrieval_flow": {
+          "identical": true,
+          "points": [
+            2,
+            2,
+            2
+          ],
+          "spread": 0
+        }
+      },
+      "samples_parsed": 3,
+      "samples_unparseable": 0,
+      "spread": 1,
+      "totals_excluding_bonus": [
+        18,
+        19,
+        19
+      ]
+    },
+    "p02": {
+      "executable_layer_total_excluding_bonus": 17,
+      "identical": true,
+      "median": 16,
+      "per_criterion": {
+        "best_practice_hybrid_search": {
+          "identical": true,
+          "points": [
+            0,
+            0,
+            0
+          ],
+          "spread": 0
+        },
+        "best_practice_query_rewriting": {
+          "identical": true,
+          "points": [
+            0,
+            0,
+            0
+          ],
+          "spread": 0
+        },
+        "best_practice_reranking": {
+          "identical": true,
+          "points": [
+            1,
+            1,
+            1
+          ],
+          "spread": 0
+        },
+        "bonus_cloud_deployment": {
+          "identical": true,
+          "points": [
+            0,
+            0,
+            0
+          ],
+          "spread": 0
+        },
+        "bonus_discretionary": {
+          "identical": true,
+          "points": [
+            0,
+            0,
+            0
+          ],
+          "spread": 0
+        },
+        "containerization": {
+          "identical": true,
+          "points": [
+            2,
+            2,
+            2
+          ],
+          "spread": 0
+        },
+        "ingestion_pipeline": {
+          "identical": true,
+          "points": [
+            1,
+            1,
+            1
+          ],
+          "spread": 0
+        },
+        "interface": {
+          "identical": true,
+          "points": [
+            2,
+            2,
+            2
+          ],
+          "spread": 0
+        },
+        "llm_evaluation": {
+          "identical": true,
+          "points": [
+            2,
+            2,
+            2
+          ],
+          "spread": 0
+        },
+        "monitoring": {
+          "identical": true,
+          "points": [
+            1,
+            1,
+            1
+          ],
+          "spread": 0
+        },
+        "problem_description": {
+          "identical": true,
+          "points": [
+            2,
+            2,
+            2
+          ],
+          "spread": 0
+        },
+        "reproducibility": {
+          "identical": true,
+          "points": [
+            1,
+            1,
+            1
+          ],
+          "spread": 0
+        },
+        "retrieval_evaluation": {
+          "identical": true,
+          "points": [
+            2,
+            2,
+            2
+          ],
+          "spread": 0
+        },
+        "retrieval_flow": {
+          "identical": true,
+          "points": [
+            2,
+            2,
+            2
+          ],
+          "spread": 0
+        }
+      },
+      "samples_parsed": 3,
+      "samples_unparseable": 0,
+      "spread": 0,
+      "totals_excluding_bonus": [
+        16,
+        16,
+        16
+      ]
+    },
+    "p02-t01": {
+      "executable_layer_total_excluding_bonus": 17,
+      "identical": true,
+      "median": 16,
+      "per_criterion": {
+        "best_practice_hybrid_search": {
+          "identical": true,
+          "points": [
+            0,
+            0,
+            0
+          ],
+          "spread": 0
+        },
+        "best_practice_query_rewriting": {
+          "identical": true,
+          "points": [
+            0,
+            0,
+            0
+          ],
+          "spread": 0
+        },
+        "best_practice_reranking": {
+          "identical": true,
+          "points": [
+            1,
+            1,
+            1
+          ],
+          "spread": 0
+        },
+        "bonus_cloud_deployment": {
+          "identical": true,
+          "points": [
+            0,
+            0,
+            0
+          ],
+          "spread": 0
+        },
+        "bonus_discretionary": {
+          "identical": true,
+          "points": [
+            0,
+            0,
+            0
+          ],
+          "spread": 0
+        },
+        "containerization": {
+          "identical": true,
+          "points": [
+            2,
+            2,
+            2
+          ],
+          "spread": 0
+        },
+        "ingestion_pipeline": {
+          "identical": true,
+          "points": [
+            1,
+            1,
+            1
+          ],
+          "spread": 0
+        },
+        "interface": {
+          "identical": true,
+          "points": [
+            2,
+            2,
+            2
+          ],
+          "spread": 0
+        },
+        "llm_evaluation": {
+          "identical": true,
+          "points": [
+            2,
+            2,
+            2
+          ],
+          "spread": 0
+        },
+        "monitoring": {
+          "identical": true,
+          "points": [
+            1,
+            1,
+            1
+          ],
+          "spread": 0
+        },
+        "problem_description": {
+          "identical": true,
+          "points": [
+            2,
+            2,
+            2
+          ],
+          "spread": 0
+        },
+        "reproducibility": {
+          "identical": true,
+          "points": [
+            1,
+            1,
+            1
+          ],
+          "spread": 0
+        },
+        "retrieval_evaluation": {
+          "identical": true,
+          "points": [
+            2,
+            2,
+            2
+          ],
+          "spread": 0
+        },
+        "retrieval_flow": {
+          "identical": true,
+          "points": [
+            2,
+            2,
+            2
+          ],
+          "spread": 0
+        }
+      },
+      "samples_parsed": 3,
+      "samples_unparseable": 0,
+      "spread": 0,
+      "totals_excluding_bonus": [
+        16,
+        16,
+        16
+      ]
+    },
+    "p03": {
+      "executable_layer_total_excluding_bonus": 17,
+      "identical": false,
+      "median": 17,
+      "per_criterion": {
+        "best_practice_hybrid_search": {
+          "identical": true,
+          "points": [
+            1,
+            1,
+            1
+          ],
+          "spread": 0
+        },
+        "best_practice_query_rewriting": {
+          "identical": true,
+          "points": [
+            1,
+            1,
+            1
+          ],
+          "spread": 0
+        },
+        "best_practice_reranking": {
+          "identical": true,
+          "points": [
+            0,
+            0,
+            0
+          ],
+          "spread": 0
+        },
+        "bonus_cloud_deployment": {
+          "identical": true,
+          "points": [
+            0,
+            0,
+            0
+          ],
+          "spread": 0
+        },
+        "bonus_discretionary": {
+          "identical": true,
+          "points": [
+            0,
+            0,
+            0
+          ],
+          "spread": 0
+        },
+        "containerization": {
+          "identical": false,
+          "points": [
+            2,
+            1,
+            2
+          ],
+          "spread": 1
+        },
+        "ingestion_pipeline": {
+          "identical": true,
+          "points": [
+            1,
+            1,
+            1
+          ],
+          "spread": 0
+        },
+        "interface": {
+          "identical": true,
+          "points": [
+            2,
+            2,
+            2
+          ],
+          "spread": 0
+        },
+        "llm_evaluation": {
+          "identical": true,
+          "points": [
+            1,
+            1,
+            1
+          ],
+          "spread": 0
+        },
+        "monitoring": {
+          "identical": true,
+          "points": [
+            2,
+            2,
+            2
+          ],
+          "spread": 0
+        },
+        "problem_description": {
+          "identical": true,
+          "points": [
+            2,
+            2,
+            2
+          ],
+          "spread": 0
+        },
+        "reproducibility": {
+          "identical": true,
+          "points": [
+            1,
+            1,
+            1
+          ],
+          "spread": 0
+        },
+        "retrieval_evaluation": {
+          "identical": true,
+          "points": [
+            2,
+            2,
+            2
+          ],
+          "spread": 0
+        },
+        "retrieval_flow": {
+          "identical": true,
+          "points": [
+            2,
+            2,
+            2
+          ],
+          "spread": 0
+        }
+      },
+      "samples_parsed": 3,
+      "samples_unparseable": 0,
+      "spread": 1,
+      "totals_excluding_bonus": [
+        17,
+        16,
+        17
+      ]
+    },
+    "p04": {
+      "executable_layer_total_excluding_bonus": 18,
+      "identical": false,
+      "median": 18,
+      "per_criterion": {
+        "best_practice_hybrid_search": {
+          "identical": true,
+          "points": [
+            1,
+            1,
+            1
+          ],
+          "spread": 0
+        },
+        "best_practice_query_rewriting": {
+          "identical": true,
+          "points": [
+            0,
+            0,
+            0
+          ],
+          "spread": 0
+        },
+        "best_practice_reranking": {
+          "identical": true,
+          "points": [
+            0,
+            0,
+            0
+          ],
+          "spread": 0
+        },
+        "bonus_cloud_deployment": {
+          "identical": true,
+          "points": [
+            2,
+            2,
+            2
+          ],
+          "spread": 0
+        },
+        "bonus_discretionary": {
+          "identical": true,
+          "points": [
+            0,
+            0,
+            0
+          ],
+          "spread": 0
+        },
+        "containerization": {
+          "identical": true,
+          "points": [
+            2,
+            2,
+            2
+          ],
+          "spread": 0
+        },
+        "ingestion_pipeline": {
+          "identical": true,
+          "points": [
+            2,
+            2,
+            2
+          ],
+          "spread": 0
+        },
+        "interface": {
+          "identical": true,
+          "points": [
+            2,
+            2,
+            2
+          ],
+          "spread": 0
+        },
+        "llm_evaluation": {
+          "identical": true,
+          "points": [
+            2,
+            2,
+            2
+          ],
+          "spread": 0
+        },
+        "monitoring": {
+          "identical": true,
+          "points": [
+            2,
+            2,
+            2
+          ],
+          "spread": 0
+        },
+        "problem_description": {
+          "identical": true,
+          "points": [
+            2,
+            2,
+            2
+          ],
+          "spread": 0
+        },
+        "reproducibility": {
+          "identical": false,
+          "points": [
+            1,
+            2,
+            1
+          ],
+          "spread": 1
+        },
+        "retrieval_evaluation": {
+          "identical": true,
+          "points": [
+            2,
+            2,
+            2
+          ],
+          "spread": 0
+        },
+        "retrieval_flow": {
+          "identical": true,
+          "points": [
+            2,
+            2,
+            2
+          ],
+          "spread": 0
+        }
+      },
+      "samples_parsed": 3,
+      "samples_unparseable": 0,
+      "spread": 1,
+      "totals_excluding_bonus": [
+        18,
+        19,
+        18
+      ]
+    },
+    "p04-t01": {
+      "executable_layer_total_excluding_bonus": 18,
+      "identical": false,
+      "median": 18,
+      "per_criterion": {
+        "best_practice_hybrid_search": {
+          "identical": true,
+          "points": [
+            1,
+            1,
+            1
+          ],
+          "spread": 0
+        },
+        "best_practice_query_rewriting": {
+          "identical": true,
+          "points": [
+            0,
+            0,
+            0
+          ],
+          "spread": 0
+        },
+        "best_practice_reranking": {
+          "identical": true,
+          "points": [
+            0,
+            0,
+            0
+          ],
+          "spread": 0
+        },
+        "bonus_cloud_deployment": {
+          "identical": true,
+          "points": [
+            2,
+            2,
+            2
+          ],
+          "spread": 0
+        },
+        "bonus_discretionary": {
+          "identical": false,
+          "points": [
+            0,
+            0,
+            1
+          ],
+          "spread": 1
+        },
+        "containerization": {
+          "identical": true,
+          "points": [
+            2,
+            2,
+            2
+          ],
+          "spread": 0
+        },
+        "ingestion_pipeline": {
+          "identical": false,
+          "points": [
+            1,
+            2,
+            1
+          ],
+          "spread": 1
+        },
+        "interface": {
+          "identical": true,
+          "points": [
+            2,
+            2,
+            2
+          ],
+          "spread": 0
+        },
+        "llm_evaluation": {
+          "identical": true,
+          "points": [
+            2,
+            2,
+            2
+          ],
+          "spread": 0
+        },
+        "monitoring": {
+          "identical": true,
+          "points": [
+            2,
+            2,
+            2
+          ],
+          "spread": 0
+        },
+        "problem_description": {
+          "identical": true,
+          "points": [
+            2,
+            2,
+            2
+          ],
+          "spread": 0
+        },
+        "reproducibility": {
+          "identical": false,
+          "points": [
+            1,
+            2,
+            2
+          ],
+          "spread": 1
+        },
+        "retrieval_evaluation": {
+          "identical": true,
+          "points": [
+            2,
+            2,
+            2
+          ],
+          "spread": 0
+        },
+        "retrieval_flow": {
+          "identical": true,
+          "points": [
+            2,
+            2,
+            2
+          ],
+          "spread": 0
+        }
+      },
+      "samples_parsed": 3,
+      "samples_unparseable": 0,
+      "spread": 2,
+      "totals_excluding_bonus": [
+        17,
+        19,
+        18
+      ]
+    },
+    "p05": {
+      "executable_layer_total_excluding_bonus": 10,
+      "identical": true,
+      "median": 11,
+      "per_criterion": {
+        "best_practice_hybrid_search": {
+          "identical": true,
+          "points": [
+            1,
+            1,
+            1
+          ],
+          "spread": 0
+        },
+        "best_practice_query_rewriting": {
+          "identical": true,
+          "points": [
+            0,
+            0,
+            0
+          ],
+          "spread": 0
+        },
+        "best_practice_reranking": {
+          "identical": true,
+          "points": [
+            0,
+            0,
+            0
+          ],
+          "spread": 0
+        },
+        "bonus_cloud_deployment": {
+          "identical": true,
+          "points": [
+            0,
+            0,
+            0
+          ],
+          "spread": 0
+        },
+        "bonus_discretionary": {
+          "identical": true,
+          "points": [
+            0,
+            0,
+            0
+          ],
+          "spread": 0
+        },
+        "containerization": {
+          "identical": true,
+          "points": [
+            0,
+            0,
+            0
+          ],
+          "spread": 0
+        },
+        "ingestion_pipeline": {
+          "identical": true,
+          "points": [
+            1,
+            1,
+            1
+          ],
+          "spread": 0
+        },
+        "interface": {
+          "identical": true,
+          "points": [
+            2,
+            2,
+            2
+          ],
+          "spread": 0
+        },
+        "llm_evaluation": {
+          "identical": true,
+          "points": [
+            0,
+            0,
+            0
+          ],
+          "spread": 0
+        },
+        "monitoring": {
+          "identical": true,
+          "points": [
+            2,
+            2,
+            2
+          ],
+          "spread": 0
+        },
+        "problem_description": {
+          "identical": true,
+          "points": [
+            2,
+            2,
+            2
+          ],
+          "spread": 0
+        },
+        "reproducibility": {
+          "identical": true,
+          "points": [
+            1,
+            1,
+            1
+          ],
+          "spread": 0
+        },
+        "retrieval_evaluation": {
+          "identical": true,
+          "points": [
+            0,
+            0,
+            0
+          ],
+          "spread": 0
+        },
+        "retrieval_flow": {
+          "identical": true,
+          "points": [
+            2,
+            2,
+            2
+          ],
+          "spread": 0
+        }
+      },
+      "samples_parsed": 3,
+      "samples_unparseable": 0,
+      "spread": 0,
+      "totals_excluding_bonus": [
+        11,
+        11,
+        11
+      ]
+    },
+    "p06": {
+      "executable_layer_total_excluding_bonus": 17,
+      "identical": true,
+      "median": 16,
+      "per_criterion": {
+        "best_practice_hybrid_search": {
+          "identical": true,
+          "points": [
+            1,
+            1,
+            1
+          ],
+          "spread": 0
+        },
+        "best_practice_query_rewriting": {
+          "identical": true,
+          "points": [
+            1,
+            1,
+            1
+          ],
+          "spread": 0
+        },
+        "best_practice_reranking": {
+          "identical": true,
+          "points": [
+            0,
+            0,
+            0
+          ],
+          "spread": 0
+        },
+        "bonus_cloud_deployment": {
+          "identical": true,
+          "points": [
+            0,
+            0,
+            0
+          ],
+          "spread": 0
+        },
+        "bonus_discretionary": {
+          "identical": true,
+          "points": [
+            0,
+            0,
+            0
+          ],
+          "spread": 0
+        },
+        "containerization": {
+          "identical": true,
+          "points": [
+            1,
+            1,
+            1
+          ],
+          "spread": 0
+        },
+        "ingestion_pipeline": {
+          "identical": true,
+          "points": [
+            1,
+            1,
+            1
+          ],
+          "spread": 0
+        },
+        "interface": {
+          "identical": true,
+          "points": [
+            2,
+            2,
+            2
+          ],
+          "spread": 0
+        },
+        "llm_evaluation": {
+          "identical": true,
+          "points": [
+            1,
+            1,
+            1
+          ],
+          "spread": 0
+        },
+        "monitoring": {
+          "identical": true,
+          "points": [
+            2,
+            2,
+            2
+          ],
+          "spread": 0
+        },
+        "problem_description": {
+          "identical": true,
+          "points": [
+            2,
+            2,
+            2
+          ],
+          "spread": 0
+        },
+        "reproducibility": {
+          "identical": true,
+          "points": [
+            1,
+            1,
+            1
+          ],
+          "spread": 0
+        },
+        "retrieval_evaluation": {
+          "identical": true,
+          "points": [
+            2,
+            2,
+            2
+          ],
+          "spread": 0
+        },
+        "retrieval_flow": {
+          "identical": true,
+          "points": [
+            2,
+            2,
+            2
+          ],
+          "spread": 0
+        }
+      },
+      "samples_parsed": 3,
+      "samples_unparseable": 0,
+      "spread": 0,
+      "totals_excluding_bonus": [
+        16,
+        16,
+        16
+      ]
+    },
+    "p07": {
+      "executable_layer_total_excluding_bonus": 15,
+      "identical": true,
+      "median": 15,
+      "per_criterion": {
+        "best_practice_hybrid_search": {
+          "identical": true,
+          "points": [
+            1,
+            1,
+            1
+          ],
+          "spread": 0
+        },
+        "best_practice_query_rewriting": {
+          "identical": true,
+          "points": [
+            0,
+            0,
+            0
+          ],
+          "spread": 0
+        },
+        "best_practice_reranking": {
+          "identical": true,
+          "points": [
+            0,
+            0,
+            0
+          ],
+          "spread": 0
+        },
+        "bonus_cloud_deployment": {
+          "identical": true,
+          "points": [
+            0,
+            0,
+            0
+          ],
+          "spread": 0
+        },
+        "bonus_discretionary": {
+          "identical": true,
+          "points": [
+            0,
+            0,
+            0
+          ],
+          "spread": 0
+        },
+        "containerization": {
+          "identical": true,
+          "points": [
+            2,
+            2,
+            2
+          ],
+          "spread": 0
+        },
+        "ingestion_pipeline": {
+          "identical": true,
+          "points": [
+            2,
+            2,
+            2
+          ],
+          "spread": 0
+        },
+        "interface": {
+          "identical": true,
+          "points": [
+            2,
+            2,
+            2
+          ],
+          "spread": 0
+        },
+        "llm_evaluation": {
+          "identical": true,
+          "points": [
+            1,
+            1,
+            1
+          ],
+          "spread": 0
+        },
+        "monitoring": {
+          "identical": true,
+          "points": [
+            2,
+            2,
+            2
+          ],
+          "spread": 0
+        },
+        "problem_description": {
+          "identical": true,
+          "points": [
+            1,
+            1,
+            1
+          ],
+          "spread": 0
+        },
+        "reproducibility": {
+          "identical": true,
+          "points": [
+            1,
+            1,
+            1
+          ],
+          "spread": 0
+        },
+        "retrieval_evaluation": {
+          "identical": true,
+          "points": [
+            1,
+            1,
+            1
+          ],
+          "spread": 0
+        },
+        "retrieval_flow": {
+          "identical": true,
+          "points": [
+            2,
+            2,
+            2
+          ],
+          "spread": 0
+        }
+      },
+      "samples_parsed": 3,
+      "samples_unparseable": 0,
+      "spread": 0,
+      "totals_excluding_bonus": [
+        15,
+        15,
+        15
+      ]
+    },
+    "p07-t01": {
+      "executable_layer_total_excluding_bonus": 15,
+      "identical": false,
+      "median": 15,
+      "per_criterion": {
+        "best_practice_hybrid_search": {
+          "identical": false,
+          "points": [
+            1,
+            0,
+            1
+          ],
+          "spread": 1
+        },
+        "best_practice_query_rewriting": {
+          "identical": true,
+          "points": [
+            0,
+            0,
+            0
+          ],
+          "spread": 0
+        },
+        "best_practice_reranking": {
+          "identical": true,
+          "points": [
+            0,
+            0,
+            0
+          ],
+          "spread": 0
+        },
+        "bonus_cloud_deployment": {
+          "identical": true,
+          "points": [
+            0,
+            0,
+            0
+          ],
+          "spread": 0
+        },
+        "bonus_discretionary": {
+          "identical": true,
+          "points": [
+            0,
+            0,
+            0
+          ],
+          "spread": 0
+        },
+        "containerization": {
+          "identical": true,
+          "points": [
+            2,
+            2,
+            2
+          ],
+          "spread": 0
+        },
+        "ingestion_pipeline": {
+          "identical": true,
+          "points": [
+            2,
+            2,
+            2
+          ],
+          "spread": 0
+        },
+        "interface": {
+          "identical": true,
+          "points": [
+            2,
+            2,
+            2
+          ],
+          "spread": 0
+        },
+        "llm_evaluation": {
+          "identical": true,
+          "points": [
+            1,
+            1,
+            1
+          ],
+          "spread": 0
+        },
+        "monitoring": {
+          "identical": true,
+          "points": [
+            2,
+            2,
+            2
+          ],
+          "spread": 0
+        },
+        "problem_description": {
+          "identical": true,
+          "points": [
+            1,
+            1,
+            1
+          ],
+          "spread": 0
+        },
+        "reproducibility": {
+          "identical": true,
+          "points": [
+            1,
+            1,
+            1
+          ],
+          "spread": 0
+        },
+        "retrieval_evaluation": {
+          "identical": true,
+          "points": [
+            1,
+            1,
+            1
+          ],
+          "spread": 0
+        },
+        "retrieval_flow": {
+          "identical": true,
+          "points": [
+            2,
+            2,
+            2
+          ],
+          "spread": 0
+        }
+      },
+      "samples_parsed": 3,
+      "samples_unparseable": 0,
+      "spread": 1,
+      "totals_excluding_bonus": [
+        15,
+        14,
+        15
+      ]
+    },
+    "p08": {
+      "executable_layer_total_excluding_bonus": 15,
+      "identical": false,
+      "median": 15,
+      "per_criterion": {
+        "best_practice_hybrid_search": {
+          "identical": true,
+          "points": [
+            0,
+            0,
+            0
+          ],
+          "spread": 0
+        },
+        "best_practice_query_rewriting": {
+          "identical": false,
+          "points": [
+            1,
+            1,
+            0
+          ],
+          "spread": 1
+        },
+        "best_practice_reranking": {
+          "identical": false,
+          "points": [
+            1,
+            1,
+            0
+          ],
+          "spread": 1
+        },
+        "bonus_cloud_deployment": {
+          "identical": true,
+          "points": [
+            0,
+            0,
+            0
+          ],
+          "spread": 0
+        },
+        "bonus_discretionary": {
+          "identical": true,
+          "points": [
+            0,
+            0,
+            0
+          ],
+          "spread": 0
+        },
+        "containerization": {
+          "identical": true,
+          "points": [
+            2,
+            2,
+            2
+          ],
+          "spread": 0
+        },
+        "ingestion_pipeline": {
+          "identical": true,
+          "points": [
+            1,
+            1,
+            1
+          ],
+          "spread": 0
+        },
+        "interface": {
+          "identical": true,
+          "points": [
+            2,
+            2,
+            2
+          ],
+          "spread": 0
+        },
+        "llm_evaluation": {
+          "identical": true,
+          "points": [
+            2,
+            2,
+            2
+          ],
+          "spread": 0
+        },
+        "monitoring": {
+          "identical": true,
+          "points": [
+            1,
+            1,
+            1
+          ],
+          "spread": 0
+        },
+        "problem_description": {
+          "identical": true,
+          "points": [
+            1,
+            1,
+            1
+          ],
+          "spread": 0
+        },
+        "reproducibility": {
+          "identical": true,
+          "points": [
+            1,
+            1,
+            1
+          ],
+          "spread": 0
+        },
+        "retrieval_evaluation": {
+          "identical": true,
+          "points": [
+            1,
+            1,
+            1
+          ],
+          "spread": 0
+        },
+        "retrieval_flow": {
+          "identical": true,
+          "points": [
+            2,
+            2,
+            2
+          ],
+          "spread": 0
+        }
+      },
+      "samples_parsed": 3,
+      "samples_unparseable": 0,
+      "spread": 2,
+      "totals_excluding_bonus": [
+        15,
+        15,
+        13
+      ]
+    },
+    "p09": {
+      "executable_layer_total_excluding_bonus": 18,
+      "identical": true,
+      "median": 18,
+      "per_criterion": {
+        "best_practice_hybrid_search": {
+          "identical": true,
+          "points": [
+            1,
+            1,
+            1
+          ],
+          "spread": 0
+        },
+        "best_practice_query_rewriting": {
+          "identical": true,
+          "points": [
+            0,
+            0,
+            0
+          ],
+          "spread": 0
+        },
+        "best_practice_reranking": {
+          "identical": true,
+          "points": [
+            0,
+            0,
+            0
+          ],
+          "spread": 0
+        },
+        "bonus_cloud_deployment": {
+          "identical": true,
+          "points": [
+            0,
+            0,
+            0
+          ],
+          "spread": 0
+        },
+        "bonus_discretionary": {
+          "identical": true,
+          "points": [
+            0,
+            0,
+            0
+          ],
+          "spread": 0
+        },
+        "containerization": {
+          "identical": true,
+          "points": [
+            2,
+            2,
+            2
+          ],
+          "spread": 0
+        },
+        "ingestion_pipeline": {
+          "identical": true,
+          "points": [
+            2,
+            2,
+            2
+          ],
+          "spread": 0
+        },
+        "interface": {
+          "identical": true,
+          "points": [
+            2,
+            2,
+            2
+          ],
+          "spread": 0
+        },
+        "llm_evaluation": {
+          "identical": true,
+          "points": [
+            2,
+            2,
+            2
+          ],
+          "spread": 0
+        },
+        "monitoring": {
+          "identical": true,
+          "points": [
+            2,
+            2,
+            2
+          ],
+          "spread": 0
+        },
+        "problem_description": {
+          "identical": true,
+          "points": [
+            1,
+            1,
+            1
+          ],
+          "spread": 0
+        },
+        "reproducibility": {
+          "identical": true,
+          "points": [
+            2,
+            2,
+            2
+          ],
+          "spread": 0
+        },
+        "retrieval_evaluation": {
+          "identical": true,
+          "points": [
+            2,
+            2,
+            2
+          ],
+          "spread": 0
+        },
+        "retrieval_flow": {
+          "identical": true,
+          "points": [
+            2,
+            2,
+            2
+          ],
+          "spread": 0
+        }
+      },
+      "samples_parsed": 3,
+      "samples_unparseable": 0,
+      "spread": 0,
+      "totals_excluding_bonus": [
+        18,
+        18,
+        18
+      ]
+    },
+    "p09-t01": {
+      "executable_layer_total_excluding_bonus": 18,
+      "identical": false,
+      "median": 18,
+      "per_criterion": {
+        "best_practice_hybrid_search": {
+          "identical": true,
+          "points": [
+            1,
+            1,
+            1
+          ],
+          "spread": 0
+        },
+        "best_practice_query_rewriting": {
+          "identical": true,
+          "points": [
+            0,
+            0,
+            0
+          ],
+          "spread": 0
+        },
+        "best_practice_reranking": {
+          "identical": true,
+          "points": [
+            0,
+            0,
+            0
+          ],
+          "spread": 0
+        },
+        "bonus_cloud_deployment": {
+          "identical": true,
+          "points": [
+            0,
+            0,
+            0
+          ],
+          "spread": 0
+        },
+        "bonus_discretionary": {
+          "identical": true,
+          "points": [
+            0,
+            0,
+            0
+          ],
+          "spread": 0
+        },
+        "containerization": {
+          "identical": true,
+          "points": [
+            2,
+            2,
+            2
+          ],
+          "spread": 0
+        },
+        "ingestion_pipeline": {
+          "identical": true,
+          "points": [
+            2,
+            2,
+            2
+          ],
+          "spread": 0
+        },
+        "interface": {
+          "identical": true,
+          "points": [
+            2,
+            2,
+            2
+          ],
+          "spread": 0
+        },
+        "llm_evaluation": {
+          "identical": true,
+          "points": [
+            2,
+            2,
+            2
+          ],
+          "spread": 0
+        },
+        "monitoring": {
+          "identical": true,
+          "points": [
+            2,
+            2,
+            2
+          ],
+          "spread": 0
+        },
+        "problem_description": {
+          "identical": false,
+          "points": [
+            2,
+            1,
+            1
+          ],
+          "spread": 1
+        },
+        "reproducibility": {
+          "identical": true,
+          "points": [
+            2,
+            2
+          ],
+          "spread": 0
+        },
+        "reproductivity": {
+          "identical": true,
+          "points": [
+            2
+          ],
+          "spread": 0
+        },
+        "retrieval_evaluation": {
+          "identical": true,
+          "points": [
+            2,
+            2,
+            2
+          ],
+          "spread": 0
+        },
+        "retrieval_flow": {
+          "identical": true,
+          "points": [
+            2,
+            2,
+            2
+          ],
+          "spread": 0
+        }
+      },
+      "samples_parsed": 3,
+      "samples_unparseable": 0,
+      "spread": 1,
+      "totals_excluding_bonus": [
+        19,
+        18,
+        18
+      ]
+    },
+    "p10": {
+      "executable_layer_total_excluding_bonus": 10,
+      "identical": false,
+      "median": 12,
+      "per_criterion": {
+        "best_practice_hybrid_search": {
+          "identical": true,
+          "points": [
+            0,
+            0,
+            0
+          ],
+          "spread": 0
+        },
+        "best_practice_query_rewriting": {
+          "identical": true,
+          "points": [
+            0,
+            0,
+            0
+          ],
+          "spread": 0
+        },
+        "best_practice_reranking": {
+          "identical": true,
+          "points": [
+            0,
+            0,
+            0
+          ],
+          "spread": 0
+        },
+        "bonus_cloud_deployment": {
+          "identical": true,
+          "points": [
+            0,
+            0,
+            0
+          ],
+          "spread": 0
+        },
+        "bonus_discretionary": {
+          "identical": true,
+          "points": [
+            0,
+            0,
+            0
+          ],
+          "spread": 0
+        },
+        "containerization": {
+          "identical": false,
+          "points": [
+            1,
+            0,
+            1
+          ],
+          "spread": 1
+        },
+        "ingestion_pipeline": {
+          "identical": true,
+          "points": [
+            1,
+            1,
+            1
+          ],
+          "spread": 0
+        },
+        "interface": {
+          "identical": true,
+          "points": [
+            2,
+            2,
+            2
+          ],
+          "spread": 0
+        },
+        "llm_evaluation": {
+          "identical": true,
+          "points": [
+            1,
+            1,
+            1
+          ],
+          "spread": 0
+        },
+        "monitoring": {
+          "identical": true,
+          "points": [
+            1,
+            1,
+            1
+          ],
+          "spread": 0
+        },
+        "problem_description": {
+          "identical": true,
+          "points": [
+            1,
+            1,
+            1
+          ],
+          "spread": 0
+        },
+        "reproducibility": {
+          "identical": true,
+          "points": [
+            1,
+            1,
+            1
+          ],
+          "spread": 0
+        },
+        "retrieval_evaluation": {
+          "identical": true,
+          "points": [
+            2,
+            2,
+            2
+          ],
+          "spread": 0
+        },
+        "retrieval_flow": {
+          "identical": true,
+          "points": [
+            2,
+            2,
+            2
+          ],
+          "spread": 0
+        }
+      },
+      "samples_parsed": 3,
+      "samples_unparseable": 0,
+      "spread": 1,
+      "totals_excluding_bonus": [
+        12,
+        11,
+        12
+      ]
+    },
+    "p10-t01": {
+      "executable_layer_total_excluding_bonus": 10,
+      "identical": false,
+      "median": 12,
+      "per_criterion": {
+        "best_practice_hybrid_search": {
+          "identical": true,
+          "points": [
+            0,
+            0,
+            0
+          ],
+          "spread": 0
+        },
+        "best_practice_query_rewriting": {
+          "identical": true,
+          "points": [
+            0,
+            0,
+            0
+          ],
+          "spread": 0
+        },
+        "best_practice_reranking": {
+          "identical": true,
+          "points": [
+            0,
+            0,
+            0
+          ],
+          "spread": 0
+        },
+        "bonus_cloud_deployment": {
+          "identical": true,
+          "points": [
+            0,
+            0,
+            0
+          ],
+          "spread": 0
+        },
+        "bonus_discretionary": {
+          "identical": true,
+          "points": [
+            0,
+            0,
+            0
+          ],
+          "spread": 0
+        },
+        "containerization": {
+          "identical": true,
+          "points": [
+            1,
+            1,
+            1
+          ],
+          "spread": 0
+        },
+        "ingestion_pipeline": {
+          "identical": true,
+          "points": [
+            1,
+            1,
+            1
+          ],
+          "spread": 0
+        },
+        "interface": {
+          "identical": true,
+          "points": [
+            2,
+            2,
+            2
+          ],
+          "spread": 0
+        },
+        "llm_evaluation": {
+          "identical": true,
+          "points": [
+            1,
+            1,
+            1
+          ],
+          "spread": 0
+        },
+        "monitoring": {
+          "identical": false,
+          "points": [
+            2,
+            1,
+            1
+          ],
+          "spread": 1
+        },
+        "problem_description": {
+          "identical": true,
+          "points": [
+            1,
+            1,
+            1
+          ],
+          "spread": 0
+        },
+        "reproducibility": {
+          "identical": true,
+          "points": [
+            1,
+            1,
+            1
+          ],
+          "spread": 0
+        },
+        "retrieval_evaluation": {
+          "identical": true,
+          "points": [
+            2,
+            2,
+            2
+          ],
+          "spread": 0
+        },
+        "retrieval_flow": {
+          "identical": true,
+          "points": [
+            2,
+            2,
+            2
+          ],
+          "spread": 0
+        }
+      },
+      "samples_parsed": 3,
+      "samples_unparseable": 0,
+      "spread": 1,
+      "totals_excluding_bonus": [
+        13,
+        12,
+        12
+      ]
+    },
+    "p11": {
+      "executable_layer_total_excluding_bonus": 19,
+      "identical": true,
+      "median": 18,
+      "per_criterion": {
+        "best_practice_hybrid_search": {
+          "identical": true,
+          "points": [
+            1,
+            1,
+            1
+          ],
+          "spread": 0
+        },
+        "best_practice_query_rewriting": {
+          "identical": true,
+          "points": [
+            1,
+            1,
+            1
+          ],
+          "spread": 0
+        },
+        "best_practice_reranking": {
+          "identical": true,
+          "points": [
+            0,
+            0,
+            0
+          ],
+          "spread": 0
+        },
+        "bonus_cloud_deployment": {
+          "identical": true,
+          "points": [
+            0,
+            0,
+            0
+          ],
+          "spread": 0
+        },
+        "bonus_discretionary": {
+          "identical": true,
+          "points": [
+            0,
+            0,
+            0
+          ],
+          "spread": 0
+        },
+        "containerization": {
+          "identical": true,
+          "points": [
+            2,
+            2,
+            2
+          ],
+          "spread": 0
+        },
+        "ingestion_pipeline": {
+          "identical": true,
+          "points": [
+            1,
+            1,
+            1
+          ],
+          "spread": 0
+        },
+        "interface": {
+          "identical": true,
+          "points": [
+            2,
+            2,
+            2
+          ],
+          "spread": 0
+        },
+        "llm_evaluation": {
+          "identical": true,
+          "points": [
+            2,
+            2,
+            2
+          ],
+          "spread": 0
+        },
+        "monitoring": {
+          "identical": true,
+          "points": [
+            2,
+            2,
+            2
+          ],
+          "spread": 0
+        },
+        "problem_description": {
+          "identical": true,
+          "points": [
+            2,
+            2,
+            2
+          ],
+          "spread": 0
+        },
+        "reproducibility": {
+          "identical": true,
+          "points": [
+            1,
+            1,
+            1
+          ],
+          "spread": 0
+        },
+        "retrieval_evaluation": {
+          "identical": true,
+          "points": [
+            2,
+            2,
+            2
+          ],
+          "spread": 0
+        },
+        "retrieval_flow": {
+          "identical": true,
+          "points": [
+            2,
+            2,
+            2
+          ],
+          "spread": 0
+        }
+      },
+      "samples_parsed": 3,
+      "samples_unparseable": 0,
+      "spread": 0,
+      "totals_excluding_bonus": [
+        18,
+        18,
+        18
+      ]
+    },
+    "p11-t01": {
+      "executable_layer_total_excluding_bonus": 19,
+      "identical": true,
+      "median": 18,
+      "per_criterion": {
+        "best_practice_hybrid_search": {
+          "identical": true,
+          "points": [
+            1,
+            1,
+            1
+          ],
+          "spread": 0
+        },
+        "best_practice_query_rewriting": {
+          "identical": true,
+          "points": [
+            1,
+            1,
+            1
+          ],
+          "spread": 0
+        },
+        "best_practice_reranking": {
+          "identical": true,
+          "points": [
+            0,
+            0,
+            0
+          ],
+          "spread": 0
+        },
+        "bonus_cloud_deployment": {
+          "identical": true,
+          "points": [
+            0,
+            0,
+            0
+          ],
+          "spread": 0
+        },
+        "bonus_discretionary": {
+          "identical": true,
+          "points": [
+            0,
+            0,
+            0
+          ],
+          "spread": 0
+        },
+        "containerization": {
+          "identical": true,
+          "points": [
+            2,
+            2,
+            2
+          ],
+          "spread": 0
+        },
+        "ingestion_pipeline": {
+          "identical": true,
+          "points": [
+            1,
+            1,
+            1
+          ],
+          "spread": 0
+        },
+        "interface": {
+          "identical": true,
+          "points": [
+            2,
+            2,
+            2
+          ],
+          "spread": 0
+        },
+        "llm_evaluation": {
+          "identical": true,
+          "points": [
+            2,
+            2,
+            2
+          ],
+          "spread": 0
+        },
+        "monitoring": {
+          "identical": true,
+          "points": [
+            2,
+            2,
+            2
+          ],
+          "spread": 0
+        },
+        "problem_description": {
+          "identical": true,
+          "points": [
+            2,
+            2,
+            2
+          ],
+          "spread": 0
+        },
+        "reproducibility": {
+          "identical": true,
+          "points": [
+            1,
+            1,
+            1
+          ],
+          "spread": 0
+        },
+        "retrieval_evaluation": {
+          "identical": true,
+          "points": [
+            2,
+            2,
+            2
+          ],
+          "spread": 0
+        },
+        "retrieval_flow": {
+          "identical": true,
+          "points": [
+            2,
+            2,
+            2
+          ],
+          "spread": 0
+        }
+      },
+      "samples_parsed": 3,
+      "samples_unparseable": 0,
+      "spread": 0,
+      "totals_excluding_bonus": [
+        18,
+        18,
+        18
+      ]
+    },
+    "p12": {
+      "executable_layer_total_excluding_bonus": 20,
+      "identical": false,
+      "median": 20,
+      "per_criterion": {
+        "best_practice_hybrid_search": {
+          "identical": true,
+          "points": [
+            1,
+            1,
+            1
+          ],
+          "spread": 0
+        },
+        "best_practice_query_rewriting": {
+          "identical": true,
+          "points": [
+            1,
+            1,
+            1
+          ],
+          "spread": 0
+        },
+        "best_practice_reranking": {
+          "identical": true,
+          "points": [
+            1,
+            1,
+            1
+          ],
+          "spread": 0
+        },
+        "bonus_cloud_deployment": {
+          "identical": true,
+          "points": [
+            2,
+            2,
+            2
+          ],
+          "spread": 0
+        },
+        "bonus_discretionary": {
+          "identical": false,
+          "points": [
+            0,
+            3,
+            0
+          ],
+          "spread": 3
+        },
+        "containerization": {
+          "identical": true,
+          "points": [
+            2,
+            2,
+            2
+          ],
+          "spread": 0
+        },
+        "ingestion_pipeline": {
+          "identical": true,
+          "points": [
+            1,
+            1,
+            1
+          ],
+          "spread": 0
+        },
+        "interface": {
+          "identical": true,
+          "points": [
+            2,
+            2,
+            2
+          ],
+          "spread": 0
+        },
+        "llm_evaluation": {
+          "identical": true,
+          "points": [
+            2,
+            2,
+            2
+          ],
+          "spread": 0
+        },
+        "monitoring": {
+          "identical": true,
+          "points": [
+            2,
+            2,
+            2
+          ],
+          "spread": 0
+        },
+        "problem_description": {
+          "identical": true,
+          "points": [
+            2,
+            2,
+            2
+          ],
+          "spread": 0
+        },
+        "reproducibility": {
+          "identical": false,
+          "points": [
+            2,
+            2,
+            1
+          ],
+          "spread": 1
+        },
+        "retrieval_evaluation": {
+          "identical": true,
+          "points": [
+            2,
+            2,
+            2
+          ],
+          "spread": 0
+        },
+        "retrieval_flow": {
+          "identical": true,
+          "points": [
+            2,
+            2,
+            2
+          ],
+          "spread": 0
+        }
+      },
+      "samples_parsed": 3,
+      "samples_unparseable": 0,
+      "spread": 1,
+      "totals_excluding_bonus": [
+        20,
+        20,
+        19
+      ]
+    },
+    "p12-t01": {
+      "executable_layer_total_excluding_bonus": 20,
+      "identical": false,
+      "median": 20,
+      "per_criterion": {
+        "best_practice_hybrid_search": {
+          "identical": true,
+          "points": [
+            1,
+            1,
+            1
+          ],
+          "spread": 0
+        },
+        "best_practice_query_rewriting": {
+          "identical": true,
+          "points": [
+            1,
+            1,
+            1
+          ],
+          "spread": 0
+        },
+        "best_practice_reranking": {
+          "identical": true,
+          "points": [
+            1,
+            1,
+            1
+          ],
+          "spread": 0
+        },
+        "bonus_cloud_deployment": {
+          "identical": true,
+          "points": [
+            2,
+            2,
+            2
+          ],
+          "spread": 0
+        },
+        "bonus_discretionary": {
+          "identical": false,
+          "points": [
+            0,
+            0,
+            3
+          ],
+          "spread": 3
+        },
+        "containerization": {
+          "identical": true,
+          "points": [
+            2,
+            2,
+            2
+          ],
+          "spread": 0
+        },
+        "ingestion_pipeline": {
+          "identical": true,
+          "points": [
+            1,
+            1,
+            1
+          ],
+          "spread": 0
+        },
+        "interface": {
+          "identical": true,
+          "points": [
+            2,
+            2,
+            2
+          ],
+          "spread": 0
+        },
+        "llm_evaluation": {
+          "identical": true,
+          "points": [
+            2,
+            2,
+            2
+          ],
+          "spread": 0
+        },
+        "monitoring": {
+          "identical": true,
+          "points": [
+            2,
+            2,
+            2
+          ],
+          "spread": 0
+        },
+        "problem_description": {
+          "identical": true,
+          "points": [
+            2,
+            2,
+            2
+          ],
+          "spread": 0
+        },
+        "reproducibility": {
+          "identical": false,
+          "points": [
+            2,
+            1,
+            2
+          ],
+          "spread": 1
+        },
+        "retrieval_evaluation": {
+          "identical": true,
+          "points": [
+            2,
+            2,
+            2
+          ],
+          "spread": 0
+        },
+        "retrieval_flow": {
+          "identical": true,
+          "points": [
+            2,
+            2,
+            2
+          ],
+          "spread": 0
+        }
+      },
+      "samples_parsed": 3,
+      "samples_unparseable": 0,
+      "spread": 1,
+      "totals_excluding_bonus": [
+        20,
+        19,
+        20
+      ]
+    },
+    "p12-t02": {
+      "executable_layer_total_excluding_bonus": 20,
+      "identical": true,
+      "median": 19,
+      "per_criterion": {
+        "best_practice_hybrid_search": {
+          "identical": true,
+          "points": [
+            1,
+            1,
+            1
+          ],
+          "spread": 0
+        },
+        "best_practice_query_rewriting": {
+          "identical": true,
+          "points": [
+            1,
+            1,
+            1
+          ],
+          "spread": 0
+        },
+        "best_practice_reranking": {
+          "identical": true,
+          "points": [
+            1,
+            1,
+            1
+          ],
+          "spread": 0
+        },
+        "bonus_cloud_deployment": {
+          "identical": true,
+          "points": [
+            2,
+            2,
+            2
+          ],
+          "spread": 0
+        },
+        "bonus_discretionary": {
+          "identical": false,
+          "points": [
+            3,
+            3,
+            0
+          ],
+          "spread": 3
+        },
+        "containerization": {
+          "identical": true,
+          "points": [
+            2,
+            2,
+            2
+          ],
+          "spread": 0
+        },
+        "ingestion_pipeline": {
+          "identical": true,
+          "points": [
+            1,
+            1,
+            1
+          ],
+          "spread": 0
+        },
+        "interface": {
+          "identical": true,
+          "points": [
+            2,
+            2,
+            2
+          ],
+          "spread": 0
+        },
+        "llm_evaluation": {
+          "identical": true,
+          "points": [
+            2,
+            2,
+            2
+          ],
+          "spread": 0
+        },
+        "monitoring": {
+          "identical": true,
+          "points": [
+            2,
+            2,
+            2
+          ],
+          "spread": 0
+        },
+        "problem_description": {
+          "identical": true,
+          "points": [
+            2,
+            2,
+            2
+          ],
+          "spread": 0
+        },
+        "reproducibility": {
+          "identical": true,
+          "points": [
+            1,
+            1,
+            1
+          ],
+          "spread": 0
+        },
+        "retrieval_evaluation": {
+          "identical": true,
+          "points": [
+            2,
+            2,
+            2
+          ],
+          "spread": 0
+        },
+        "retrieval_flow": {
+          "identical": true,
+          "points": [
+            2,
+            2,
+            2
+          ],
+          "spread": 0
+        }
+      },
+      "samples_parsed": 3,
+      "samples_unparseable": 0,
+      "spread": 0,
+      "totals_excluding_bonus": [
+        19,
+        19,
+        19
+      ]
+    },
+    "p13": {
+      "executable_layer_total_excluding_bonus": 20,
+      "identical": true,
+      "median": 20,
+      "per_criterion": {
+        "best_practice_hybrid_search": {
+          "identical": true,
+          "points": [
+            1,
+            1,
+            1
+          ],
+          "spread": 0
+        },
+        "best_practice_query_rewriting": {
+          "identical": true,
+          "points": [
+            1,
+            1,
+            1
+          ],
+          "spread": 0
+        },
+        "best_practice_reranking": {
+          "identical": true,
+          "points": [
+            1,
+            1,
+            1
+          ],
+          "spread": 0
+        },
+        "bonus_cloud_deployment": {
+          "identical": true,
+          "points": [
+            0,
+            0,
+            0
+          ],
+          "spread": 0
+        },
+        "bonus_discretionary": {
+          "identical": false,
+          "points": [
+            0,
+            3,
+            0
+          ],
+          "spread": 3
+        },
+        "containerization": {
+          "identical": true,
+          "points": [
+            2,
+            2,
+            2
+          ],
+          "spread": 0
+        },
+        "ingestion_pipeline": {
+          "identical": true,
+          "points": [
+            1,
+            1,
+            1
+          ],
+          "spread": 0
+        },
+        "interface": {
+          "identical": true,
+          "points": [
+            2,
+            2,
+            2
+          ],
+          "spread": 0
+        },
+        "llm_evaluation": {
+          "identical": true,
+          "points": [
+            2,
+            2,
+            2
+          ],
+          "spread": 0
+        },
+        "monitoring": {
+          "identical": true,
+          "points": [
+            2,
+            2,
+            2
+          ],
+          "spread": 0
+        },
+        "problem_description": {
+          "identical": true,
+          "points": [
+            2,
+            2,
+            2
+          ],
+          "spread": 0
+        },
+        "reproducibility": {
+          "identical": true,
+          "points": [
+            2,
+            2,
+            2
+          ],
+          "spread": 0
+        },
+        "retrieval_evaluation": {
+          "identical": true,
+          "points": [
+            2,
+            2,
+            2
+          ],
+          "spread": 0
+        },
+        "retrieval_flow": {
+          "identical": true,
+          "points": [
+            2,
+            2,
+            2
+          ],
+          "spread": 0
+        }
+      },
+      "samples_parsed": 3,
+      "samples_unparseable": 0,
+      "spread": 0,
+      "totals_excluding_bonus": [
+        20,
+        20,
+        20
+      ]
+    },
+    "p13-t01": {
+      "executable_layer_total_excluding_bonus": 20,
+      "identical": true,
+      "median": 20,
+      "per_criterion": {
+        "best_practice_hybrid_search": {
+          "identical": true,
+          "points": [
+            1,
+            1,
+            1
+          ],
+          "spread": 0
+        },
+        "best_practice_query_rewriting": {
+          "identical": true,
+          "points": [
+            1,
+            1,
+            1
+          ],
+          "spread": 0
+        },
+        "best_practice_reranking": {
+          "identical": true,
+          "points": [
+            1,
+            1,
+            1
+          ],
+          "spread": 0
+        },
+        "bonus_cloud_deployment": {
+          "identical": true,
+          "points": [
+            0,
+            0,
+            0
+          ],
+          "spread": 0
+        },
+        "bonus_discretionary": {
+          "identical": true,
+          "points": [
+            3,
+            3,
+            3
+          ],
+          "spread": 0
+        },
+        "containerization": {
+          "identical": true,
+          "points": [
+            2,
+            2,
+            2
+          ],
+          "spread": 0
+        },
+        "ingestion_pipeline": {
+          "identical": true,
+          "points": [
+            1,
+            1,
+            1
+          ],
+          "spread": 0
+        },
+        "interface": {
+          "identical": true,
+          "points": [
+            2,
+            2,
+            2
+          ],
+          "spread": 0
+        },
+        "llm_evaluation": {
+          "identical": true,
+          "points": [
+            2,
+            2,
+            2
+          ],
+          "spread": 0
+        },
+        "monitoring": {
+          "identical": true,
+          "points": [
+            2,
+            2,
+            2
+          ],
+          "spread": 0
+        },
+        "problem_description": {
+          "identical": true,
+          "points": [
+            2,
+            2,
+            2
+          ],
+          "spread": 0
+        },
+        "reproducibility": {
+          "identical": true,
+          "points": [
+            2,
+            2,
+            2
+          ],
+          "spread": 0
+        },
+        "retrieval_evaluation": {
+          "identical": true,
+          "points": [
+            2,
+            2,
+            2
+          ],
+          "spread": 0
+        },
+        "retrieval_flow": {
+          "identical": true,
+          "points": [
+            2,
+            2,
+            2
+          ],
+          "spread": 0
+        }
+      },
+      "samples_parsed": 3,
+      "samples_unparseable": 0,
+      "spread": 0,
+      "totals_excluding_bonus": [
+        20,
+        20,
+        20
+      ]
+    },
+    "p14": {
+      "executable_layer_total_excluding_bonus": 20,
+      "identical": false,
+      "median": 20,
+      "per_criterion": {
+        "best_practice_hybrid_search": {
+          "identical": true,
+          "points": [
+            1,
+            1,
+            1
+          ],
+          "spread": 0
+        },
+        "best_practice_query_rewriting": {
+          "identical": true,
+          "points": [
+            1,
+            1,
+            1
+          ],
+          "spread": 0
+        },
+        "best_practice_reranking": {
+          "identical": true,
+          "points": [
+            1,
+            1,
+            1
+          ],
+          "spread": 0
+        },
+        "bonus_cloud_deployment": {
+          "identical": true,
+          "points": [
+            2,
+            2,
+            2
+          ],
+          "spread": 0
+        },
+        "bonus_discretionary": {
+          "identical": false,
+          "points": [
+            0,
+            3,
+            3
+          ],
+          "spread": 3
+        },
+        "containerization": {
+          "identical": true,
+          "points": [
+            2,
+            2,
+            2
+          ],
+          "spread": 0
+        },
+        "ingestion_pipeline": {
+          "identical": true,
+          "points": [
+            1,
+            1,
+            1
+          ],
+          "spread": 0
+        },
+        "interface": {
+          "identical": true,
+          "points": [
+            2,
+            2,
+            2
+          ],
+          "spread": 0
+        },
+        "llm_evaluation": {
+          "identical": true,
+          "points": [
+            2,
+            2,
+            2
+          ],
+          "spread": 0
+        },
+        "monitoring": {
+          "identical": true,
+          "points": [
+            2,
+            2,
+            2
+          ],
+          "spread": 0
+        },
+        "problem_description": {
+          "identical": true,
+          "points": [
+            2,
+            2,
+            2
+          ],
+          "spread": 0
+        },
+        "reproducibility": {
+          "identical": false,
+          "points": [
+            1,
+            2,
+            2
+          ],
+          "spread": 1
+        },
+        "retrieval_evaluation": {
+          "identical": true,
+          "points": [
+            2,
+            2,
+            2
+          ],
+          "spread": 0
+        },
+        "retrieval_flow": {
+          "identical": true,
+          "points": [
+            2,
+            2,
+            2
+          ],
+          "spread": 0
+        }
+      },
+      "samples_parsed": 3,
+      "samples_unparseable": 0,
+      "spread": 1,
+      "totals_excluding_bonus": [
+        19,
+        20,
+        20
+      ]
+    },
+    "p15": {
+      "executable_layer_total_excluding_bonus": 16,
+      "identical": false,
+      "median": 17,
+      "per_criterion": {
+        "best_practice_hybrid_search": {
+          "identical": true,
+          "points": [
+            1,
+            1,
+            1
+          ],
+          "spread": 0
+        },
+        "best_practice_query_rewriting": {
+          "identical": false,
+          "points": [
+            0,
+            1,
+            1
+          ],
+          "spread": 1
+        },
+        "best_practice_reranking": {
+          "identical": true,
+          "points": [
+            0,
+            0,
+            0
+          ],
+          "spread": 0
+        },
+        "bonus_cloud_deployment": {
+          "identical": true,
+          "points": [
+            0,
+            0,
+            0
+          ],
+          "spread": 0
+        },
+        "bonus_discretionary": {
+          "identical": false,
+          "points": [
+            0,
+            0,
+            1
+          ],
+          "spread": 1
+        },
+        "containerization": {
+          "identical": true,
+          "points": [
+            2,
+            2,
+            2
+          ],
+          "spread": 0
+        },
+        "ingestion_pipeline": {
+          "identical": true,
+          "points": [
+            1,
+            1,
+            1
+          ],
+          "spread": 0
+        },
+        "interface": {
+          "identical": true,
+          "points": [
+            2,
+            2,
+            2
+          ],
+          "spread": 0
+        },
+        "llm_evaluation": {
+          "identical": true,
+          "points": [
+            1,
+            1,
+            1
+          ],
+          "spread": 0
+        },
+        "monitoring": {
+          "identical": true,
+          "points": [
+            1,
+            1,
+            1
+          ],
+          "spread": 0
+        },
+        "problem_description": {
+          "identical": true,
+          "points": [
+            2,
+            2,
+            2
+          ],
+          "spread": 0
+        },
+        "reproducibility": {
+          "identical": false,
+          "points": [
+            1,
+            2,
+            2
+          ],
+          "spread": 1
+        },
+        "retrieval_evaluation": {
+          "identical": true,
+          "points": [
+            2,
+            2,
+            2
+          ],
+          "spread": 0
+        },
+        "retrieval_flow": {
+          "identical": true,
+          "points": [
+            2,
+            2,
+            2
+          ],
+          "spread": 0
+        }
+      },
+      "samples_parsed": 3,
+      "samples_unparseable": 0,
+      "spread": 2,
+      "totals_excluding_bonus": [
+        15,
+        17,
+        17
+      ]
+    },
+    "p16": {
+      "executable_layer_total_excluding_bonus": 14,
+      "identical": false,
+      "median": 15,
+      "per_criterion": {
+        "best_practice_hybrid_search": {
+          "identical": true,
+          "points": [
+            1,
+            1,
+            1
+          ],
+          "spread": 0
+        },
+        "best_practice_query_rewriting": {
+          "identical": true,
+          "points": [
+            0,
+            0,
+            0
+          ],
+          "spread": 0
+        },
+        "best_practice_reranking": {
+          "identical": true,
+          "points": [
+            0,
+            0,
+            0
+          ],
+          "spread": 0
+        },
+        "bonus_cloud_deployment": {
+          "identical": true,
+          "points": [
+            0,
+            0,
+            0
+          ],
+          "spread": 0
+        },
+        "bonus_discretionary": {
+          "identical": true,
+          "points": [
+            0,
+            0,
+            0
+          ],
+          "spread": 0
+        },
+        "containerization": {
+          "identical": true,
+          "points": [
+            2,
+            2,
+            2
+          ],
+          "spread": 0
+        },
+        "ingestion_pipeline": {
+          "identical": true,
+          "points": [
+            1,
+            1,
+            1
+          ],
+          "spread": 0
+        },
+        "interface": {
+          "identical": true,
+          "points": [
+            2,
+            2,
+            2
+          ],
+          "spread": 0
+        },
+        "llm_evaluation": {
+          "identical": true,
+          "points": [
+            1,
+            1,
+            1
+          ],
+          "spread": 0
+        },
+        "monitoring": {
+          "identical": true,
+          "points": [
+            0,
+            0,
+            0
+          ],
+          "spread": 0
+        },
+        "problem_description": {
+          "identical": true,
+          "points": [
+            2,
+            2,
+            2
+          ],
+          "spread": 0
+        },
+        "reproducibility": {
+          "identical": false,
+          "points": [
+            2,
+            2,
+            1
+          ],
+          "spread": 1
+        },
+        "retrieval_evaluation": {
+          "identical": true,
+          "points": [
+            2,
+            2,
+            2
+          ],
+          "spread": 0
+        },
+        "retrieval_flow": {
+          "identical": true,
+          "points": [
+            2,
+            2,
+            2
+          ],
+          "spread": 0
+        }
+      },
+      "samples_parsed": 3,
+      "samples_unparseable": 0,
+      "spread": 1,
+      "totals_excluding_bonus": [
+        15,
+        15,
+        14
+      ]
+    },
+    "p17": {
+      "executable_layer_total_excluding_bonus": 18,
+      "identical": false,
+      "median": 20,
+      "per_criterion": {
+        "best_practice_hybrid_search": {
+          "identical": true,
+          "points": [
+            1,
+            1,
+            1
+          ],
+          "spread": 0
+        },
+        "best_practice_query_rewriting": {
+          "identical": true,
+          "points": [
+            1,
+            1,
+            1
+          ],
+          "spread": 0
+        },
+        "best_practice_reranking": {
+          "identical": true,
+          "points": [
+            1,
+            1,
+            1
+          ],
+          "spread": 0
+        },
+        "bonus_cloud_deployment": {
+          "identical": true,
+          "points": [
+            0,
+            0,
+            0
+          ],
+          "spread": 0
+        },
+        "bonus_discretionary": {
+          "identical": true,
+          "points": [
+            0,
+            0,
+            0
+          ],
+          "spread": 0
+        },
+        "containerization": {
+          "identical": true,
+          "points": [
+            2,
+            2,
+            2
+          ],
+          "spread": 0
+        },
+        "ingestion_pipeline": {
+          "identical": true,
+          "points": [
+            2,
+            2,
+            2
+          ],
+          "spread": 0
+        },
+        "interface": {
+          "identical": true,
+          "points": [
+            2,
+            2,
+            2
+          ],
+          "spread": 0
+        },
+        "llm_evaluation": {
+          "identical": true,
+          "points": [
+            2,
+            2,
+            2
+          ],
+          "spread": 0
+        },
+        "monitoring": {
+          "identical": true,
+          "points": [
+            2,
+            2,
+            2
+          ],
+          "spread": 0
+        },
+        "problem_description": {
+          "identical": true,
+          "points": [
+            1,
+            1,
+            1
+          ],
+          "spread": 0
+        },
+        "reproducibility": {
+          "identical": true,
+          "points": [
+            2,
+            2,
+            2
+          ],
+          "spread": 0
+        },
+        "retrieval_evaluation": {
+          "identical": false,
+          "points": [
+            2,
+            1,
+            2
+          ],
+          "spread": 1
+        },
+        "retrieval_flow": {
+          "identical": true,
+          "points": [
+            2,
+            2,
+            2
+          ],
+          "spread": 0
+        }
+      },
+      "samples_parsed": 3,
+      "samples_unparseable": 0,
+      "spread": 1,
+      "totals_excluding_bonus": [
+        20,
+        19,
+        20
+      ]
+    },
+    "p17-t01": {
+      "executable_layer_total_excluding_bonus": 18,
+      "identical": false,
+      "median": 20,
+      "per_criterion": {
+        "best_practice_hybrid_search": {
+          "identical": true,
+          "points": [
+            1,
+            1,
+            1
+          ],
+          "spread": 0
+        },
+        "best_practice_query_rewriting": {
+          "identical": true,
+          "points": [
+            1,
+            1,
+            1
+          ],
+          "spread": 0
+        },
+        "best_practice_reranking": {
+          "identical": true,
+          "points": [
+            1,
+            1,
+            1
+          ],
+          "spread": 0
+        },
+        "bonus_cloud_deployment": {
+          "identical": true,
+          "points": [
+            0,
+            0,
+            0
+          ],
+          "spread": 0
+        },
+        "bonus_discretionary": {
+          "identical": true,
+          "points": [
+            0,
+            0,
+            0
+          ],
+          "spread": 0
+        },
+        "containerization": {
+          "identical": true,
+          "points": [
+            2,
+            2,
+            2
+          ],
+          "spread": 0
+        },
+        "ingestion_pipeline": {
+          "identical": true,
+          "points": [
+            2,
+            2,
+            2
+          ],
+          "spread": 0
+        },
+        "interface": {
+          "identical": true,
+          "points": [
+            2,
+            2,
+            2
+          ],
+          "spread": 0
+        },
+        "llm_evaluation": {
+          "identical": false,
+          "points": [
+            2,
+            1,
+            2
+          ],
+          "spread": 1
+        },
+        "monitoring": {
+          "identical": true,
+          "points": [
+            2,
+            2,
+            2
+          ],
+          "spread": 0
+        },
+        "problem_description": {
+          "identical": true,
+          "points": [
+            1,
+            1,
+            1
+          ],
+          "spread": 0
+        },
+        "reproducibility": {
+          "identical": true,
+          "points": [
+            2,
+            2,
+            2
+          ],
+          "spread": 0
+        },
+        "retrieval_evaluation": {
+          "identical": false,
+          "points": [
+            2,
+            1,
+            2
+          ],
+          "spread": 1
+        },
+        "retrieval_flow": {
+          "identical": true,
+          "points": [
+            2,
+            2,
+            2
+          ],
+          "spread": 0
+        }
+      },
+      "samples_parsed": 3,
+      "samples_unparseable": 0,
+      "spread": 2,
+      "totals_excluding_bonus": [
+        20,
+        18,
+        20
+      ]
+    },
+    "p18": {
+      "executable_layer_total_excluding_bonus": 18,
+      "identical": false,
+      "median": 18,
+      "per_criterion": {
+        "best_practice_hybrid_search": {
+          "identical": true,
+          "points": [
+            1,
+            1,
+            1
+          ],
+          "spread": 0
+        },
+        "best_practice_query_rewriting": {
+          "identical": true,
+          "points": [
+            0,
+            0,
+            0
+          ],
+          "spread": 0
+        },
+        "best_practice_reranking": {
+          "identical": true,
+          "points": [
+            0,
+            0,
+            0
+          ],
+          "spread": 0
+        },
+        "bonus_cloud_deployment": {
+          "identical": true,
+          "points": [
+            0,
+            0,
+            0
+          ],
+          "spread": 0
+        },
+        "bonus_discretionary": {
+          "identical": true,
+          "points": [
+            0,
+            0,
+            0
+          ],
+          "spread": 0
+        },
+        "containerization": {
+          "identical": true,
+          "points": [
+            2,
+            2,
+            2
+          ],
+          "spread": 0
+        },
+        "ingestion_pipeline": {
+          "identical": true,
+          "points": [
+            1,
+            1,
+            1
+          ],
+          "spread": 0
+        },
+        "interface": {
+          "identical": true,
+          "points": [
+            2,
+            2,
+            2
+          ],
+          "spread": 0
+        },
+        "llm_evaluation": {
+          "identical": false,
+          "points": [
+            2,
+            1,
+            2
+          ],
+          "spread": 1
+        },
+        "monitoring": {
+          "identical": true,
+          "points": [
+            2,
+            2,
+            2
+          ],
+          "spread": 0
+        },
+        "problem_description": {
+          "identical": true,
+          "points": [
+            2,
+            2,
+            2
+          ],
+          "spread": 0
+        },
+        "reproducibility": {
+          "identical": true,
+          "points": [
+            2,
+            2,
+            2
+          ],
+          "spread": 0
+        },
+        "retrieval_evaluation": {
+          "identical": true,
+          "points": [
+            2,
+            2,
+            2
+          ],
+          "spread": 0
+        },
+        "retrieval_flow": {
+          "identical": true,
+          "points": [
+            2,
+            2,
+            2
+          ],
+          "spread": 0
+        }
+      },
+      "samples_parsed": 3,
+      "samples_unparseable": 0,
+      "spread": 1,
+      "totals_excluding_bonus": [
+        18,
+        17,
+        18
+      ]
+    },
+    "p18-t01": {
+      "executable_layer_total_excluding_bonus": 18,
+      "identical": false,
+      "median": 16,
+      "per_criterion": {
+        "best_practice_hybrid_search": {
+          "identical": true,
+          "points": [
+            1,
+            1,
+            1
+          ],
+          "spread": 0
+        },
+        "best_practice_query_rewriting": {
+          "identical": true,
+          "points": [
+            0,
+            0,
+            0
+          ],
+          "spread": 0
+        },
+        "best_practice_reranking": {
+          "identical": true,
+          "points": [
+            0,
+            0,
+            0
+          ],
+          "spread": 0
+        },
+        "bonus_cloud_deployment": {
+          "identical": true,
+          "points": [
+            0,
+            0,
+            0
+          ],
+          "spread": 0
+        },
+        "bonus_discretionary": {
+          "identical": true,
+          "points": [
+            0,
+            0,
+            0
+          ],
+          "spread": 0
+        },
+        "containerization": {
+          "identical": true,
+          "points": [
+            2,
+            2,
+            2
+          ],
+          "spread": 0
+        },
+        "ingestion_pipeline": {
+          "identical": true,
+          "points": [
+            1,
+            1,
+            1
+          ],
+          "spread": 0
+        },
+        "interface": {
+          "identical": true,
+          "points": [
+            2,
+            2,
+            2
+          ],
+          "spread": 0
+        },
+        "llm_evaluation": {
+          "identical": false,
+          "points": [
+            2,
+            1,
+            1
+          ],
+          "spread": 1
+        },
+        "monitoring": {
+          "identical": true,
+          "points": [
+            2,
+            2,
+            2
+          ],
+          "spread": 0
+        },
+        "problem_description": {
+          "identical": true,
+          "points": [
+            2,
+            2,
+            2
+          ],
+          "spread": 0
+        },
+        "reproducibility": {
+          "identical": false,
+          "points": [
+            2,
+            1,
+            1
+          ],
+          "spread": 1
+        },
+        "retrieval_evaluation": {
+          "identical": true,
+          "points": [
+            2,
+            2,
+            2
+          ],
+          "spread": 0
+        },
+        "retrieval_flow": {
+          "identical": true,
+          "points": [
+            2,
+            2,
+            2
+          ],
+          "spread": 0
+        }
+      },
+      "samples_parsed": 3,
+      "samples_unparseable": 0,
+      "spread": 2,
+      "totals_excluding_bonus": [
+        18,
+        16,
+        16
+      ]
+    },
+    "p19": {
+      "executable_layer_total_excluding_bonus": 16,
+      "identical": true,
+      "median": 16,
+      "per_criterion": {
+        "best_practice_hybrid_search": {
+          "identical": true,
+          "points": [
+            1,
+            1,
+            1
+          ],
+          "spread": 0
+        },
+        "best_practice_query_rewriting": {
+          "identical": true,
+          "points": [
+            0,
+            0,
+            0
+          ],
+          "spread": 0
+        },
+        "best_practice_reranking": {
+          "identical": true,
+          "points": [
+            0,
+            0,
+            0
+          ],
+          "spread": 0
+        },
+        "bonus_cloud_deployment": {
+          "identical": true,
+          "points": [
+            0,
+            0,
+            0
+          ],
+          "spread": 0
+        },
+        "bonus_discretionary": {
+          "identical": true,
+          "points": [
+            0,
+            0,
+            0
+          ],
+          "spread": 0
+        },
+        "containerization": {
+          "identical": true,
+          "points": [
+            2,
+            2,
+            2
+          ],
+          "spread": 0
+        },
+        "ingestion_pipeline": {
+          "identical": true,
+          "points": [
+            1,
+            1,
+            1
+          ],
+          "spread": 0
+        },
+        "interface": {
+          "identical": true,
+          "points": [
+            2,
+            2,
+            2
+          ],
+          "spread": 0
+        },
+        "llm_evaluation": {
+          "identical": true,
+          "points": [
+            1,
+            1,
+            1
+          ],
+          "spread": 0
+        },
+        "monitoring": {
+          "identical": true,
+          "points": [
+            2,
+            2,
+            2
+          ],
+          "spread": 0
+        },
+        "problem_description": {
+          "identical": true,
+          "points": [
+            1,
+            1,
+            1
+          ],
+          "spread": 0
+        },
+        "reproducibility": {
+          "identical": true,
+          "points": [
+            2,
+            2,
+            2
+          ],
+          "spread": 0
+        },
+        "retrieval_evaluation": {
+          "identical": true,
+          "points": [
+            2,
+            2,
+            2
+          ],
+          "spread": 0
+        },
+        "retrieval_flow": {
+          "identical": true,
+          "points": [
+            2,
+            2,
+            2
+          ],
+          "spread": 0
+        }
+      },
+      "samples_parsed": 3,
+      "samples_unparseable": 0,
+      "spread": 0,
+      "totals_excluding_bonus": [
+        16,
+        16,
+        16
+      ]
+    },
+    "p20": {
+      "executable_layer_total_excluding_bonus": 19,
+      "identical": false,
+      "median": 18,
+      "per_criterion": {
+        "best_practice_hybrid_search": {
+          "identical": true,
+          "points": [
+            1,
+            1,
+            1
+          ],
+          "spread": 0
+        },
+        "best_practice_query_rewriting": {
+          "identical": true,
+          "points": [
+            0,
+            0,
+            0
+          ],
+          "spread": 0
+        },
+        "best_practice_reranking": {
+          "identical": true,
+          "points": [
+            0,
+            0,
+            0
+          ],
+          "spread": 0
+        },
+        "bonus_cloud_deployment": {
+          "identical": true,
+          "points": [
+            0,
+            0,
+            0
+          ],
+          "spread": 0
+        },
+        "bonus_discretionary": {
+          "identical": true,
+          "points": [
+            0,
+            0,
+            0
+          ],
+          "spread": 0
+        },
+        "containerization": {
+          "identical": true,
+          "points": [
+            2,
+            2,
+            2
+          ],
+          "spread": 0
+        },
+        "ingestion_pipeline": {
+          "identical": true,
+          "points": [
+            2,
+            2,
+            2
+          ],
+          "spread": 0
+        },
+        "interface": {
+          "identical": true,
+          "points": [
+            2,
+            2,
+            2
+          ],
+          "spread": 0
+        },
+        "llm_evaluation": {
+          "identical": true,
+          "points": [
+            2,
+            2,
+            2
+          ],
+          "spread": 0
+        },
+        "monitoring": {
+          "identical": true,
+          "points": [
+            2,
+            2,
+            2
+          ],
+          "spread": 0
+        },
+        "problem_description": {
+          "identical": true,
+          "points": [
+            2,
+            2,
+            2
+          ],
+          "spread": 0
+        },
+        "reproducibility": {
+          "identical": false,
+          "points": [
+            2,
+            1,
+            1
+          ],
+          "spread": 1
+        },
+        "retrieval_evaluation": {
+          "identical": true,
+          "points": [
+            2,
+            2,
+            2
+          ],
+          "spread": 0
+        },
+        "retrieval_flow": {
+          "identical": true,
+          "points": [
+            2,
+            2,
+            2
+          ],
+          "spread": 0
+        }
+      },
+      "samples_parsed": 3,
+      "samples_unparseable": 0,
+      "spread": 1,
+      "totals_excluding_bonus": [
+        19,
+        18,
+        18
+      ]
+    },
+    "p21": {
+      "executable_layer_total_excluding_bonus": 13,
+      "identical": true,
+      "median": 12,
+      "per_criterion": {
+        "best_practice_hybrid_search": {
+          "identical": true,
+          "points": [
+            0,
+            0,
+            0
+          ],
+          "spread": 0
+        },
+        "best_practice_query_rewriting": {
+          "identical": true,
+          "points": [
+            0,
+            0,
+            0
+          ],
+          "spread": 0
+        },
+        "best_practice_reranking": {
+          "identical": true,
+          "points": [
+            0,
+            0,
+            0
+          ],
+          "spread": 0
+        },
+        "bonus_cloud_deployment": {
+          "identical": true,
+          "points": [
+            0,
+            0,
+            0
+          ],
+          "spread": 0
+        },
+        "bonus_discretionary": {
+          "identical": true,
+          "points": [
+            0,
+            0,
+            0
+          ],
+          "spread": 0
+        },
+        "containerization": {
+          "identical": true,
+          "points": [
+            0,
+            0,
+            0
+          ],
+          "spread": 0
+        },
+        "ingestion_pipeline": {
+          "identical": true,
+          "points": [
+            1,
+            1,
+            1
+          ],
+          "spread": 0
+        },
+        "interface": {
+          "identical": true,
+          "points": [
+            2,
+            2,
+            2
+          ],
+          "spread": 0
+        },
+        "llm_evaluation": {
+          "identical": true,
+          "points": [
+            1,
+            1,
+            1
+          ],
+          "spread": 0
+        },
+        "monitoring": {
+          "identical": true,
+          "points": [
+            2,
+            2,
+            2
+          ],
+          "spread": 0
+        },
+        "problem_description": {
+          "identical": true,
+          "points": [
+            2,
+            2,
+            2
+          ],
+          "spread": 0
+        },
+        "reproducibility": {
+          "identical": true,
+          "points": [
+            1,
+            1,
+            1
+          ],
+          "spread": 0
+        },
+        "retrieval_evaluation": {
+          "identical": true,
+          "points": [
+            1,
+            1,
+            1
+          ],
+          "spread": 0
+        },
+        "retrieval_flow": {
+          "identical": true,
+          "points": [
+            2,
+            2,
+            2
+          ],
+          "spread": 0
+        }
+      },
+      "samples_parsed": 3,
+      "samples_unparseable": 0,
+      "spread": 0,
+      "totals_excluding_bonus": [
+        12,
+        12,
+        12
+      ]
+    },
+    "p22": {
+      "executable_layer_total_excluding_bonus": 12,
+      "identical": true,
+      "median": 12,
+      "per_criterion": {
+        "best_practice_hybrid_search": {
+          "identical": true,
+          "points": [
+            1,
+            1,
+            1
+          ],
+          "spread": 0
+        },
+        "best_practice_query_rewriting": {
+          "identical": true,
+          "points": [
+            0,
+            0,
+            0
+          ],
+          "spread": 0
+        },
+        "best_practice_reranking": {
+          "identical": true,
+          "points": [
+            0,
+            0,
+            0
+          ],
+          "spread": 0
+        },
+        "bonus_cloud_deployment": {
+          "identical": true,
+          "points": [
+            0,
+            0,
+            0
+          ],
+          "spread": 0
+        },
+        "bonus_discretionary": {
+          "identical": true,
+          "points": [
+            0,
+            0,
+            0
+          ],
+          "spread": 0
+        },
+        "containerization": {
+          "identical": true,
+          "points": [
+            1,
+            1,
+            1
+          ],
+          "spread": 0
+        },
+        "ingestion_pipeline": {
+          "identical": true,
+          "points": [
+            1,
+            1,
+            1
+          ],
+          "spread": 0
+        },
+        "interface": {
+          "identical": true,
+          "points": [
+            2,
+            2,
+            2
+          ],
+          "spread": 0
+        },
+        "llm_evaluation": {
+          "identical": true,
+          "points": [
+            0,
+            0,
+            0
+          ],
+          "spread": 0
+        },
+        "monitoring": {
+          "identical": true,
+          "points": [
+            0,
+            0,
+            0
+          ],
+          "spread": 0
+        },
+        "problem_description": {
+          "identical": true,
+          "points": [
+            2,
+            2,
+            2
+          ],
+          "spread": 0
+        },
+        "reproducibility": {
+          "identical": true,
+          "points": [
+            1,
+            1,
+            1
+          ],
+          "spread": 0
+        },
+        "retrieval_evaluation": {
+          "identical": true,
+          "points": [
+            2,
+            2,
+            2
+          ],
+          "spread": 0
+        },
+        "retrieval_flow": {
+          "identical": true,
+          "points": [
+            2,
+            2,
+            2
+          ],
+          "spread": 0
+        }
+      },
+      "samples_parsed": 3,
+      "samples_unparseable": 0,
+      "spread": 0,
+      "totals_excluding_bonus": [
+        12,
+        12,
+        12
+      ]
+    },
+    "p23": {
+      "executable_layer_total_excluding_bonus": 11,
+      "identical": false,
+      "median": 11,
+      "per_criterion": {
+        "best_practice_hybrid_search": {
+          "identical": true,
+          "points": [
+            0,
+            0,
+            0
+          ],
+          "spread": 0
+        },
+        "best_practice_query_rewriting": {
+          "identical": true,
+          "points": [
+            0,
+            0,
+            0
+          ],
+          "spread": 0
+        },
+        "best_practice_reranking": {
+          "identical": true,
+          "points": [
+            0,
+            0,
+            0
+          ],
+          "spread": 0
+        },
+        "bonus_cloud_deployment": {
+          "identical": true,
+          "points": [
+            0,
+            0,
+            0
+          ],
+          "spread": 0
+        },
+        "bonus_discretionary": {
+          "identical": true,
+          "points": [
+            0,
+            0,
+            0
+          ],
+          "spread": 0
+        },
+        "containerization": {
+          "identical": true,
+          "points": [
+            2,
+            2,
+            2
+          ],
+          "spread": 0
+        },
+        "ingestion_pipeline": {
+          "identical": false,
+          "points": [
+            2,
+            1,
+            1
+          ],
+          "spread": 1
+        },
+        "interface": {
+          "identical": true,
+          "points": [
+            2,
+            2,
+            2
+          ],
+          "spread": 0
+        },
+        "llm_evaluation": {
+          "identical": true,
+          "points": [
+            0,
+            0,
+            0
+          ],
+          "spread": 0
+        },
+        "monitoring": {
+          "identical": true,
+          "points": [
+            0,
+            0,
+            0
+          ],
+          "spread": 0
+        },
+        "problem_description": {
+          "identical": true,
+          "points": [
+            2,
+            2,
+            2
+          ],
+          "spread": 0
+        },
+        "reproducibility": {
+          "identical": true,
+          "points": [
+            2,
+            2,
+            2
+          ],
+          "spread": 0
+        },
+        "retrieval_evaluation": {
+          "identical": true,
+          "points": [
+            0,
+            0,
+            0
+          ],
+          "spread": 0
+        },
+        "retrieval_flow": {
+          "identical": true,
+          "points": [
+            2,
+            2,
+            2
+          ],
+          "spread": 0
+        }
+      },
+      "samples_parsed": 3,
+      "samples_unparseable": 0,
+      "spread": 1,
+      "totals_excluding_bonus": [
+        12,
+        11,
+        11
+      ]
+    }
+  },
+  "per_criterion_weighted": {
+    "best_practice_hybrid_search": {
+      "buckets": {
+        "2/3": 1,
+        "3/3": 40
+      },
+      "n": 41,
+      "weighted": 0.9919
+    },
+    "best_practice_query_rewriting": {
+      "buckets": {
+        "2/3": 2,
+        "3/3": 39
+      },
+      "n": 41,
+      "weighted": 0.9838
+    },
+    "best_practice_reranking": {
+      "buckets": {
+        "2/3": 1,
+        "3/3": 40
+      },
+      "n": 41,
+      "weighted": 0.9919
+    },
+    "containerization": {
+      "buckets": {
+        "2/3": 2,
+        "3/3": 39
+      },
+      "n": 41,
+      "weighted": 0.9838
+    },
+    "ingestion_pipeline": {
+      "buckets": {
+        "2/3": 2,
+        "3/3": 39
+      },
+      "n": 41,
+      "weighted": 0.9838
+    },
+    "interface": {
+      "buckets": {
+        "3/3": 41
+      },
+      "n": 41,
+      "weighted": 1.0
+    },
+    "llm_evaluation": {
+      "buckets": {
+        "2/3": 3,
+        "3/3": 38
+      },
+      "n": 41,
+      "weighted": 0.9756
+    },
+    "monitoring": {
+      "buckets": {
+        "2/3": 1,
+        "3/3": 40
+      },
+      "n": 41,
+      "weighted": 0.9919
+    },
+    "problem_description": {
+      "buckets": {
+        "2/3": 1,
+        "3/3": 40
+      },
+      "n": 41,
+      "weighted": 0.9919
+    },
+    "reproducibility": {
+      "buckets": {
+        "2/3": 16,
+        "3/3": 24
+      },
+      "n": 40,
+      "weighted": 0.8668
+    },
+    "retrieval_evaluation": {
+      "buckets": {
+        "2/3": 2,
+        "3/3": 39
+      },
+      "n": 41,
+      "weighted": 0.9838
+    },
+    "retrieval_flow": {
+      "buckets": {
+        "3/3": 41
+      },
+      "n": 41,
+      "weighted": 1.0
+    }
+  }
+}

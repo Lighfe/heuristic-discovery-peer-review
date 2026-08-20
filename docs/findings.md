@@ -493,19 +493,56 @@ gets exactly one data point from this batch (p14) — not enough to settle
 it; item 3e stays open, sealed as a named risk
 (`retrieval-best-approach-not-normalised-open`).
 
-**Same-model self-consistency (the real G4 baseline): 29.3% exact-match**
-(12 of 41 cases have all three samples identical), mean spread 1.29
-points, max 4. Far below the 0.95 ceiling in `agreement-protocol-ceiling`
-— **G4 measures real variance here, is not decorative, and its form (one
-of the four options in `objective.md`) is a live step-10 decision**, now
-informed by an actual number instead of the owner's stated tendency
-alone. Constructed twins show spread in the same range as real records,
-not obviously worse.
+**Same-model self-consistency (the real G4 baseline), bonus points
+excluded from every total (owner instruction, 2026-08-19): 36.6%
+exact-match** (15 of 41 cases have all three samples identical on the
+21-point non-bonus scale), weighted score 0.7726 (owner's formula:
+1.0 × 3/3 + 0.667 × 2/3 + 0.0 × 0/3, averaged). Far below the 0.95
+ceiling in `agreement-protocol-ceiling` — **G4 measures real variance
+here, is not decorative, and its form (one of the four options in
+`objective.md`) is a live step-10 decision**, now informed by an actual
+number instead of the owner's stated tendency alone.
+
+`bonus_cloud_deployment` and `bonus_discretionary` are excluded from
+`max_total` and every total here, though Gemini still scores them in
+every sample — the exclusion is an analysis choice, not a change to what
+gets judged. Reason: an initial pass (bonus included) found
+`bonus_discretionary` swings its full 0-to-3 range in 7 of 41 cases,
+disproportionately distorting case-level total spread relative to how
+often it actually disagrees (round-1 detail below). Without bonus
+points, **per-criterion agreement clears 95% on 11 of 12 remaining
+criteria** — only `reproducibility` sits well below it, at 0.8668
+weighted (disagreeing, always by a narrow 1-point margin, on 39% of the
+corpus) — while **case-level agreement stays at 0.7726, not near 95%**.
+This gap is real, not an error: a case's total needs all 12 criteria to
+agree simultaneously, so even at ~97-100% per-criterion agreement each,
+the compounded joint probability lands close to the observed rate (a
+back-of-envelope independent-event estimate gives ≈41%, the same order
+of magnitude as 36.6%). Per-criterion and per-case agreement answer
+different questions and should not be expected to match.
 
 **The model's own arithmetic remains unreliable at M2 scale:** 69 of 123
 samples (56%) have a self-reported `total` disagreeing with the sum of
 that response's own listed per-criterion points — the defect
 `agreement-total-recomputed` found at 67%-of-24 in the M1 smoke test did
-not shrink with 5x the case count. Every number in this finding uses the
+not shrink with 5x the case count. Every number above uses the
 mechanically recomputed total; the model's self-reported total is never
 trusted, unchanged from F5's fix.
+
+**Round 1 (bonus included, superseded above as the reported number, kept
+for the record):** exact-match was 29.3% (12/41), weighted 0.7157. A
+3-way breakdown showed the modal outcome was two-of-three agreement
+(63.4%), not scattered disagreement (7.3% full 0/3). Raw responses for
+the two highest-spread cases (p01, p12, spread 4 each) showed the spread
+concentrated almost entirely in `bonus_discretionary`, going `[0, 3, 0]`
+in both, which is what motivated excluding it above — its selection was
+driven by picking the highest-*total*-spread cases, and
+`bonus_discretionary`'s large max (3) and all-or-nothing swing pattern
+made it disproportionately likely to dominate that selection despite
+disagreeing on only 9 of 41 cases corpus-wide (round-1 per-criterion
+check, bonus included).
+
+Full detail for both rounds, plus the per-criterion storage added to
+`loop/agreement.py` for future passes:
+`runs/2026-08-19-m2-step9-measurements/report.md`, "Baseline agreement,
+in more detail."

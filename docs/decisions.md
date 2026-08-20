@@ -339,6 +339,26 @@ unsealed case set isn't a real baseline) — the checklist closing is what
 makes the case set stable enough to measure, not the step 10 paperwork
 act itself. Step 10 still runs afterward, unchanged.
 
+**agreement-stores-per-criterion** — `loop/agreement.py`'s `summarise()`
+now groups each parsed sample's `criteria[].points` by criterion id
+(`points`, `identical`, `spread` per criterion per case), not only the
+summed total. Reason: a total-only view hides which *criteria* disagree,
+not only which repos, and can hide two criteria moving in opposite
+directions cancelling out in the sum. Added as a step 9(a) follow-up
+(2026-08-19), verified against the existing response cache at zero new
+requests — not retroactive: `runs/20260819T135911Z-agreement/agreement.json`
+predates the change and is unmodified. Binds: the next agreement pass's
+`agreement.json` carries `per_criterion` per case; no schema or scoring
+change, measurement-layer only.
+
+**agreement-excludes-bonus-points** — Owner decision 2026-08-19: G4
+agreement totals exclude `bonus_cloud_deployment` and
+`bonus_discretionary` (max_total 26 → 21) — Gemini still scores both,
+they're just left out of every total and the per-criterion table.
+Reason: `bonus_discretionary` swings its full 0-to-3 range in 7 of 41
+cases, distorting case-level spread out of proportion to how often it
+actually disagrees. `findings.md` F6 has the numbers both ways.
+
 ## Objective and measurement
 
 **objective-lexicographic** — Owner decision 2026-08-09: gates first, then

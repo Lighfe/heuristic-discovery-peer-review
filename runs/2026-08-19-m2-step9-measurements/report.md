@@ -127,14 +127,15 @@ with the larger case set. `loop/agreement.py`'s fix
 and every number below uses the recomputed total exclusively.
 
 **Baseline agreement (exact-match self-consistency, the G4 ceiling-check
-metric per `findings.md` F5's convention): 12 / 41 = 29.3%.** Far below
-the 0.95 ceiling in `agreement-protocol-ceiling` — same-model
-self-consistency is real, measurable variance here, not a ceiling
-artifact, so **G4 is not decorative** and its *form* (one of the four
-options in `objective.md`, owner's stated tendency toward (4) demotion to
-a reported metric) is a live decision at step 10, informed by this actual
-number rather than an assumption. Mean spread across all 41 cases: 1.29
-points (max 4, min 0).
+metric per `findings.md` F5's convention), bonus points excluded (owner
+instruction, 2026-08-19 — see "Baseline agreement, in more detail"
+below for the full reasoning): 15 / 41 = 36.6%.** Far below the 0.95
+ceiling in `agreement-protocol-ceiling` — same-model self-consistency is
+real, measurable variance here, not a ceiling artifact, so **G4 is not
+decorative** and its *form* (one of the four options in `objective.md`,
+owner's stated tendency toward (4) demotion to a reported metric) is a
+live decision at step 10, informed by this actual number rather than an
+assumption.
 
 Twin-only vs. record-only spread is worth naming for step 10's
 discussion, not analysed further here: constructed twins (`p01-t0N`,
@@ -206,3 +207,92 @@ requiring a decision before step 10. `containerization_kind: other`'s
 fallback behavior is worth keeping in mind if a future candidate
 broadens the containerization criterion's mechanism vocabulary, but it
 does not block sealing or step 10 as v0 currently stands.
+
+## Baseline agreement, in more detail (follow-up, no new spend)
+
+The exact-match figure asks whether all three samples landed on the
+*identical* total, a stricter bar than the real course itself uses
+(three human reviewers, median taken, unanimity never required). Two
+rounds of follow-up analysis, both computed from data already on disk —
+zero new Gemini requests for either.
+
+**Round 1** (superseded by round 2 below, kept here for the record, not
+as the reported number): a 3-way exact-match breakdown (3/3 / 2/3 / 0/3),
+per-criterion storage added to `loop/agreement.py`, a percentage-of-max
+scoping exercise, and the raw p01/p12 samples — all computed with bonus
+points still included. That pass found the two highest-total-spread
+cases (p01, p12) disagreed almost entirely on `bonus_discretionary`, the
+one criterion with no written tier.
+
+**Round 2 — bonus points excluded from every total (owner instruction,
+2026-08-19).** `bonus_cloud_deployment` (max 2) and `bonus_discretionary`
+(max 3) are still scored by Gemini in every sample — nothing about what
+the model judges changed — but are excluded from `max_total` (26 → 21),
+every case total, and the per-criterion averaging table below. Reason:
+round 1 found `bonus_discretionary` swings its full 0-to-3 range in 7 of
+41 cases, an unusually volatile untiered field that was distorting the
+case-level total-spread signal disproportionately to its actual
+frequency of disagreement (`findings.md` F6 has the full round-1 finding
+and the selection-bias correction). Recomputed via the same cache-replay
+method as round 1 (0 new requests, 123/123 samples recovered, 0
+unparseable — identical to every prior pass over this cache). Full
+artifact: `runs/20260819T135911Z-agreement/agreement_detailed.json`.
+
+**Case-level (bonus excluded):**
+
+| bucket | count | % |
+|---|---|---|
+| 3/3 (all three identical) | 15 | 36.6% |
+| 2/3 (exactly two agree) | 25 | 61.0% |
+| 0/3 (all three differ) | 1 | 2.4% |
+
+Weighted score (owner's formula: 1.0 × 3/3 + 0.667 × 2/3 + 0.0 × 0/3,
+averaged): **0.7726**. Both numbers move up from the bonus-included
+round (29.3% → 36.6% exact-match; 0.7157 → 0.7726 weighted) but not by
+much — bonus points were a real contributor to case-level disagreement,
+not the dominant one.
+
+**Per-criterion (bonus excluded), same weighted formula, worst first:**
+
+| criterion | n | 3/3 | 2/3 | 0/3 | weighted |
+|---|---|---|---|---|---|
+| **reproducibility** | 40* | 24 | 16 | 0 | **0.8668** |
+| llm_evaluation | 41 | 38 | 3 | 0 | 0.9756 |
+| best_practice_query_rewriting | 41 | 39 | 2 | 0 | 0.9838 |
+| containerization | 41 | 39 | 2 | 0 | 0.9838 |
+| ingestion_pipeline | 41 | 39 | 2 | 0 | 0.9838 |
+| retrieval_evaluation | 41 | 39 | 2 | 0 | 0.9838 |
+| best_practice_hybrid_search | 41 | 40 | 1 | 0 | 0.9919 |
+| best_practice_reranking | 41 | 40 | 1 | 0 | 0.9919 |
+| monitoring | 41 | 40 | 1 | 0 | 0.9919 |
+| problem_description | 41 | 40 | 1 | 0 | 0.9919 |
+| interface | 41 | 41 | 0 | 0 | 1.0000 |
+| retrieval_flow | 41 | 41 | 0 | 0 | 1.0000 |
+
+*`reproducibility` n=40: one sample (p09-t01, sample index 2) omitted the
+criterion entirely from its returned list rather than misjudging it —
+excluded, not padded, per `per_criterion_points()`'s no-guessing rule.
+
+**With bonus excluded, every criterion but `reproducibility` clears 95%
+weighted agreement** — 11 of 12 sit at 0.9756 or above, `interface` and
+`retrieval_flow` at a clean 1.0. `reproducibility` alone drags the
+distribution down, disagreeing (always by a narrow 1-point margin, never
+full-range — confirmed in round 1's per-criterion severity check) on 16
+of 41 cases, 39% of the corpus. This is the field with real written
+tiers, not an open-ended judgment call — a criterion reviewers should in
+principle converge on, and consistently don't.
+
+**One honest divergence worth stating plainly, not smoothing over: the
+case-level weighted number (0.7726) is well below the ≥95% most
+individual criteria clear, not "somewhere similar" to it.** A case's
+total requires all 12 remaining criteria to land on the same value
+simultaneously for a 3/3 match; even with 11 of 12 criteria individually
+agreeing ≥97.5% of the time, the *joint* probability of all 12 agreeing
+at once compounds down fast. A back-of-envelope check confirms this
+isn't a computation error: multiplying each criterion's own 3/3-rate
+together (treating them as independent, which they are not exactly, but
+close) gives ≈41% — the same order of magnitude as the observed 36.6%
+exact-match rate. **Per-criterion agreement being high is compatible
+with per-case agreement being much lower; they are not the same
+question**, and this run shows both numbers rather than only the
+flattering one.
