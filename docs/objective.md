@@ -7,12 +7,19 @@ sealing decisions should shrink it back toward ~150.*
 > approval withdrawn by `tasks/reviews/review-01.md`. That review rebuilt
 > G2 as a certification rate floor, split G3 into a gate plus ranking term
 > R3, changed G6 from zero-spend to a cost ceiling, bounded the stopping
-> criterion, and reopened G4. Approval unblocks M1 only. Two things are
-> deliberately unresolved and are decided at M2, not before: **G4's form**
-> (measured first, then chosen) and the **M3 round cap** (8, uncalibrated).
-> Every other measurement parameter — G3 table and per-criterion cap, G4
-> temperature, noise bands — freezes at M2 sealing, where the owner looks
-> again.
+> criterion, and reopened G4. Approval unblocks M1 only.
+>
+> **M2 sealing decisions, closed 2026-08-20** (`tasks/03-milestone-2.md`
+> step 10; full working record in
+> `runs/2026-08-20-m2-step10-sealing/checklist.md`): G3's cost table and
+> per-criterion cap, G4's temperature and form, R1's primary statistic,
+> the M3 round cap, and a new G2 addendum (certification-loss citation
+> requirement) are all frozen — values stated inline at each gate/term
+> below. **Two items remain genuinely open, not resolved by sealing**:
+> R1's noise band and tie rule (need a bootstrap run against the newly
+> chosen statistic, not yet done) and the G4/R2 noise-band form
+> (deferred to M3 — it depends on real red-team re-run data that
+> doesn't exist yet, and was never a pure M2 item).
 
 A candidate is compared to another candidate — or to the current criteria —
 **lexicographically**: first the gates, all of which must pass; then the
@@ -76,45 +83,91 @@ caught by exactly this check. The asymmetry is deliberate, and stated once.
   r₀ − 75%, so it is **widest when v0 certifies everything** — the expected
   case — and the floor becomes *stricter than today* if r₀ falls below 75%.
   The working hypothesis (0 of 12 fail) is checked, never carried forward.
-- **G3 — review-time ceiling.** Reviewer minutes come from a fixed cost
-  table keyed by evidence-field type, set with the owner at M2 and
-  read-only to every agent — never from the candidate's own claims. A
-  candidate's cost is the sum of table entries over the fields its mapping
-  reads; it must not exceed **150% of v0's cost** computed from the same
-  table. Additionally, **no single criterion may exceed a per-criterion
-  minute cap**, owner-set at M2 alongside the table: reviewers skip
-  individually expensive criteria, so the careless-application risk is
-  per-criterion, not only aggregate (decision `g3-per-criterion-cap`). The
-  preference for staying *near* current cost lives in R3, not here.
-- **G4 — agreement floor (form resolved at M2, *after* the baseline is
-  measured).** What G4 measures is **same-model self-consistency** of the
-  candidate's prose layer — three stateless samples per case from one
-  Gemini model at a fixed temperature above zero (frozen at M2), evidence
-  fields shuffled in an order seeded by (case-id, sample-index,
-  protocol-version), protocol-version in the cache key — compared against
-  the current rubric's own figure, measured once on the same case subset
-  with the same protocol. It is not human reviewer agreement and not
-  cross-family agreement (a single M4 measurement on a subset); the writeup
-  may not use the bare word "agreement" without this qualification.
-  **Owner decision 2026-08-10: measure the baseline first, then choose the
-  form** — a tolerance fixed before the number is known would be invented
-  rather than reasoned. Options carried to M2: (1) *strict ≥ baseline*,
-  which keeps the cliff and demands prose as unambiguous as checkboxes;
-  (2) *noise-band tie*, tolerating noise but no real drop; (3) *noise band
-  plus owner-set δ*, at the cost of one more owner-set number; (4) *demote
-  G4 to a reported metric*, no cliff and no floor. **The owner's stated
-  tendency is (4)**, because the real process already absorbs reviewer
-  variance by design: the course assigns three independent human reviewers
-  and takes the **median** of their grades (`sources.md`), so one
-  reviewer's inconsistency cannot move the outcome, and a per-reviewer
-  consistency floor over-constrains the candidate. Residual to weigh at M2,
-  recorded now: a median of three absorbs *dispersed* disagreement, not
-  *systematic* ambiguity — a criterion vague in a way that moves all three
-  reviewers together, or splits them bimodally, is not defended against by
-  a median, and under (4) nothing else in this objective floors prose
-  clarity. *Ceiling check* applies whatever the form: if the baseline comes
-  back ≥ 0.95, same-model self-consistency cannot separate candidates and
-  G4 is reported as decorative — never as a passed gate.
+  **G2 addendum, frozen at M2 sealing, 2026-08-20** (decision
+  `g2-certify-loss-citation`): any `role: corpus` record that certifies
+  under v0 but does not certify under a candidate must cite, in the
+  candidate's writeup, a twin-catalogue entry or red-team finding ID —
+  pre-existing or newly catalogued as part of the same candidate's own
+  submission — whose **base record ID equals the record losing
+  certification**, and which resolves to a real, logged entry in the
+  case set or findings log. The check is mechanical: citation exists,
+  base record matches, resolves to a real entry — never whether the
+  cited defect is "good enough." **Record-specific only**; a general
+  finding naming a class of affected records does not satisfy this
+  without a citation built on the record in question. Records *gaining*
+  certification are not covered — that risk (a record scoring
+  artificially high despite real structural badness) is R2's territory.
+  Reason: G2's erosion budget (r₀ − 75%) is legally available for any
+  reason today, including spending it on discrimination rather than a
+  genuine finding; this closes that gap without introducing a judgment
+  call into a gate.
+- **G3 — review-time ceiling. Frozen at M2 sealing, 2026-08-20**
+  (decision `g3-cost-table-frozen`). Reviewer minutes come from a fixed
+  cost table keyed by **criterion**, owner-set, read-only to every
+  agent — never from the candidate's own claims:
+
+  | criterion | minutes |
+  |---|---|
+  | problem_description | 2 |
+  | retrieval_flow | 10 |
+  | retrieval_evaluation | 15 |
+  | llm_evaluation | 15 |
+  | interface | 5 |
+  | ingestion_pipeline | 5 |
+  | monitoring | 7 |
+  | containerization | 2 |
+  | reproducibility | 45 |
+  | best_practice_hybrid_search | 6 |
+  | best_practice_reranking | 6 |
+  | best_practice_query_rewriting | 6 |
+  | bonus_cloud_deployment | 5 |
+
+  `bonus_discretionary` carries no minute cost and is excluded from this
+  table (decision `g3-g4-r1-exclude-bonus-discretionary`) — it is still
+  scored by every criterion mapping exactly as the guidance states; the
+  exclusion is measurement-scope only. **v0's total cost: 129 minutes.
+  150% ceiling: 193.5 minutes.** A candidate's cost is the sum of table
+  entries over the criteria its mapping reads (bonus_discretionary
+  excluded the same way). **Per-criterion cap: 60 minutes**, anchored to
+  `reproducibility`'s own real cost (45 min) plus its measured 60.0%
+  self-consistency — the least reliably judged criterion by a wide
+  margin (decision `g3-per-criterion-cap`): a cap set below
+  reproducibility's real cost would force reviewers to shortcut exactly
+  the criterion most prone to being gotten wrong under time pressure.
+  The preference for staying *near* current cost lives in R3, not here.
+- **G4 — agreement floor. Form frozen at M2 sealing, 2026-08-20**
+  (decision `g4-form-frozen`): **option (4), demoted to a reported
+  metric — never a blocking gate.** What G4 measures is **same-model
+  self-consistency** of the candidate's prose layer — three stateless
+  samples per case from one Gemini model at **temperature 0.7 (frozen)**,
+  evidence fields shuffled in an order seeded by (case-id, sample-index,
+  protocol-version), protocol-version in the cache key — compared
+  against the current rubric's own figure, measured once on the same
+  case subset with the same protocol. It is not human reviewer agreement
+  and not cross-family agreement (a single M4 measurement on a subset);
+  the writeup may not use the bare word "agreement" without this
+  qualification.
+
+  **Measured M2 baseline** (`runs/20260819T135911Z-agreement/`,
+  `bonus_discretionary` excluded per scope): case-level weighted
+  agreement **0.7726**. Per-criterion weighted, all 13 remaining
+  criteria: `reproducibility` 0.8668 (the one exception); every other
+  criterion clears **0.92** weighted, up to 1.0000 for
+  `bonus_cloud_deployment`/`interface`/`retrieval_flow`. Reasoning for
+  (4), confirmed against this number rather than assumed: the real
+  process already absorbs reviewer variance by design — the course
+  assigns three independent human reviewers and takes the **median** of
+  their grades (`sources.md`), so one reviewer's inconsistency cannot
+  move the outcome, and a per-reviewer consistency floor over-constrains
+  the candidate. Residual, recorded not resolved: a median of three
+  absorbs *dispersed* disagreement, not *systematic* ambiguity — a
+  criterion vague in a way that moves all three reviewers together is
+  not defended against by a median, and under (4) nothing else in this
+  objective floors prose clarity; `reproducibility` is the one criterion
+  showing this pattern today. *Ceiling check*: at 0.7726, same-model
+  self-consistency is real, measurable variance, not a ceiling artifact
+  — G4 reports something genuine, not a number that flatters every
+  candidate.
 - **G5 — curriculum bound.** No criterion requires anything the course does
   not teach and the guidance does not tell authors to produce. Checked
   against the module list in the course repo; tools remain unrestricted, as
@@ -143,10 +196,33 @@ this size, R1 ties will be common, and R2 carries more of the ranking work
 than its position suggests. The bootstrap is recomputed against whichever
 corpus exists at M2 sealing, never carried forward from twelve.
 
-- **R1 — discrimination.** Spread of candidate scores over the `role:
-  corpus` records versus v0's spread on the same records: count of distinct
-  totals first, standard deviation within its band as tiebreak. Synthetic
-  records are excluded. R1 precedes R2 by owner confirmation (2026-08-09).
+- **R1 — discrimination. Statistic frozen at M2 sealing, 2026-08-20**
+  (decision `r1-statistic-frozen`): **record-count-normalized Shannon
+  entropy** (H / log2(n), n = corpus record count) as the primary
+  statistic, **IQR** (not standard deviation) as the tiebreak, computed
+  over candidate scores on the `role: corpus` records versus v0's on the
+  same records. Chosen over the original distinct-totals-count statistic
+  because entropy retains frequency information distinct-count discards,
+  and normalizing by record count (not by the candidate's own point
+  range) was confirmed scale-invariant under a direct test — stretching
+  the same 22 records' relative positions onto a wider point scale left
+  this statistic exactly unchanged, while a range-width-normalized
+  variant dropped purely from the wider scale with zero real change in
+  discrimination. IQR chosen over std dev for robustness to the
+  small-n outlier sensitivity this corpus shows. Synthetic records are
+  excluded. R1 precedes R2 by owner confirmation (2026-08-09).
+  `bonus_discretionary` is excluded from every R1 total (measurement
+  scope only, decision `g3-g4-r1-exclude-bonus-discretionary`).
+  A 10,000-resample bootstrap (seed 42) over the 22-record corpus was
+  run against the *original* distinct-totals/std-dev statistic during
+  the comparison that motivated this switch (distinct-totals point
+  estimate 13, 5th-95th percentile band 8–12; std dev point estimate
+  3.59, band 2.75–4.19) — informative for the choice above, but **not a
+  noise band for the frozen entropy/IQR statistic**, which has not yet
+  been bootstrapped itself. **Neither R1's noise band nor the tie rule
+  for comparing two candidates' statistics is frozen yet** — both need
+  the entropy/IQR statistic's own bootstrap run before R1 is usable for
+  a real comparison.
 - **R2 — red-team resistance.** Fewer successful attacks per budgeted
   round. An attack is a schema-valid record scoring in the top half of the
   corpus range whose structural badness is stated as a **checkable
@@ -213,14 +289,14 @@ catalogue category plus free-form) produce no new successful attack;
 new was found" is backed by the logged attempts, including the failures.
 Diminishing returns is recorded in `findings.md` as a result.
 
-**Round cap.** M3 runs at most **8 budgeted discovery rounds**. Rounds are
-owner-paced by design, so the cap is sized by owner availability, not
-quota. Owner note 2026-08-10: **8 is uncalibrated and nobody can calibrate
-it yet** — no round has run, so its real cost in owner time is unknown. It
-is therefore a stop-and-look point rather than a limit believed correct:
-resizable at M2 sealing, and resizable again once the first two rounds
-have shown their actual pace, with the resize and its reason logged in
-`runs/`. If the cap is reached without
+**Round cap. Confirmed at M2 sealing, 2026-08-20** (decision
+`m3-round-cap-kept-at-8`): **8 budgeted discovery rounds**, unchanged.
+Rounds are owner-paced by design, so the cap is sized by owner
+availability, not quota. Still uncalibrated — no round has run since the
+original 2026-08-10 note, so there was nothing new to calibrate against
+at sealing time either; kept as a stop-and-look point, to be revisited
+once the first rounds show whether 8 is commonly maxed out, not resized
+now on guesswork. If the cap is reached without
 (a)–(c): the best candidate that passes all gates ships, labelled
 **non-converged**, with its final red-team round's full attack log
 attached; if no candidate passes all gates, nothing ships and the writeup

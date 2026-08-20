@@ -414,6 +414,114 @@ criterion may exceed an owner-set minute cap (frozen at M2 with the cost
 table). Reason (review-01 B8): reviewers skip individually expensive
 criteria, so the careless-application risk is per-criterion; a candidate
 could otherwise hide one costly criterion under nine cheap ones.
+**Value frozen at M2 sealing (2026-08-20): 60 minutes**, anchored to
+`reproducibility`'s own real cost (45 min, the highest of any criterion)
+plus its measured 60.0% G4 self-consistency — the least reliably judged
+criterion by a wide margin. A cap below reproducibility's real cost
+would force reviewers to shortcut exactly the criterion most prone to
+being gotten wrong under time pressure. Full reasoning:
+`runs/2026-08-20-m2-step10-sealing/checklist.md`.
+
+**g3-cost-table-frozen** — G3's cost table is **per-criterion minutes**,
+not per-field-type (an earlier draft proposed field-type minutes; the
+owner corrected this — field-type estimates track how long an LLM would
+take to verify a fact, not how long a careful human reviewer spends
+reading, judging, and writing feedback, which is what G3 exists to
+bound). Owner-set values, sense-checked against the owner's own stated
+review time ("2 hours or more, including feedback"): 129 minutes total
+for v0 across 13 criteria (`bonus_discretionary` excluded, see
+`g3-g4-r1-exclude-bonus-discretionary`), landing at 2h9m — inside the
+stated range. 150% ceiling: 193.5 minutes. Values live in `objective.md`
+G3; full table and reasoning: `runs/2026-08-20-m2-step10-sealing/checklist.md`.
+
+**g3-g4-r1-exclude-bonus-discretionary** — `bonus_discretionary` is
+excluded from G3's cost table, G4's agreement measurement, and R1's
+discrimination statistic — measurement/reporting scope only. **v0,
+`criteria.yaml`, and `score.py` are unchanged**: v0 remains a faithful,
+unmodified transcription of the guidance and still scores every project
+on `bonus_discretionary` exactly as written; this decision affects only
+how G3/G4/R1 are computed and reported, never the candidate itself.
+Reason: it has no written tier (pure judgment, no minute cost to
+estimate meaningfully) and was found to swing its full 0-to-3 point
+range in 7 of 41 G4-measurement cases — distorting case-level
+comparisons out of proportion to how often it actually disagrees (9 of
+41 cases). Owner-confirmed 2026-08-20.
+
+**g4-form-frozen** — G4's form (one of four options named in
+`objective.md`) is **option (4): demoted to a reported metric, never a
+blocking gate.** Confirmed against the measured M2 baseline, not
+assumed from the owner's stated pre-measurement tendency: case-level
+weighted agreement 0.7726 (`bonus_discretionary` excluded), 12 of 13
+criteria clearing 0.92 weighted, `reproducibility` the one exception at
+0.8668. Reporting convention, owner-set: weighted scores only (no
+exact-match percentages), every criterion listed, no comfort-floor or
+noise-band discussion carried into the permanent record — G4 is
+informative-only, and the write-up stays lean accordingly. Full numbers:
+`objective.md` G4, `runs/2026-08-20-m2-step10-sealing/checklist.md`.
+
+**g2-certify-loss-citation** — New G2 addendum: any `role: corpus`
+record certifying under v0 but not under a candidate must cite a
+twin-catalogue entry or red-team finding ID whose **base record ID
+equals the record losing certification** (pre-existing or newly
+catalogued by the same candidate), resolving to a real, logged entry.
+Mechanical check only (citation exists, base record matches, resolves
+to a real entry — never whether the defect is "good enough"). Losses
+only, not gains (gains don't touch G2's erosion budget; score inflation
+is R2's territory). Record-specific only, no class-level citation,
+chosen for the airtight property over convenience for general fixes.
+Reason: G2's erosion budget (r₀ − 75%) was otherwise spendable for any
+reason, including discrimination-chasing rather than a genuine finding.
+Considered and rejected: folding into R2 — R2 is scoped to purpose-built
+adversarial records one at a time, this is a whole-corpus post-hoc
+comparison, wrong fit. Full design trace, including an earlier
+draft that only checked citation existence without requiring
+relevance (caught before being finalised):
+`runs/2026-08-20-m2-step10-sealing/checklist.md`.
+
+**r1-statistic-frozen** — R1's primary statistic is
+**record-count-normalized Shannon entropy** (H / log2(n)), tiebreak
+**IQR** (not standard deviation), replacing the original
+distinct-totals-count + std-dev pair. Computed against actual data, not
+chosen in the abstract: entropy retains frequency information
+distinct-count discards; normalizing by record count (not the
+candidate's own point range) was confirmed scale-invariant under a
+direct test (stretching the same 22 records' relative positions onto a
+wider point scale left it exactly unchanged; a range-width-normalized
+variant dropped purely from the wider scale, a demonstrated, not
+theoretical, vulnerability). IQR chosen over std dev for robustness to
+this corpus's small-n outlier sensitivity. **R1's noise band and the
+tie rule for comparing two candidates remain open** — the entropy/IQR
+statistic hasn't been bootstrapped itself yet; the 10,000-resample
+bootstrap already run (seed 42, distinct-count band 8–12, std-dev band
+2.75–4.19) informed the *choice* of statistic but is not a noise band
+for the one actually frozen. `bonus_discretionary` excluded from every
+R1 total, see `g3-g4-r1-exclude-bonus-discretionary`.
+
+**r1-g2-tension-sensecheck** — Worked through directly, not asserted:
+does R1 (rewards evenly-spread scores) conflict with G2 (wants most
+real submissions to pass, an intentionally asymmetric outcome)? Not in
+the common case — 20 of 22 corpus records currently pass with only 12
+distinct totals among them, so most available discrimination gain sits
+entirely above the certify line. But a real, bounded gap exists: G2's
+15.9-point erosion budget is legally spendable for any reason,
+including entropy-chasing rather than genuine quality-finding, and the
+lexicographic gate ordering only blocks the catastrophic version
+(failing G2 outright). `g2-certify-loss-citation` closes this narrower
+gap.
+
+**m3-round-cap-kept-at-8** — M3 round cap confirmed at 8, unchanged,
+2026-08-20. Still uncalibrated (no round has run since the original
+2026-08-10 note) — nothing new to calibrate against at sealing time
+either, so kept as a stop-and-look point rather than resized on
+guesswork. Revisit once the first rounds show whether 8 is commonly
+maxed out.
+
+**g4-r2-noise-band-deferred** — G4/R2's noise-band form (single-value
+vs. difference-of-two-candidates; per-case vs. aggregate) is deferred
+to M3, not decided at M2 sealing. Reason: it needs real red-team re-run
+data to design against, which doesn't exist until M3 runs — this was
+never a pure M2 item to begin with, only listed as an M2 row because
+`objective.md`'s original text bundled it with G4's other parameters.
 
 **g6-cost-ceiling** — G6 is a ceiling of ≈€0.10 expected token cost per
 project verification, not zero-spend; no credentials beyond what the course
