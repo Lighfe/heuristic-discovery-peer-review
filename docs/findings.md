@@ -359,9 +359,12 @@ response listed per criterion. Checked directly against the cached response
 text: **16 of the 24 M1 smoke samples (67%) have a self-reported `total`
 that does not equal the sum of that response's own per-criterion points**,
 off by 1 to 3 points, in both directions. This has nothing to do with
-criterion-level judgment — it is the model failing to add thirteen small
-integers correctly — and it was inflating every spread and median number
-this entry originally reported.
+criterion-level judgment — it is the model failing to add fourteen small
+integers correctly (v0's 14 criteria at M1, checked directly against a
+cached M1 response: 12 scored plus both `bonus_cloud_deployment` and
+`bonus_discretionary`, none excluded yet at this date — that exclusion is
+a later, M2 step-10 decision) — and it was inflating every spread and
+median number this entry originally reported.
 
 **Fixed**: `loop/agreement.py` now recomputes each sample's total from its
 `criteria[].points`, mechanically, and ignores the model's own sum. Rerun on
@@ -496,38 +499,53 @@ it; item 3e stays open, sealed as a named risk
 **Same-model self-consistency (the real G4 baseline), bonus points
 excluded from every total (owner instruction, 2026-08-19): 36.6%
 exact-match** (15 of 41 cases have all three samples identical on the
-21-point non-bonus scale), weighted score 0.7726 (owner's formula:
-1.0 × 3/3 + 0.667 × 2/3 + 0.0 × 0/3, averaged). Far below the 0.95
-ceiling in `agreement-protocol-ceiling` — **G4 measures real variance
-here, is not decorative, and its form (one of the four options in
-`objective.md`) is a live step-10 decision**, now informed by an actual
-number instead of the owner's stated tendency alone.
+non-bonus scale), weighted score 0.7726 — each case scores 1.0 if all
+three samples' totals agree exactly (15 of 41 cases, "3/3"), 0.667 if
+exactly two of three agree (25 of 41, "2/3"), 0.0 if all three differ (1
+of 41, "0/3"), averaged across all 41 cases: (15×1.0 + 25×0.667 +
+1×0.0)/41 = 0.7726. Far below the 0.95 ceiling in
+`agreement-protocol-ceiling` — **G4 measures real variance here, is not
+decorative, and its form (one of the four options in `objective.md`) is a
+live step-10 decision**, now informed by an actual number instead of the
+owner's stated tendency alone.
 
-`bonus_cloud_deployment` and `bonus_discretionary` are excluded from
-`max_total` and every total here, though Gemini still scores them in
-every sample — the exclusion is an analysis choice, not a change to what
-gets judged. Reason: an initial pass (bonus included) found
-`bonus_discretionary` swings its full 0-to-3 range in 7 of 41 cases,
-disproportionately distorting case-level total spread relative to how
-often it actually disagrees (round-1 detail below). Without bonus
-points, **per-criterion agreement clears 95% on 11 of 12 remaining
-criteria** — only `reproducibility` sits well below it, at 0.8668
-weighted (disagreeing, always by a narrow 1-point margin, on 39% of the
-corpus) — while **case-level agreement stays at 0.7726, not near 95%**.
-This gap is real, not an error: a case's total needs all 12 criteria to
-agree simultaneously, so even at ~97-100% per-criterion agreement each,
-the compounded joint probability lands close to the observed rate (a
-back-of-envelope independent-event estimate gives ≈41%, the same order
-of magnitude as 36.6%). Per-criterion and per-case agreement answer
-different questions and should not be expected to match.
+**[Corrected 2026-08-20, at step 10 sealing]** Only `bonus_discretionary`
+is excluded from `max_total` (26 → 23) and every total here, though
+Gemini still scores it in every sample — the exclusion is an analysis
+choice, not a change to what gets judged. `bonus_cloud_deployment` is
+**not** excluded: it has a written tier and a real cost, unlike
+`bonus_discretionary`, and stays in scope (`g3-g4-r1-exclude-bonus-discretionary`
+in `decisions.md`). This entry originally excluded both bonus criteria
+(max_total 26 → 21, "11 of 12 remaining criteria"); step 10 narrowed the
+exclusion to `bonus_discretionary` alone. The narrowing does not change
+any measured number below: `bonus_cloud_deployment` scores exactly 1.0000
+weighted (zero disagreement across all 41 cases,
+`runs/2026-08-20-m2-step10-sealing/checklist.md`), so reincluding it in
+totals cannot move which cases' three samples agree or disagree — it
+adds an identical increment to all three samples of every case. Reason
+for excluding `bonus_discretionary`: an initial pass (bonus included)
+found it swings its full 0-to-3 range in 7 of 41 cases, disproportionately
+distorting case-level total spread relative to how often it actually
+disagrees (round-1 detail below). Without it, **per-criterion agreement
+clears 95% on 12 of 13 remaining criteria** — only `reproducibility` sits
+well below it, at 0.8668 weighted (disagreeing, always by a narrow
+1-point margin, on 39% of the corpus) — while **case-level agreement
+stays at 0.7726, not near 95%**. This gap is real, not an error: a case's
+total needs all 13 criteria to agree simultaneously, so even at ~97-100%
+per-criterion agreement each, the compounded joint probability lands
+close to the observed rate (a back-of-envelope independent-event estimate
+gives ≈41%, the same order of magnitude as 36.6%). Per-criterion and
+per-case agreement answer different questions and should not be expected
+to match.
 
 **The model's own arithmetic remains unreliable at M2 scale:** 69 of 123
 samples (56%) have a self-reported `total` disagreeing with the sum of
-that response's own listed per-criterion points — the defect
-`agreement-total-recomputed` found at 67%-of-24 in the M1 smoke test did
-not shrink with 5x the case count. Every number above uses the
-mechanically recomputed total; the model's self-reported total is never
-trusted, unchanged from F5's fix.
+that response's own listed per-criterion points — down from the 67%-of-24
+the defect `agreement-total-recomputed` found in the M1 smoke test, but
+still affecting more than half of every sample at 5x the case count, not
+a defect that is disappearing. Every number above uses the mechanically
+recomputed total; the model's self-reported total is never trusted,
+unchanged from F5's fix.
 
 **Round 1 (bonus included, superseded above as the reported number, kept
 for the record):** exact-match was 29.3% (12/41), weighted 0.7157. A
@@ -546,3 +564,40 @@ Full detail for both rounds, plus the per-criterion storage added to
 `loop/agreement.py` for future passes:
 `runs/2026-08-19-m2-step9-measurements/report.md`, "Baseline agreement,
 in more detail."
+
+**[Added 2026-08-21]** F1 and F2 (both 2-record, M1-era) each promised
+that M2's extraction would be "the first honest base rate" for
+config-drift and absent judge spot-checking. Tallied directly against all
+23 committed records (`cases/records/p01.yaml` … `p23.yaml`), split by
+`role`:
+
+- **`llm_eval_judge_spotchecked: true`**: exactly one record holds it —
+  p13, which is `role: self` and excluded from every corpus statistic
+  (`g2-rate-not-count`). Among the 22 `role: corpus` records, the rate is
+  **0/22**: no real corpus submission's LLM judge is ever spot-checked.
+  This sharpens F1's original 2-of-2 (p01, p02) finding rather than merely
+  confirming it at scale — the one apparent exception (p13) turns out not
+  to count toward the population the criteria are measured against.
+- **`matches` on both `retrieval_eval_config_matches_shipped` and
+  `llm_eval_config_matches_shipped`** (the condition F2 found absent on
+  both original records): **6 of 22** corpus records hold it (p07, p09,
+  p18, p19, p20, p21; p13 also holds it but is `role: self`). **6 of 22**
+  differ on both fields (p01, p02, p03, p11, p16, p17 — the F1/F2
+  phenomenon in its strongest form). Of the remaining 10: **7 are genuinely
+  partial** (one field `matches`, the other `differs` — p04, p06, p08,
+  p10, p12, p14, p15), and **3 involve an unresolved field, not partial
+  agreement** (p05 and p23 are `undeterminable` on both fields; p22 is
+  `differs` on one and `undeterminable` on the other) — `undeterminable`
+  means the repo doesn't settle the question, not that it disagrees with
+  itself, so these three are evidence gaps, not disagreement. Unlike judge
+  spot-checking, config-drift does **not** sharpen to near-zero at
+  corpus scale: roughly a quarter of real corpus submissions evaluate the
+  configuration they actually ship, so F1/F2's "both projects" framing
+  does not generalise to "essentially all projects," only to a
+  substantial majority (16 of 22 hold `differs` on at least one field).
+  **Note the two-field tally above answers a different question from
+  `constructed-base-policy`'s twin-eligibility count**: a config-drift
+  twin mutates only `retrieval_eval_config_matches_shipped`, so 10 of 22
+  records are real twin bases on that field alone (matching regardless of
+  the `llm_eval` field's value) — a larger, and different, set than the
+  6 counted here as "matches on both."

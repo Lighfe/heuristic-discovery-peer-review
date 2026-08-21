@@ -107,8 +107,22 @@ base chosen at step 5. Resolves `deferred-to-m2.md` item 3d.
 **constructed-base-policy** — Real bases are used wherever the extended
 six-field table shows one; a synthetic base is constructed only for a
 sub-mutation still showing zero real bases after step 4 extends the corpus
-to 22. `config-drift` is now unblocked (p07, p09, p13 hold `matches` on
-both config fields at once); `circular-eval`'s `llm_eval_judge_spotchecked:
+to 22. `config-drift` is now unblocked — **corrected 2026-08-21**, a
+staleness audit found the original "p07, p09, p13 hold matches on both
+config fields" undercounted and used the wrong criterion: the twin only
+mutates `retrieval_eval_config_matches_shipped`, so the operative
+eligibility test is that field alone, not both config fields together.
+10 records hold `matches` on it (p07, p09, p10, p12, p13, p15, p18, p19,
+p20, p21). These split into exactly 4 distinct `hybrid_search.measured_effect`
+branches (`not_measured`, `mixed`, `improves`, `hurts`), and one twin was
+built per branch — `p07-t01` (not_measured, unconditional), `p09-t01`
+(mixed), `p12-t02` (improves), `p18-t01` (hurts) — complete branch
+coverage by construction, not partial. Of the remaining 6 eligible
+records: p10 and p13 were instead used as the only real base for two
+other catalogue types with no alternative (`unlocatable-project`,
+`circular-eval` respectively — see below); p15, p19, p20, p21 duplicate
+an already-covered branch and are unused, available if a future
+catalogue type needs them. `circular-eval`'s `llm_eval_judge_spotchecked:
 true` sub-case still has only one real base (p13) — thin, not zero.
 Resolves item 3k; the final buildable/not-buildable list is produced at
 step 5, not here.
@@ -134,10 +148,10 @@ instance found. (2) **`retrieval_eval_relevance_rule` split** into
 `retrieval_eval_match_strictness` and `retrieval_eval_label_origin`
 (schema M2) — the old field conflated match mechanism with label
 provenance, which is what produced p03's cross-extraction disagreement.
-Backfilled from each record's existing basis text only, no re-read: 21 of
-23 records land `undeterminable` for label origin, because the old
-field's basis text was written to answer the strictness question, not
-this one — expected, not an error. (3) `data_accessible`'s `manual_steps`
+Backfilled from each record's existing basis text only, no re-read: 20 of
+23 records land `undeterminable` for label origin (2 land `none`, 1 lands
+`human_labelled`), because the old field's basis text was written to
+answer the strictness question, not this one — expected, not an error. (3) `data_accessible`'s `manual_steps`
 vs. `other` boundary defined (owner ruling: `manual_steps` needs both a
 named source and stated access instructions; `other` is source named,
 no instructions) — p05 reclassified from `manual_steps` to `other`
@@ -145,20 +159,11 @@ under this definition, scoring-neutral (its `run_instructions: partial`
 already decided its tier independently). `candidates/v0/criteria.yaml`'s
 `reproducibility` criterion gained an explicit (structurally unreachable,
 documented, same treatment as the `missing` tier) 0-point mapping for
-`data_accessible: other`. (4) Investigated whether `mixed_result` ships
-get reasoned about or silently dropped, across all 9 corpus records
-holding that value: 8 of 9 have a measurement-grounded
-`decision_basis: measured` on the relevant group-H technique; only p01
-has none — consistent with p01's known role as the harmful-component-kept
-example. (5) Checked whether a retrieval-eval config mismatch is visible
-through `retrieval_best_approach_shipped`: **it is not** — 6 of those same
-9 `mixed_result` records also hold
-`retrieval_eval_config_matches_shipped: differs`, meaning most of the
-corpus's `mixed_result` evidence comes from an evaluation that does not
-reflect the shipped system, and `retrieval_best_approach_shipped` does not
-cross-reference that fact. This strengthens, not resolves, item 3e's open
-status — recorded as new evidence for that item, not a fix to it. Full
-detail: `runs/2026-08-18-m2-sealing-checklist/checklist.md`.
+`data_accessible: other`. (4) Investigated the 9 corpus records holding
+`mixed_result`, both for whether the ship decision is measurement-grounded
+and for retrieval-eval config drift — full numbers and the p02 nuance live
+in `retrieval-best-approach-not-normalised-open`, not repeated here.
+Full detail: `runs/2026-08-18-m2-sealing-checklist/checklist.md`.
 
 **v0-fidelity-diff-fixes** — M2 step 7's independent fidelity diff ran in
 a technically-isolated scratch directory (owner decision, 2026-08-18: only
@@ -285,10 +290,10 @@ tracing it against the schema's actual stated methodology.
 `monitoring_instrumentation`'s `logged`/`traced_on_request_path` line is
 already decidable from its own wording (runs during request handling AND
 consumed by a viewer), checked record-by-record, not assumed from one
-result. Checked 9: p05, p07, p09, p14, p17 misclassified as `logged`,
+result. Checked 11: p05, p07, p09, p14, p17 misclassified as `logged`,
 corrected to `traced_on_request_path` (each confirmed by reading the
 clone directly — request-handler write and Grafana datasource/dashboard
-target the same table); p04, p06, p08, p10, p12 confirmed already
+target the same table); p04, p06, p08, p10, p11, p12 confirmed already
 correct (p04/p12: write happens on explicit feedback submission, not
 automatically per request; p08: dashboard not confirmed wired to the
 write table). Rule written into `cases/schema.md` as a literal-wording
@@ -350,14 +355,6 @@ requests — not retroactive: `runs/20260819T135911Z-agreement/agreement.json`
 predates the change and is unmodified. Binds: the next agreement pass's
 `agreement.json` carries `per_criterion` per case; no schema or scoring
 change, measurement-layer only.
-
-**agreement-excludes-bonus-points** — Owner decision 2026-08-19: G4
-agreement totals exclude `bonus_cloud_deployment` and
-`bonus_discretionary` (max_total 26 → 21) — Gemini still scores both,
-they're just left out of every total and the per-criterion table.
-Reason: `bonus_discretionary` swings its full 0-to-3 range in 7 of 41
-cases, distorting case-level spread out of proportion to how often it
-actually disagrees. `findings.md` F6 has the numbers both ways.
 
 ## Objective and measurement
 
@@ -436,16 +433,24 @@ G3; full table and reasoning: `runs/2026-08-20-m2-step10-sealing/checklist.md`.
 
 **g3-g4-r1-exclude-bonus-discretionary** — `bonus_discretionary` is
 excluded from G3's cost table, G4's agreement measurement, and R1's
-discrimination statistic — measurement/reporting scope only. **v0,
+discrimination statistic (max_total 26 → 23) — measurement/reporting
+scope only. `bonus_cloud_deployment` is **not** excluded from anything: it
+has a written tier and a real minute cost, unlike `bonus_discretionary`,
+and stays in G3's cost table, G4's totals, and R1's statistic. **v0,
 `criteria.yaml`, and `score.py` are unchanged**: v0 remains a faithful,
 unmodified transcription of the guidance and still scores every project
 on `bonus_discretionary` exactly as written; this decision affects only
 how G3/G4/R1 are computed and reported, never the candidate itself.
-Reason: it has no written tier (pure judgment, no minute cost to
-estimate meaningfully) and was found to swing its full 0-to-3 point
-range in 7 of 41 G4-measurement cases — distorting case-level
-comparisons out of proportion to how often it actually disagrees (9 of
-41 cases). Owner-confirmed 2026-08-20.
+Reason: `bonus_discretionary` has no written tier (pure judgment, no
+minute cost to estimate meaningfully) and was found to swing its full
+0-to-3 point range in 7 of 41 G4-measurement cases — distorting
+case-level comparisons out of proportion to how often it actually
+disagrees (9 of 41 cases). Owner-confirmed 2026-08-20. Supersedes:
+`agreement-excludes-bonus-points`, see `superseded.md` — the earlier
+2026-08-19 decision also excluded `bonus_cloud_deployment`; checked
+directly, `bonus_cloud_deployment` scores exactly 1.0000 weighted (zero
+disagreement across all 41 cases), so its reinclusion does not move any
+measured G4 number, only the excluded-criteria count and max_total.
 
 **g4-form-frozen** — G4's form (one of four options named in
 `objective.md`) is **option (4): demoted to a reported metric, never a
@@ -679,8 +684,10 @@ not a renderer omission (review-m1 B2).
 `agents/extractor` bumped v1 → v2. Source: 21 items in `deferred-to-m2.md`,
 worked through in `runs/2026-08-13-m2-schema-closure/proposal.md`, owner
 sign-off recorded there. Twenty of twenty-one resolved below; item 3e
-stays open, entry below states why. Not yet sealed (`tasks/03-milestone-2.md`
-step 8 is a separate, later gate).
+stays open, entry below states why. **Sealed at step 10**
+(`runs/2026-08-20-m2-step10-sealing/checklist.md`, closed 2026-08-20);
+item 3e's open status is unaffected, tracked separately in
+`retrieval-best-approach-not-normalised-open`.
 
 **cell-locator-confirmed** — The `path:cellN` notebook-locator convention
 (`cases/schema.md` "Locators inside notebooks") was already settled when

@@ -65,3 +65,33 @@ merit; it belongs in a candidate, where R1 can measure what it buys.
 
 `docs/findings.md` F2 — which the candidate proposer reads (`plan.md`,
 roles table), so it seeds proposals rather than sitting inert here.
+
+## `agreement-excludes-bonus-points`
+
+**Held 2026-08-19, reversed 2026-08-20** (step 10 sealing). Replaced by
+`g3-g4-r1-exclude-bonus-discretionary`.
+
+### The entry as it stood
+
+> **agreement-excludes-bonus-points** — Owner decision 2026-08-19: G4
+> agreement totals exclude `bonus_cloud_deployment` and
+> `bonus_discretionary` (max_total 26 → 21) — Gemini still scores both,
+> they're just left out of every total and the per-criterion table.
+> Reason: `bonus_discretionary` swings its full 0-to-3 range in 7 of 41
+> cases, distorting case-level spread out of proportion to how often it
+> actually disagrees. `findings.md` F6 has the numbers both ways.
+
+### Why it was reversed
+
+At step 10 sealing (2026-08-20) the owner confirmed only
+`bonus_discretionary` should be excluded, not `bonus_cloud_deployment` —
+`bonus_cloud_deployment` has a written tier and a real minute cost, unlike
+`bonus_discretionary`, so there was no reason to drop it from G3/R1's
+scope once G3's cost table was being finalised in the same sealing pass.
+`g3-cost-table-frozen`'s 13-row table and `g4-form-frozen`'s 13-criterion
+report reflect the corrected scope. Checked directly: `bonus_cloud_deployment`
+scores exactly 1.0000 weighted (zero disagreement across all 41 cases,
+`runs/2026-08-20-m2-step10-sealing/checklist.md`), so reincluding it does
+not move the case-level weighted-agreement number (0.7726 is unchanged
+between the two scopes) — only the excluded-criteria count and max_total
+(21 → 23) needed correcting, not any measured statistic.
