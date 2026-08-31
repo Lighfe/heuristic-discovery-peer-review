@@ -1,59 +1,80 @@
 # heuristic-discovery-peer-review
 
-> **Work in progress.** This repository is a design, not a result. No code
-> has been written, no project has been analysed, no measurement has been
-> taken, and the deliverable is still an empty file. Everything below
-> describes what is *intended*.
+An agentic loop that discovers better evaluation criteria for
+DataTalksClub zoomcamp capstone projects — and produces the evidence
+needed to argue for them, without any labelled/graded corpus to train or
+check against.
 
-A loop of agents that searches for better evaluation criteria for
-DataTalksClub zoomcamp capstone projects, and produces the evidence needed
-to argue for them.
+The deliverable is a single revised guidance document: scoring criteria
+plus the reviewer guidance around them, structured so it could replace the
+course's current brief outright.
 
-The output is meant to be a single document — `docs/proposed-guidance.md`,
-a complete replacement for the course's project brief, carrying revised
-scoring criteria together with the reviewer guidance around them.
-Everything else the loop produces is working evidence that the document
-cites.
+## Approach
 
-The goal is **not stricter criteria**. Today's criteria certify nearly
-every submission and cluster scores near the top, so a score carries little
-information. The aim is criteria that keep certification just as
-achievable while making the scores above the pass line mean something.
+**No graded projects exist, so validity has to come from construction, not
+comparison.** Each real capstone repo is extracted once into a structured
+evidence record. From every record, a "twin" is derived by mutating exactly
+one structural fact in a known direction — e.g. taking a component whose
+own reported numbers show it hurts, and shipping it enabled. Nobody grades
+anything; the twin's correct ranking relative to its original is known
+because it was built that way.
 
-## Where things stand — 2026-08-10
+A candidate scoring function is judged against that twin set, not against
+a rubric:
 
-Planning and design only. Milestone 1 has not started.
+1. **Propose** — an agent drafts a deterministic scoring function over the
+   extracted evidence fields.
+2. **Gate** — it must rank every twin pair correctly, hold a certification
+   rate no worse than the current criteria, and stay under a reviewer-time
+   budget. Any gate failure discards the candidate outright, no matter how
+   well it ranks.
+3. **Rank** — gate-passing candidates are compared on how much they
+   discriminate between real projects and how well they resist attack.
+4. **Red-team** — a separate agent tries to construct new records that
+   score well while being structurally bad, to break the current best
+   candidate.
 
-| file | what it is |
-|---|---|
-| `CLAUDE.md` | the project's constraints — **start here** |
-| `docs/objective.md` | what "better" means: six gates, three ranking terms (approved 2026-08-10) |
-| `docs/plan.md` | the loop's shape, agent roles, cost model, milestones M1–M4 |
-| `docs/decisions.md` | every current design decision, one short block each |
-| `docs/proposed-guidance.md` | the deliverable — **empty placeholder** |
-| `tasks/` | the prompts steering the work, in order |
-| `courses/<slug>/` | the course inputs under study |
+Discovery stops once a candidate clears every gate and survives repeated
+red-teaming with no new successful attack.
 
-Next up is `tasks/02-milestone-1.md`: extract two real capstone repos into
-evidence records, build a handful of test cases, transcribe the *current*
-criteria into an executable baseline, and run one pass end to end.
+Two other pieces worth knowing:
 
-## Two things worth knowing before reading further
+- **LLM-as-judge is used for validation, not scoring.** The score itself
+  comes from a deterministic function over structured fields. Separate
+  reviewer agents — drawn from more than one model family, to avoid a
+  single family's blind spots — are used only to check that the
+  deterministic score agrees with what an LLM applying the *prose*
+  criteria would conclude.
+- **Every call is cached by input hash.** The loop runs against
+  quota-constrained free-tier APIs, so a re-run must cost zero new
+  requests for anything already seen.
 
-**There is no labelled corpus of graded projects, and there will not be
-one.** Validity comes instead from pairs of records that differ in exactly
-one way whose direction is known *because the pair was constructed that
-way* — nobody grades anything. The epistemics section of `CLAUDE.md`
-explains why, and most other design choices follow from it.
+## Layout
 
-**Every threshold in the design is a judgment value, not a measurement.**
-The numbers were set by the project owner with no data behind them, and
-`docs/objective.md` names them all in one place so no gate can quietly
-present itself as more grounded than it is.
+```
+courses/<slug>/     course-specific inputs (the current guidance, source repos)
+cases/              evidence records extracted from real repos, and their twins
+agents/             versioned prompts for each agent role
+loop/               the runner, cache, and model clients
+runs/               logged output of every run
+docs/               objective, plan, and the deliverable itself
+```
 
-## Anonymity
+`docs/objective.md` defines the gates and ranking terms in full;
+`docs/plan.md` lays out the loop's shape and agent roles; `CLAUDE.md`
+states the project's hard constraints.
 
-Capstone projects are referred to only as `p01`, `p02`, … The file mapping
-those ids to real repositories and people is gitignored and never
-committed, so the published artifacts are anonymous by construction rather
-than by discipline.
+## Stack
+
+Python 3.12, `uv`. Gemini and Hugging Face Inference Providers as the two
+model families (no Anthropic API key — Claude runs only as the coding
+agent building this).
+
+## Credits
+
+The propose → measure → red-team → critique loop shape and the
+executable-candidate pattern are adapted from
+[nima-siboni/llm-heuristic-scientists-workshop](https://github.com/nima-siboni/llm-heuristic-scientists-workshop).
+
+The criteria under study belong to
+[DataTalksClub/llm-zoomcamp](https://github.com/DataTalksClub/llm-zoomcamp).
